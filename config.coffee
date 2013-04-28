@@ -17,7 +17,7 @@ exports.config =
           'vendor/scripts/lodash.min.js',
           'vendor/scripts/console-helper.js',
           'vendor/scripts/underscore-1.4.2.js',
-          'vendor/scripts/backbone-0.9.10.js'
+          'vendor/scripts/backbone-0.9.2.js'
         ]
 
     stylesheets:
