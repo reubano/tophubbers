@@ -14,7 +14,7 @@ exports.config =
           'vendor/scripts/base.js',
           'vendor/scripts/handlebars.min.js',
           'vendor/scripts/jquery.min.js',
-#           'vendor/scripts/lodash.min.js',
+          'vendor/scripts/lodash.min.js',
           'vendor/scripts/console-helper.js',
           'vendor/scripts/jquery-1.8.2.js',
           'vendor/scripts/underscore-1.4.2.js',
