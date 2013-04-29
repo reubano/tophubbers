@@ -1,8 +1,8 @@
 Controller = require 'controllers/base/controller'
-HeaderView = require 'views/tdheader-view'
+TdHeaderView = require 'views/tdheader-view'
 mediator = require 'mediator'
 
-module.exports = class HeaderController extends Controller
+module.exports = class TdHeaderController extends Controller
   initialize: ->
     super
-    @view = new HeaderView collection: mediator.todos
+    @view = new TdHeaderView collection: mediator.todos
