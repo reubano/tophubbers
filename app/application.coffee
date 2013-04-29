@@ -3,7 +3,6 @@ mediator = require 'mediator'
 routes = require 'routes'
 TopHeaderController = require 'controllers/header-controller'
 HeaderController = require 'controllers/tdheader-controller'
-FooterController = require 'controllers/tdfooter-controller'
 TodosController = require 'controllers/todos-controller'
 Todos = require 'models/todos'
 Layout = require 'views/layout'
@@ -54,7 +53,6 @@ module.exports = class Application extends Chaplin.Application
     # e.g. new NavigationController()
     new HeaderController()
     new TopHeaderController()
-    new FooterController()
     new TodosController()
 
   # Create additional mediator properties
