@@ -1,9 +1,9 @@
 View = require 'views/base/view'
-template = require 'views/templates/tdheader'
+template = require 'views/templates/graph-hdr'
 
 module.exports = class HeaderView extends View
   autoRender: yes
-  el: '#tdheader'
+  el: '#graph-header'
   template: template
 
   initialize: ->
