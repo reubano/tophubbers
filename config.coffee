@@ -12,12 +12,12 @@ exports.config =
         # even if they aren't specified in order.before.
         before: [
           'vendor/scripts/console-polyfill.js',
-          'vendor/scripts/jquery-1.9.1.js',
+          'vendor/scripts/jquery.js',
           'vendor/scripts/lodash.min.js',
           'vendor/scripts/moment.min.js',
           'vendor/scripts/handlebars.min.js',
           'vendor/scripts/console-helper.js',
-          'vendor/scripts/backbone-0.9.2.js',
+          'vendor/scripts/backbone.js',
           'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/bootstrap.js',
           'vendor/scripts/nvd3/lib/d3.v2.js',
