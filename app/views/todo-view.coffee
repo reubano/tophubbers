@@ -12,20 +12,12 @@ module.exports = class GraphView extends View
     @delegate 'dblclick', 'label', @edit
     @delegate 'keypress', '.edit', @save
     @delegate 'blur', '.edit', @save
-    @delegate 'click', '.toggle', @toggle
 
   render: =>
     super
-    # Reset classes, re-add the appropriate ones.
-    @$el.removeClass 'active completed'
-    className = if @model.get('completed') then 'completed' else 'active'
-    @$el.addClass className
 
   destroy: =>
     @model.destroy()
-
-  toggle: =>
-    @model.toggle().save()
 
   edit: =>
     @$el.addClass 'editing'
