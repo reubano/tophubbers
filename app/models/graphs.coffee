@@ -3,7 +3,7 @@ Graph = require 'models/graph'
 
 module.exports = class Graphs extends Collection
   model: Graph
-  localStorage: new Store 'todos-chaplin'
+  localStorage: new Store 'graphs-chaplin'
 
   allAreCompleted: ->
     @getCompleted().length is @length
