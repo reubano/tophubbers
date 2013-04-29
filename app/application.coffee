@@ -1,6 +1,7 @@
 Chaplin = require 'chaplin'
 mediator = require 'mediator'
 routes = require 'routes'
+TopHeaderController = require 'controllers/header-controller'
 HeaderController = require 'controllers/tdheader-controller'
 FooterController = require 'controllers/tdfooter-controller'
 TodosController = require 'controllers/todos-controller'
@@ -52,6 +53,7 @@ module.exports = class Application extends Chaplin.Application
     # or navigation views.
     # e.g. new NavigationController()
     new HeaderController()
+    new TopHeaderController()
     new FooterController()
     new TodosController()
 
