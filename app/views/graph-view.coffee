@@ -3,7 +3,6 @@ template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
   template: template
-  tagName: 'li'
 
   initialize: ->
     super
