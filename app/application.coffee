@@ -3,7 +3,7 @@ mediator = require 'mediator'
 routes = require 'routes'
 HeaderController = require 'controllers/header-controller'
 TdHeaderController = require 'controllers/tdheader-controller'
-GraphsController = require 'controllers/todos-controller'
+GraphsController = require 'controllers/graphs-controller'
 Graphs = require 'models/todos'
 Layout = require 'views/layout'
 

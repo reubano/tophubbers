@@ -1,5 +1,5 @@
 View = require 'views/base/view'
-template = require 'views/templates/todo'
+template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
   template: template

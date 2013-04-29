@@ -1,6 +1,6 @@
 CollectionView = require 'views/base/collection-view'
-template = require 'views/templates/todos'
-GraphView = require 'views/todo-view'
+template = require 'views/templates/graphs'
+GraphView = require 'views/graph-view'
 
 module.exports = class GraphsView extends CollectionView
   el: '#graph-container'
