@@ -7,4 +7,4 @@ module.exports = class Layout extends Chaplin.Layout
     @subscribeEvent 'todos:filter', @changeFilterer
 
   changeFilterer: (filterer = 'all') ->
-    $('#todoapp').attr 'class', "filter-#{filterer}"
+    $('#graphapp').attr 'class', "filter-#{filterer}"
