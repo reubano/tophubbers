@@ -1,7 +1,7 @@
 View = require 'views/base/view'
 template = require 'views/templates/todo'
 
-module.exports = class TodoView extends View
+module.exports = class GraphView extends View
   template: template
   tagName: 'li'
 

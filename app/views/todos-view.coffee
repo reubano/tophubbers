@@ -1,11 +1,11 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/todos'
-TodoView = require 'views/todo-view'
+GraphView = require 'views/todo-view'
 
 module.exports = class TodosView extends CollectionView
-  itemView: TodoView
   listSelector: '#todo-list'
   el: '#graph-container'
+  itemView: GraphView
   template: template
 
   initialize: ->
