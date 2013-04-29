@@ -31,6 +31,9 @@ exports.config =
           'vendor/scripts/nvd3/src/models/multiBarHorizontalChart.js',
           'vendor/scripts/stream_layers.js',
         ]
+        after: [
+          'app/scripts/gen-chart.js',
+        ]
 
     stylesheets:
       joinTo:
