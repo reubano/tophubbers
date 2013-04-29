@@ -5,4 +5,4 @@ mediator = require 'mediator'
 module.exports = class GraphsController extends Controller
   initialize: ->
     super
-    @view = new GraphsView collection: mediator.todos
+    @view = new GraphsView collection: mediator.graphs

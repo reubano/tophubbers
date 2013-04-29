@@ -4,7 +4,7 @@ Chaplin = require 'chaplin'
 module.exports = class Layout extends Chaplin.Layout
   initialize: ->
     super
-    @subscribeEvent 'todos:filter', @changeFilterer
+    @subscribeEvent 'graphs:filter', @changeFilterer
 
   changeFilterer: (filterer = 'all') ->
     $('#graphapp').attr 'class', "filter-#{filterer}"

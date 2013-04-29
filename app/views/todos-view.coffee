@@ -10,7 +10,7 @@ module.exports = class GraphsView extends CollectionView
 
   initialize: ->
     super
-    @subscribeEvent 'todos:clear', @clear
+    @subscribeEvent 'graphs:clear', @clear
     @modelBind 'all', @renderCheckbox
     @delegate 'click', '#toggle-all', @toggleCompleted
 

@@ -61,7 +61,7 @@ module.exports = class Application extends Chaplin.Application
     # Create a user property
     mediator.user = null
     # Add additional application-specific properties and methods
-    mediator.todos = new Graphs()
-    mediator.todos.fetch()
+    mediator.graphs = new Graphs()
+    mediator.graphs.fetch()
     # Seal the mediator
     mediator.seal()
