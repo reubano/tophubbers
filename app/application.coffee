@@ -4,7 +4,7 @@ routes = require 'routes'
 HeaderController = require 'controllers/header-controller'
 TdHeaderController = require 'controllers/tdheader-controller'
 GraphsController = require 'controllers/todos-controller'
-Todos = require 'models/todos'
+Graphs = require 'models/todos'
 Layout = require 'views/layout'
 
 # The application object
@@ -61,7 +61,7 @@ module.exports = class Application extends Chaplin.Application
     # Create a user property
     mediator.user = null
     # Add additional application-specific properties and methods
-    mediator.todos = new Todos()
+    mediator.todos = new Graphs()
     mediator.todos.fetch()
     # Seal the mediator
     mediator.seal()

@@ -1,7 +1,7 @@
 Collection = require 'models/base/collection'
 Graph = require 'models/todo'
 
-module.exports = class Todos extends Collection
+module.exports = class Graphs extends Collection
   localStorage: new Store 'todos-chaplin'
 
   allAreCompleted: ->
