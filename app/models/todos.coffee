@@ -1,8 +1,7 @@
 Collection = require 'models/base/collection'
-Todo = require 'models/todo'
+Graph = require 'models/todo'
 
 module.exports = class Todos extends Collection
-  model: Todo
   localStorage: new Store 'todos-chaplin'
 
   allAreCompleted: ->
@@ -16,3 +15,4 @@ module.exports = class Todos extends Collection
 
   comparator: (todo) ->
     todo.get('created')
+  model: Graph

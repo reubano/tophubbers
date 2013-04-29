@@ -1,6 +1,6 @@
 Model = require 'models/base/model'
 
-module.exports = class Todo extends Model
+module.exports = class Graph extends Model
   defaults:
     title: ''
     completed: no
