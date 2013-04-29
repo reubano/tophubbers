@@ -12,7 +12,6 @@ module.exports = class GraphsView extends CollectionView
     super
     @subscribeEvent 'graphs:clear', @clear
     @modelBind 'all', @renderCheckbox
-    @delegate 'click', '#toggle-all', @toggleCompleted
 
   render: =>
     super
@@ -21,10 +20,6 @@ module.exports = class GraphsView extends CollectionView
   renderCheckbox: =>
     @$('#toggle-all').prop 'checked', @collection.allAreCompleted()
     @$el.toggle(@collection.length isnt 0)
-
-  toggleCompleted: (event) =>
-    isChecked = event.currentTarget.checked
-    @collection.each (todo) -> todo.save completed: isChecked
 
   clear: ->
     @collection.getCompleted().forEach (model) ->
