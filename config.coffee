@@ -20,7 +20,6 @@ exports.config =
           'vendor/scripts/backbone-0.9.2.js',
           'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/bootstrap.js',
-          'vendor/scripts/base.js',
           'vendor/scripts/nvd3/lib/d3.v2.js',
           'vendor/scripts/nvd3/nv.d3.js',
           'vendor/scripts/nvd3/src/utils.js',
@@ -44,6 +43,7 @@ exports.config =
           'vendor/styles/bootstrap.css',
           'vendor/styles/bootstrap-body.css',
           'vendor/styles/bootstrap-responsive.css'
+          'vendor/styles/nv.d3.css',
         ]
         after: ['vendor/styles/helpers.css']
 
