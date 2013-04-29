@@ -1,9 +1,9 @@
 View = require 'views/base/view'
-template = require 'views/templates/footer'
+template = require 'views/templates/tdfooter'
 
 module.exports = class FooterView extends View
   autoRender: yes
-  el: '#footer'
+  el: '#todofooter'
   template: template
 
   initialize: ->

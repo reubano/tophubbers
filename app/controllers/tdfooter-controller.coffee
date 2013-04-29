@@ -1,5 +1,5 @@
 Controller = require 'controllers/base/controller'
-FooterView = require 'views/footer-view'
+FooterView = require 'views/tdfooter-view'
 mediator = require 'mediator'
 
 module.exports = class FooterController extends Controller
