@@ -5,7 +5,7 @@ GraphView = require 'views/todo-view'
 module.exports = class GraphsView extends CollectionView
   el: '#graph-container'
   itemView: GraphView
-  listSelector: '#todo-list'
+  listSelector: '#graph-list'
   template: template
 
   initialize: ->
