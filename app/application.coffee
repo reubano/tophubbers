@@ -2,7 +2,7 @@ Chaplin = require 'chaplin'
 mediator = require 'mediator'
 routes = require 'routes'
 HeaderController = require 'controllers/header-controller'
-TdHeaderController = require 'controllers/tdheader-controller'
+GraphHdrController = require 'controllers/graph-hdr-controller'
 GraphsController = require 'controllers/graphs-controller'
 Graphs = require 'models/graphs'
 Layout = require 'views/layout'
@@ -11,7 +11,7 @@ Layout = require 'views/layout'
 module.exports = class Application extends Chaplin.Application
   # Set your application name here so the document title is set to
   # “Controller title – Site title” (see Layout#adjustTitle)
-  title: 'Chaplin • TodoMVC'
+  title: 'Ongeza Work Graph'
 
   initialize: ->
     super
@@ -52,7 +52,7 @@ module.exports = class Application extends Chaplin.Application
     # or navigation views.
     # e.g. new NavigationController()
     new HeaderController()
-    new TdHeaderController()
+    new GraphHdrController()
     new GraphsController()
 
   # Create additional mediator properties
