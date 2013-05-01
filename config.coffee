@@ -20,18 +20,6 @@ exports.config =
           'vendor/scripts/backbone.js',
           'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/bootstrap.js',
-          'vendor/scripts/nvd3/lib/d3.v2.js',
-          'vendor/scripts/nvd3/nv.d3.js',
-          'vendor/scripts/nvd3/src/utils.js',
-          'vendor/scripts/nvd3/src/tooltip.js',
-          'vendor/scripts/nvd3/src/models/legend.js',
-          'vendor/scripts/nvd3/src/models/axis.js',
-          'vendor/scripts/nvd3/src/models/multiBarHorizontal.js',
-          'vendor/scripts/nvd3/src/models/multiBarHorizontalChart.js',
-          'vendor/scripts/stream_layers.js',
-        ]
-        after: [
-          'app/scripts/gen-chart.js',
         ]
 
     stylesheets:
