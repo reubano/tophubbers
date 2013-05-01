@@ -1,3 +1,4 @@
+# nvd3util = require '../nvd3util'
 View = require 'views/base/view'
 template = require 'views/templates/graph'
 
@@ -14,6 +15,7 @@ module.exports = class GraphView extends View
 
   render: =>
     super
+#     nvd3util.loadCSV()
 
   destroy: =>
     @model.destroy()
