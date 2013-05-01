@@ -2,17 +2,19 @@ View = require 'views/base/view'
 template = require 'views/templates/graph-hdr'
 
 module.exports = class HeaderView extends View
-  autoRender: yes
-  el: '#graph-header'
-  template: template
+	autoRender: yes
+	el: '#graph-header'
+	template: template
 
-  initialize: ->
-    super
-    @delegate 'keypress', '#new-graph', @createOnEnter
+	initialize: ->
+		super
+		# @delegate 'keypress', '#new-graph', @refresh
 
-   createOnEnter: (event) =>
-     ENTER_KEY = 13
-     title = $(event.currentTarget).val().trim()
-     return if event.keyCode isnt ENTER_KEY or not title
-     @collection.create {title}
-     @$('#new-graph').val ''
+	render: =>
+		super
+		@refresh
+
+	refresh: =>
+		titles = ['E0009', 'E0015', 'E0019']
+		(@collection.create {title} for title in titles)
+
