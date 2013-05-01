@@ -9,6 +9,7 @@ module.exports = class HeaderView extends View
 	initialize: ->
 		super
 		# @delegate 'keypress', '#new-graph', @refresh
+		@refresh
 
 	render: =>
 		super
