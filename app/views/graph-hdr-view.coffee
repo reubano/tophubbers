@@ -8,12 +8,11 @@ module.exports = class HeaderView extends View
 
 	initialize: ->
 		super
-		# @delegate 'keypress', '#new-graph', @refresh
-		@refresh
+		@delegate 'click', '.icon-refresh', @refresh
 
 	render: =>
 		super
-		@refresh
+		# @refresh
 
 	refresh: =>
 		titles = ['E0009', 'E0015', 'E0019']
