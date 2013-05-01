@@ -10,16 +10,6 @@ module.exports = class GraphsView extends CollectionView
 
   initialize: ->
     super
-    @modelBind 'all', @renderCheckbox
 
   render: =>
     super
-    @renderCheckbox()
-
-  renderCheckbox: =>
-    @$('#toggle-all').prop 'checked', @collection.allAreCompleted()
-    @$el.toggle(@collection.length isnt 0)
-
-  clear: ->
-    @collection.getCompleted().forEach (model) ->
-      model.destroy()
