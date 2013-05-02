@@ -2,17 +2,8 @@ Collection = require 'models/base/collection'
 Graph = require 'models/graph'
 
 module.exports = class Graphs extends Collection
-  model: Graph
-  localStorage: new Store 'graphs-chaplin'
+	model: Graph
+	localStorage: new Store 'graphs-chaplin'
 
-  allAreCompleted: ->
-    @getCompleted().length is @length
-
-  getCompleted: ->
-    @where completed: yes
-
-  getActive: ->
-    @where completed: no
-
-  comparator: (todo) ->
-    todo.get('created')
+	comparator: (model) ->
+		model.get('title')
