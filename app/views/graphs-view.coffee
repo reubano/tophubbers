@@ -10,6 +10,10 @@ module.exports = class GraphsView extends CollectionView
 
 	initialize: ->
 		super
+		@subscribeEvent 'graphs:clear', @clear
 
 	render: =>
 		super
+
+	clear: ->
+		model.destroy() while model = @collection.first()
