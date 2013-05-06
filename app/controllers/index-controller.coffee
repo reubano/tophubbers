@@ -1,7 +1,7 @@
 Controller = require 'controllers/base/controller'
 
 module.exports = class IndexController extends Controller
-  title: 'Graph list'
+  adjustTitle: 'Todo list'
 
   list: (options) ->
-    @publishEvent 'graphs:filter', options.filterer?.trim() ? 'all'
+    @publishEvent 'todos:filter', options.filterer?.trim() ? 'all'
