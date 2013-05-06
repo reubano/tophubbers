@@ -28,7 +28,7 @@ function dateRange(startDate, endDate) {
 }
 
 function loadCSV() {
-	d3.json('http://localhost:5000/data/', function(json) {
+	d3.json('http://ongeza-api.herokuapp.com/data/', function(json) {
 		var rows = json.data.map(function(d) {
 			var startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.START)),
 				dur = (myFormat.parse(d.END) - myFormat.parse(d.START)) / (1000 * 60);
