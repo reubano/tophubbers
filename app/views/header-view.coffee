@@ -7,3 +7,4 @@ module.exports = class HeaderView extends View
   region: 'header'
   id: 'header'
   template: template
+
