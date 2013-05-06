@@ -1,7 +1,6 @@
 Chaplin = require 'chaplin'
 SiteView = require 'views/site-view'
-HeaderView = require 'views/header-view'
-TopView = require 'views/top-view'
+NavbarView = require 'views/navbar-view'
 GraphsView = require 'views/graphs-view'
 Graphs = require 'models/graphs'
 
@@ -11,11 +10,8 @@ module.exports = class Controller extends Chaplin.Controller
 
     @compose 'site', SiteView
 
-    @compose 'header', =>
-      @view = new HeaderView {@collection}
-
-    @compose 'footer', =>
-      @view = new TopView {@collection}
+    @compose 'navbar', =>
+      @view = new NavbarView {@collection}
 
     @compose 'graphs', =>
       @view = new GraphsView {@collection}
