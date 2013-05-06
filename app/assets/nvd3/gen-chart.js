@@ -1,4 +1,4 @@
-var myFormat = d3.time.format("%b %d, %Y %X %p"),
+var myFormat = d3.time.format("%Y-%m-%d %X"),
 	dateFormat = d3.time.format("%m/%d/%y"),
 	formatMinutes = function(d) {
 		var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
@@ -28,25 +28,26 @@ function dateRange(startDate, endDate) {
 }
 
 function loadCSV() {
-	d3.csv("db/sales.csv", function(data) {
-		var rows = data.map(function(d) {
-			var startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.start)),
-				dur = (myFormat.parse(d.end) - myFormat.parse(d.start)) / (1000 * 60);
+	d3.json('http://localhost:5000/data/', function(json) {
+		var rows = json.data.map(function(d) {
+			var startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.START)),
+				dur = (myFormat.parse(d.END) - myFormat.parse(d.START)) / (1000 * 60);
 
 			return {
 				date: startDate,
-				employee: d.employee_id,
-				start: (myFormat.parse(d.start) - dateFormat.parse(startDate)) / (1000 * 60),
+				employee: d.EMPLOYEE_ID,
+				start: (myFormat.parse(d.START) - dateFormat.parse(startDate)) / (1000 * 60),
 				duration: (dur > 0 && dur < maxDur) ? dur : 0
 			};
 		});
 
 		var grouped = _.groupBy(rows, 'employee');
-//			alert(JSON.stringify(rows, null, 4));
-//			alert(JSON.stringify(grouped, null, 4));
+//		alert(JSON.stringify(rows, null, 4));
+//		alert(JSON.stringify(grouped, null, 4));
+
 		_.each(grouped, function(obj, i) {
-//				alert(JSON.stringify(obj, null, 4));
-//				alert(i);
+//			alert(JSON.stringify(obj, null, 4));
+//			alert(i);
 			var string = 'MM/DD/YY',
 				date = moment(obj[0].date, string),
 				month = date.month(),
@@ -93,7 +94,6 @@ function loadData(title, rows, missing) {
 function graph(title, data) {
 	nv.addGraph(function() {
 		selection = '#' + title +'.view .chart svg'
-//		alert(selection);
 
 		chart = nv.models.multiBarHorizontalChart()
 			.x(function(d) {return d.label})
