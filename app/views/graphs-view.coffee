@@ -5,9 +5,8 @@ GraphView = require 'views/graph-view'
 module.exports = class GraphsView extends CollectionView
 	itemView: GraphView
 	listSelector: '#graph-list'
-	className: 'graphs'
 	region: 'graphs'
-	id: 'graphs'
+	className: 'span12'
 	template: template
 
 	initialize: ->
