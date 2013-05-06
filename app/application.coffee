@@ -1,45 +1,47 @@
 Chaplin = require 'chaplin'
-mediator = require 'mediator'
 routes = require 'routes'
-HeaderController = require 'controllers/header-controller'
-FooterController = require 'controllers/footer-controller'
-TodosController = require 'controllers/todos-controller'
-Todos = require 'models/todos'
+Graphs = require 'models/graphs'
 Layout = require 'views/layout'
 
-# The application object
+# The application object.
 module.exports = class Application extends Chaplin.Application
   # Set your application name here so the document title is set to
-  # “Controller title – Site title” (see Layout#adjustTitle)
+  # “Controller title – Site title” (see Chaplin.Layout#adjustTitle)
   title: 'Chaplin • TodoMVC'
 
   initialize: ->
     super
 
-    # Initialize core components
+    # Initialize core components.
+    # ---------------------------
+
+    # Dispatcher listens for routing events and initialises controllers.
     @initDispatcher controllerSuffix: '-controller'
+
+    # Layout listens for click events & delegates internal links to router.
     @initLayout()
+
+    # Composer grants the ability for views and stuff to be persisted.
+    @initComposer()
+
+    # Mediator is a global message broker which implements pub / sub pattern.
     @initMediator()
 
-    # Application-specific scaffold
-    @initControllers()
-
-    # Register all routes and start routing
-    @initRouter routes, pushState: no
+    # Register all routes.
     # You might pass Router/History options as the second parameter.
     # Chaplin enables pushState per default and Backbone uses / as
     # the root per default. You might change that in the options
     # if necessary:
     # @initRouter routes, pushState: false, root: '/subdir/'
+    @initRouter routes
 
-    # Freeze the application instance to prevent further changes
+    # Actually start routing.
+    @startRouting()
+
+    # Freeze the application instance to prevent further changes.
     Object.freeze? this
 
-  # Override standard layout initializer
-  # ------------------------------------
   initLayout: ->
-    # Use an application-specific Layout class. Currently this adds
-    # no features to the standard Chaplin Layout, it’s an empty placeholder.
     @layout = new Layout {@title}
 
   # Instantiate common controllers
@@ -51,17 +53,13 @@ module.exports = class Application extends Chaplin.Application
     # and views which are needed the whole time, for example header, footer
     # or navigation views.
     # e.g. new NavigationController()
-    new HeaderController()
-    new FooterController()
-    new TodosController()
 
-  # Create additional mediator properties
-  # -------------------------------------
+  # Create additional mediator properties.
   initMediator: ->
-    # Create a user property
-    mediator.user = null
     # Add additional application-specific properties and methods
-    mediator.todos = new Todos()
-    mediator.todos.fetch()
-    # Seal the mediator
-    mediator.seal()
+    # e.g. Chaplin.mediator.prop = null
+    Chaplin.mediator.graphs = new Graphs()
+    Chaplin.mediator.graphs.fetch()
+
+    # Seal the mediator.
+    Chaplin.mediator.seal()

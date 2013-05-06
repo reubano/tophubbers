@@ -11,10 +11,13 @@ exports.config =
         # Files in `vendor` directories are compiled before other files
         # even if they aren't specified in order.before.
         before: [
-          'vendor/scripts/console-helper.js',
-          'vendor/scripts/jquery-1.8.2.js',
-          'vendor/scripts/underscore-1.4.2.js',
-          'vendor/scripts/backbone-0.9.2.js'
+          'vendor/scripts/console-polyfill.js',
+          'vendor/scripts/jquery.js',
+          'vendor/scripts/underscore.js',
+          'vendor/scripts/backbone-1.0.0.js',
+          'vendor/scripts/moment.min.js',
+          'vendor/scripts/backbone-localStorage.js',
+          'vendor/scripts/bootstrap.js',
         ]
 
     stylesheets:
@@ -22,7 +25,12 @@ exports.config =
         'stylesheets/app.css': /^(app|vendor)/
         'test/stylesheets/test.css': /^test/
       order:
-        before: ['vendor/styles/normalize-2.0.1.css']
+        before: [
+          'vendor/styles/bootstrap.css',
+          'vendor/styles/bootstrap-body.css',
+          'vendor/styles/bootstrap-responsive.css'
+          'vendor/styles/nv.d3.css',
+        ]
         after: ['vendor/styles/helpers.css']
 
     templates:
