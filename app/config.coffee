@@ -1,2 +1,2 @@
-config = {api: 'http://ongeza-api.herokuapp.com/data/'}
+config = {api: 'http://ongeza-api.herokuapp.com/reps/'}
 module.exports = config
