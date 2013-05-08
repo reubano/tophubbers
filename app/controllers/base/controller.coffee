@@ -1,3 +1,4 @@
+config = require 'config'
 Chaplin = require 'chaplin'
 SiteView = require 'views/site-view'
 NavbarView = require 'views/navbar-view'
@@ -5,14 +6,23 @@ GraphsView = require 'views/graphs-view'
 Graphs = require 'models/graphs'
 
 module.exports = class Controller extends Chaplin.Controller
-  beforeAction: (params, route) ->
-    @collection = new Graphs [{title: 'E0009'}, {title: 'E0015'}, {title: 'E0019'}]
+	collection: Chaplin.mediator.graphs
+	url: config.api
 
-    @compose 'site', SiteView
+	getReps: ->
+		$.ajax url: @url, type: 'get', dataType: 'json'
 
-    @compose 'navbar', =>
-      @view = new NavbarView {@collection}
+	publishReps: (response) =>
+		reps = ({title: rep} for rep in response.data)
+		@publishEvent 'graphs:clear'
+		(@collection.create graph for graph in reps)
 
-    @compose 'graphs', =>
-      @view = new GraphsView {@collection}
+	initialize: ->
+		@getReps().success(@publishReps)
+
+	beforeAction: (params, route) =>
+		@compose 'site', SiteView
+		@compose 'navbar', NavbarView
+		@compose 'graphs', =>
+			@view = new GraphsView {@collection}
 

@@ -11,6 +11,7 @@ module.exports = class GraphsView extends CollectionView
 
 	initialize: ->
 		super
+		@listenTo @collection, 'change', @render
 		@subscribeEvent 'graphs:clear', @clear
 
 	render: =>
