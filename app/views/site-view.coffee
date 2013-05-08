@@ -8,6 +8,5 @@ module.exports = class SiteView extends View
   className: 'container-fluid'
   regions:
     '#navbar': 'navbar'
-    '#top': 'top'
     '#graphs': 'graphs'
   template: template
