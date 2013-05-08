@@ -13,7 +13,7 @@ module.exports = class Controller extends Chaplin.Controller
 		$.ajax url: @url, type: 'get', dataType: 'json'
 
 	publishReps: (response) =>
-		reps = ({title: rep} for rep in response.data)
+		reps = ({id: i, first_name: rep.first_name, last_name: rep.last_name} for i, rep of response)
 		@publishEvent 'graphs:clear'
 		(@collection.create graph for graph in reps)
 
