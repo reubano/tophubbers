@@ -23,7 +23,7 @@
   z-index: 10000;
 
   font-family: Arial;
-  font-size: 13px;
+  font-size: 15px;
 
   transition: opacity 500ms linear;
   -moz-transition: opacity 500ms linear;
@@ -56,7 +56,7 @@
   padding: 8px;
 }
 
-.nvtooltip h3 {
+.nvtooltip h5 {
   margin: 0;
   padding: 4px 14px;
   line-height: 18px;
