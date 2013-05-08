@@ -13,7 +13,7 @@ date = moment();
 year = date.year();
 month = 1;
 startDate = moment([year, month, 1]);
-endDate = startDate.add('m', 1).subtract('d', 1);
+endDate = moment(startDate).endOf('month');
 
 formatMinutes = function(d) {
 	var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
