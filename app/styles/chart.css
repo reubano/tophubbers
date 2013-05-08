@@ -9,8 +9,8 @@
 */
 .chart {
     margin: 10px;
-    min-width: 100px;
-    min-height: 100px;
+    min-width: 800px;
+    min-height: 350px;
 }
 
 .chart svg {height: 550px;}
