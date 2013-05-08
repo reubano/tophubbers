@@ -1,10 +1,18 @@
 exports.config =
   # See http://brunch.readthedocs.org/en/latest/config.html for documentation.
+  # modules:
+  #   wrapper: false
+
+  # conventions:
+  #   vendor: /^vendor.nvd3/
+
   files:
     javascripts:
       joinTo:
         'javascripts/app.js': /^app/
+        # 'javascripts/vendor.js': /^vendor.(?!nvd3)/
         'javascripts/vendor.js': /^vendor/
+        # 'javascripts/nvd3.js' : /^vendor.nvd3/
         'test/javascripts/test.js': /^test[\\/](?!vendor)/
         'test/javascripts/test-vendor.js': /^test[\\/](?=vendor)/
       order:
