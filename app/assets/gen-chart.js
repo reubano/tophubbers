@@ -57,8 +57,8 @@ formatDates = function(d) {
 allDates = _.map(dateRange(startDate, endDate), formatDates);
 
 loadCSV = function() {
-	d3.json('http://ongeza-api.herokuapp.com/data/', groupData);
-	d3.json('http://127.0.0.1:5000/missing_reps/', makeBlank);
+	d3.json('http://ongeza-api.herokuapp.com/cur_data/', groupData);
+	d3.json('http://ongeza-api.herokuapp.com/missing_reps/', makeBlank);
 }
 
 groupData = function(json) {
