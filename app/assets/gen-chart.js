@@ -18,7 +18,7 @@ endDate = moment(startDate).endOf('month');
 formatMinutes = function(d) {
 	var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
 	return time.substr(0,1) == '0' ? time.substr(1) : time;
-},
+};
 
 dateRange = function(startDate, endDate) {
 	var newDate, _results;
@@ -59,7 +59,7 @@ allDates = _.map(dateRange(startDate, endDate), formatDates);
 loadCSV = function() {
 	d3.json('http://ongeza-api.herokuapp.com/cur_data/', groupData);
 	d3.json('http://ongeza-api.herokuapp.com/missing_reps/', makeBlank);
-}
+};
 
 groupData = function(json) {
 	var grouped, rows;
@@ -67,7 +67,7 @@ groupData = function(json) {
 	rows = json.data.map(formatData);
 	grouped = _.groupBy(rows, 'employee');
 	_.each(grouped, formatGrouped);
-}
+};
 
 makeBlank = function(json) {
 	_.each(json.data, function(id) {
@@ -113,7 +113,7 @@ loadData = function(chart_data) {
 	// alert(data);
 
 	makeChart(id, data);
-}
+};
 
 makeChart = function(id, data) {
 	var i;
