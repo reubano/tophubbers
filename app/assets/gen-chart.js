@@ -40,7 +40,7 @@ formatData = function(d) {
 	startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.START));
 	diff = (myFormat.parse(d.END) - myFormat.parse(d.START)) / 60000;
 	startTime = (myFormat.parse(d.START) - dateFormat.parse(startDate)) / 60000;
-	duration = dur > 0 && dur < maxDur ? dur : 0;
+	duration = diff > 0 && diff < maxDur ? diff : 0;
 
 	return {
 		date: startDate,
