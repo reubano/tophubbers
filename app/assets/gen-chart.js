@@ -70,6 +70,8 @@ groupData = function(json) {
 };
 
 makeBlank = function(json) {
+	var formatted;
+
 	_.each(json.data, function(id) {
 		formatted = {id: id, rows: false, missing: allDates};
 		loadData(formatted);
