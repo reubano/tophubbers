@@ -23,7 +23,7 @@ formatMinutes = function(d) {
 dateRange = function(startDate, endDate) {
 	var newDate, _results;
 
-	newDate = startDate;
+	newDate = startDate.clone();
 	_results = [];
 
 	while (newDate <= endDate) {
