@@ -87,18 +87,15 @@ formatGrouped = function(obj, i) {
 	loadData(formatted);
 };
 
-loadData = function(chart_data) {
-	var id, rows, missing, endValues = [], durValues = [];
-	id = chart_data.id;
-	rows = chart_data.rows;
-	missing = chart_data.missing;
+loadData = function(d) {
+	var endValues = [], durValues = [];
 
-	_.each(rows, function(obj, i) {
+	_.each(d.rows, function(obj, i) {
 		endValues.push({"label": obj.date, "value": obj.start});
 		durValues.push({"label": obj.date, "value": obj.duration});
 	})
 
-	_.each(missing, function(obj, i) {
+	_.each(d.missing, function(obj, i) {
 		endValues.push({"label": obj, "value": 0});
 		durValues.push({"label": obj, "value": 0});
 	})
@@ -114,13 +111,13 @@ loadData = function(chart_data) {
 	// alert(JSON.stringify(data, null, 4));
 	// alert(data);
 
-	makeChart(id, data);
+	makeChart({id: d.id, data: data});
 };
 
-makeChart = function(id, data) {
+makeChart = $(document).ready(function(result) {
 	var i;
 
-	selection = '#' + id +'.view .chart svg';
+	selection = '#' + result.id +'.view .chart svg';
 
 	chart = nv.models.multiBarHorizontalChart()
 		.x(function(d) {return d.label})
@@ -145,7 +142,7 @@ makeChart = function(id, data) {
 		.tickFormat(formatMinutes)
 
 	d3.select(selection)
-		.datum(data)
+		.datum(result.data)
 		.transition().duration(0)
 		.call(chart);
 
@@ -157,6 +154,6 @@ makeChart = function(id, data) {
 
 	chart.multibar.yScale().clamp(true)
 	nv.addGraph(chart);
-}
+});
 
 loadCSV();
