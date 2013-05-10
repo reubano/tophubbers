@@ -15,6 +15,15 @@ month = 1;
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
 
+Storage.prototype.setObject = function(key, value) {
+	this.setItem(key, JSON.stringify(value));
+};
+
+Storage.prototype.getObject = function(key) {
+	var value = this.getItem(key);
+	return value && JSON.parse(value);
+};
+
 formatMinutes = function(d) {
 	var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
 	return time.substr(0,1) == '0' ? time.substr(1) : time;
@@ -57,8 +66,36 @@ formatDates = function(d) {
 allDates = _.map(dateRange(currStart, currEnd), formatDates);
 
 loadCSV = function() {
-	d3.json('http://ongeza-api.herokuapp.com/cur_data/', groupData);
-	d3.json('http://ongeza-api.herokuapp.com/missing_reps/', makeBlank);
+	var cur_data, miss_reps, cd_tstamp, mr_tstamp;
+
+	cur_data = localStorage.getObject('cur_data');
+	miss_reps = localStorage.getObject('miss_reps');
+	cd_tstamp = localStorage.getObject('cd_tstamp');
+	mr_tstamp = localStorage.getObject('mr_tstamp');
+
+	if (cur_data == undefined || moment().diff(cd_tstamp, 'hours') > 24) {
+		d3.json('http://ongeza-api.herokuapp.com/cur_data/', cacheCurData);
+	} else {
+		groupData(cur_data);
+	}
+
+	if (miss_reps == undefined || moment().diff(mr_tstamp, 'hours') > 24) {
+		d3.json('http://ongeza-api.herokuapp.com/missing_reps/', cacheMissReps);
+	} else {
+		makeBlank(miss_reps);
+	}
+};
+
+cacheCurData = function(json) {
+	localStorage.setObject('cur_data', json);
+	localStorage.setObject('cd_tstamp', moment());
+	groupData(json);
+};
+
+cacheMissReps = function(json) {
+	localStorage.setObject('miss_reps', json);
+	localStorage.setObject('mr_tstamp', moment());
+	makeBlank(json);
 };
 
 groupData = function(json) {
