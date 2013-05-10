@@ -1,4 +1,4 @@
-var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, startDate, endDate, allDates, dateRange;
+var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, currStart, currEnd, allDates, dateRange, cache, results;
 
 myFormat = d3.time.format("%Y-%m-%d %X");
 dateFormat = d3.time.format("%m/%d/%y");
@@ -12,8 +12,8 @@ date = moment();
 // month = date.month();
 year = date.year();
 month = 1;
-startDate = moment([year, month, 1]);
-endDate = moment(startDate).endOf('month');
+currStart = moment([year, month, 1]);
+currEnd = moment(currStart).endOf('month');
 
 formatMinutes = function(d) {
 	var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
@@ -35,17 +35,17 @@ dateRange = function(startDate, endDate) {
 };
 
 formatData = function(d) {
-	var dur, duration, start, startDate;
+	var diff, duration, startTime, startDate;
 
 	startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.START));
-	dur = (myFormat.parse(d.END) - myFormat.parse(d.START)) / (1000 * 60)
-	start = (myFormat.parse(d.START) - dateFormat.parse(startDate)) / (1000 * 60);
+	diff = (myFormat.parse(d.END) - myFormat.parse(d.START)) / 60000;
+	startTime = (myFormat.parse(d.START) - dateFormat.parse(startDate)) / 60000;
 	duration = dur > 0 && dur < maxDur ? dur : 0;
 
 	return {
 		date: startDate,
 		employee: d.EMPLOYEE_ID,
-		start: start,
+		start: startTime,
 		duration: duration
 	};
 };
@@ -54,7 +54,7 @@ formatDates = function(d) {
 	return d.format(string);
 };
 
-allDates = _.map(dateRange(startDate, endDate), formatDates);
+allDates = _.map(dateRange(currStart, currEnd), formatDates);
 
 loadCSV = function() {
 	d3.json('http://ongeza-api.herokuapp.com/cur_data/', groupData);
