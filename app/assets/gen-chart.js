@@ -114,7 +114,7 @@ loadData = function(d) {
 	makeChart({id: d.id, data: data});
 };
 
-makeChart = $(document).ready(function(result) {
+makeChart = function(result) {
 	var i;
 
 	selection = '#' + result.id +'.view .chart svg';
@@ -152,8 +152,11 @@ makeChart = $(document).ready(function(result) {
 		nv.log('New State:', JSON.stringify(e));
 	});
 
-	chart.multibar.yScale().clamp(true)
-	nv.addGraph(chart);
-});
+	chart.multibar.yScale().clamp(true);
+
+	$(document).ready(function() {
+		nv.addGraph(chart);
+	});
+};
 
 loadCSV();
