@@ -1,4 +1,4 @@
-var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, startDate, endDate, allDates, dateRange;
+var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, currStart, currEnd, allDates, dateRange, cache, maxCacheAge, results;
 
 myFormat = d3.time.format("%Y-%m-%d %X");
 dateFormat = d3.time.format("%m/%d/%y");
@@ -12,18 +12,28 @@ date = moment();
 // month = date.month();
 year = date.year();
 month = 1;
-startDate = moment([year, month, 1]);
-endDate = moment(startDate).endOf('month');
+currStart = moment([year, month, 1]);
+currEnd = moment(currStart).endOf('month');
+maxCacheAge = 24;
+
+Storage.prototype.setObject = function(key, value) {
+	this.setItem(key, JSON.stringify(value));
+};
+
+Storage.prototype.getObject = function(key) {
+	var value = this.getItem(key);
+	return value && JSON.parse(value);
+};
 
 formatMinutes = function(d) {
 	var time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d));
 	return time.substr(0,1) == '0' ? time.substr(1) : time;
-},
+};
 
 dateRange = function(startDate, endDate) {
 	var newDate, _results;
 
-	newDate = startDate;
+	newDate = startDate.clone();
 	_results = [];
 
 	while (newDate <= endDate) {
@@ -35,17 +45,17 @@ dateRange = function(startDate, endDate) {
 };
 
 formatData = function(d) {
-	var dur, duration, start, startDate;
+	var diff, duration, startTime, startDate;
 
 	startDate = d3.time.format("%m/%d/%y")(myFormat.parse(d.START));
-	dur = (myFormat.parse(d.END) - myFormat.parse(d.START)) / (1000 * 60)
-	start = (myFormat.parse(d.START) - dateFormat.parse(startDate)) / (1000 * 60);
-	duration = dur > 0 && dur < maxDur ? dur : 0;
+	diff = (myFormat.parse(d.END) - myFormat.parse(d.START)) / 60000;
+	startTime = (myFormat.parse(d.START) - dateFormat.parse(startDate)) / 60000;
+	duration = diff > 0 && diff < maxDur ? diff : 0;
 
 	return {
 		date: startDate,
 		employee: d.EMPLOYEE_ID,
-		start: start,
+		start: startTime,
 		duration: duration
 	};
 };
@@ -54,12 +64,46 @@ formatDates = function(d) {
 	return d.format(string);
 };
 
-allDates = _.map(dateRange(startDate, endDate), formatDates);
+allDates = _.map(dateRange(currStart, currEnd), formatDates);
 
 loadCSV = function() {
-	d3.json('http://ongeza-api.herokuapp.com/cur_data/', groupData);
-	d3.json('http://ongeza-api.herokuapp.com/missing_reps/', makeBlank);
-}
+	var cur_data, miss_reps, cd_tstamp, mr_tstamp;
+
+	cur_data = localStorage.getObject('cur_data');
+	miss_reps = localStorage.getObject('miss_reps');
+	cd_tstamp = moment(localStorage.getObject('cd_tstamp'));
+	mr_tstamp = moment(localStorage.getObject('mr_tstamp'));
+
+	if (
+		(!cur_data || !cd_tstamp)
+		|| (cd_tstamp && (cd_tstamp.diff(moment(), 'hours') >= maxCacheAge))
+	) {
+		d3.json('http://ongeza-api.herokuapp.com/cur_data/', cacheCurData);
+	} else {
+		groupData(cur_data);
+	}
+
+	if (
+		(!miss_reps || !mr_tstamp)
+		|| (mr_tstamp && mr_tstamp.diff(moment(), 'hours') >= maxCacheAge)
+	) {
+		d3.json('http://ongeza-api.herokuapp.com/missing_reps/', cacheMissReps);
+	} else {
+		makeBlank(miss_reps);
+	}
+};
+
+cacheCurData = function(json) {
+	localStorage.setObject('cur_data', json);
+	localStorage.setObject('cd_tstamp', moment());
+	groupData(json);
+};
+
+cacheMissReps = function(json) {
+	localStorage.setObject('miss_reps', json);
+	localStorage.setObject('mr_tstamp', moment());
+	makeBlank(json);
+};
 
 groupData = function(json) {
 	var grouped, rows;
@@ -67,9 +111,11 @@ groupData = function(json) {
 	rows = json.data.map(formatData);
 	grouped = _.groupBy(rows, 'employee');
 	_.each(grouped, formatGrouped);
-}
+};
 
 makeBlank = function(json) {
+	var formatted;
+
 	_.each(json.data, function(id) {
 		formatted = {id: id, rows: false, missing: allDates};
 		loadData(formatted);
@@ -85,18 +131,15 @@ formatGrouped = function(obj, i) {
 	loadData(formatted);
 };
 
-loadData = function(chart_data) {
-	var id, rows, missing, endValues = [], durValues = [];
-	id = chart_data.id;
-	rows = chart_data.rows;
-	missing = chart_data.missing;
+loadData = function(d) {
+	var endValues = [], durValues = [];
 
-	_.each(rows, function(obj, i) {
+	_.each(d.rows, function(obj, i) {
 		endValues.push({"label": obj.date, "value": obj.start});
 		durValues.push({"label": obj.date, "value": obj.duration});
 	})
 
-	_.each(missing, function(obj, i) {
+	_.each(d.missing, function(obj, i) {
 		endValues.push({"label": obj, "value": 0});
 		durValues.push({"label": obj, "value": 0});
 	})
@@ -112,49 +155,50 @@ loadData = function(chart_data) {
 	// alert(JSON.stringify(data, null, 4));
 	// alert(data);
 
-	makeChart(id, data);
-}
+	makeChart({id: d.id, data: data});
+};
 
-makeChart = function(id, data) {
-	var i;
+makeChart = function(result) {
+	$(document).ready(function(){
+		var i;
 
-	selection = '#' + id +'.view .chart svg';
+		selection = '#' + result.id +'.view .chart svg';
 
-	chart = nv.models.multiBarHorizontalChart()
-		.x(function(d) {return d.label})
-		.y(function(d) {return d.value})
-		.forceY(chartRange)
-		.yDomain(chartRange)
-		.margin({top: 0, right: 110, bottom: 30, left: 80})
-		//.showValues(true)
-		//.tooltips(false)
-		.stacked(true)
-		.showLegend(false)
-		.barColor([d3.rgb('steelblue')])
-		.showControls(false)
-		;
+		chart = nv.models.multiBarHorizontalChart()
+			.x(function(d) {return d.label})
+			.y(function(d) {return d.value})
+			.forceY(chartRange)
+			.yDomain(chartRange)
+			.margin({top: 0, right: 110, bottom: 30, left: 80})
+			//.showValues(true)
+			//.tooltips(false)
+			.stacked(true)
+			.showLegend(false)
+			.barColor([d3.rgb('steelblue')])
+			.showControls(false)
+			;
 
-	for (i = 0; i < maxTime - 1; i++) {
-		tickInterval[i] = (minTime + i + 1) * 60;
-	}
+		for (i = 0; i < maxTime - 1; i++) {
+			tickInterval[i] = (minTime + i + 1) * 60;
+		}
 
-	chart.yAxis
-		.tickValues(tickInterval)
-		.tickFormat(formatMinutes)
+		chart.yAxis
+			.tickValues(tickInterval)
+			.tickFormat(formatMinutes)
 
-	d3.select(selection)
-		.datum(data)
-		.transition().duration(0)
-		.call(chart);
+		chart.multibar.yScale().clamp(true);
 
-	nv.utils.windowResize(chart.update);
+		d3.select(selection)
+			.datum(result.data)
+			.transition().duration(100)
+			.call(chart);
 
-	chart.dispatch.on('stateChange', function(e) {
-		nv.log('New State:', JSON.stringify(e));
+		// nv.utils.windowResize(chart.update);
+
+		chart.dispatch.on('stateChange', function(e) {
+			nv.log('New State:', JSON.stringify(e));
+		});
+
+		nv.addGraph(chart);
 	});
-
-	chart.multibar.yScale().clamp(true)
-	nv.addGraph(chart);
-}
-
-loadCSV();
+};

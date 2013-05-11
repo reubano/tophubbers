@@ -36,7 +36,7 @@ exports.config =
         before: [
           'vendor/styles/bootstrap.css',
           'vendor/styles/bootstrap-body.css',
-          'vendor/styles/bootstrap-responsive.css'
+          'vendor/styles/bootstrap-responsive.css',
           'vendor/styles/nv.d3.css',
         ]
         after: ['vendor/styles/helpers.css']

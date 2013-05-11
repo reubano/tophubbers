@@ -6,4 +6,4 @@ module.exports = class Graphs extends Collection
 	localStorage: new Store 'graphs-chaplin'
 
 	comparator: (model) ->
-		model.get('last_name')
+		model.get('id')
