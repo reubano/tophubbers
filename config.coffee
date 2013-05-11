@@ -26,8 +26,6 @@ exports.config =
           'vendor/scripts/moment.min.js',
           'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/bootstrap.js',
-          'vendor/scripts/fabric.js',
-          'vendor/scripts/modernizr.js',
         ]
 
     stylesheets:
