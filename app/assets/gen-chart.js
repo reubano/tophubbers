@@ -186,23 +186,19 @@ makeChart = function(result) {
 			.tickValues(tickInterval)
 			.tickFormat(formatMinutes)
 
+		chart.multibar.yScale().clamp(true);
+
 		d3.select(selection)
 			.datum(result.data)
-			.transition().duration(0)
+			.transition().duration(100)
 			.call(chart);
 
-		nv.utils.windowResize(chart.update);
+		// nv.utils.windowResize(chart.update);
 
 		chart.dispatch.on('stateChange', function(e) {
 			nv.log('New State:', JSON.stringify(e));
 		});
 
-		chart.multibar.yScale().clamp(true);
-		console.log('charting');
 		nv.addGraph(chart);
 	});
 };
-
-$(document).ready(function(){
-	console.log('ready...');
-});
