@@ -1,4 +1,4 @@
-var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, currStart, currEnd, allDates, dateRange, cache, results;
+var myFormat, dateFormat, formatMinutes, formatDates, isBetween, minTime, maxTime, maxDur, chartRange, tickInterval, data, selection, string, chart, date, month, year, currStart, currEnd, allDates, dateRange, cache, maxCacheAge, results;
 
 myFormat = d3.time.format("%Y-%m-%d %X");
 dateFormat = d3.time.format("%m/%d/%y");
@@ -14,6 +14,7 @@ year = date.year();
 month = 1;
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
+maxCacheAge = 24;
 
 Storage.prototype.setObject = function(key, value) {
 	this.setItem(key, JSON.stringify(value));
@@ -70,16 +71,22 @@ loadCSV = function() {
 
 	cur_data = localStorage.getObject('cur_data');
 	miss_reps = localStorage.getObject('miss_reps');
-	cd_tstamp = localStorage.getObject('cd_tstamp');
-	mr_tstamp = localStorage.getObject('mr_tstamp');
+	cd_tstamp = moment(localStorage.getObject('cd_tstamp'));
+	mr_tstamp = moment(localStorage.getObject('mr_tstamp'));
 
-	if (cur_data == undefined || moment().diff(cd_tstamp, 'hours') > 24) {
+	if (
+		(!cur_data || !cd_tstamp)
+		|| (cd_tstamp && (cd_tstamp.diff(moment(), 'hours') >= maxCacheAge))
+	) {
 		d3.json('http://ongeza-api.herokuapp.com/cur_data/', cacheCurData);
 	} else {
 		groupData(cur_data);
 	}
 
-	if (miss_reps == undefined || moment().diff(mr_tstamp, 'hours') > 24) {
+	if (
+		(!miss_reps || !mr_tstamp)
+		|| (mr_tstamp && mr_tstamp.diff(moment(), 'hours') >= maxCacheAge)
+	) {
 		d3.json('http://ongeza-api.herokuapp.com/missing_reps/', cacheMissReps);
 	} else {
 		makeBlank(miss_reps);
@@ -152,46 +159,45 @@ loadData = function(d) {
 };
 
 makeChart = function(result) {
-	var i;
+	$(document).ready(function(){
+		var i;
 
-	selection = '#' + result.id +'.view .chart svg';
+		selection = '#' + result.id +'.view .chart svg';
 
-	chart = nv.models.multiBarHorizontalChart()
-		.x(function(d) {return d.label})
-		.y(function(d) {return d.value})
-		.forceY(chartRange)
-		.yDomain(chartRange)
-		.margin({top: 0, right: 110, bottom: 30, left: 80})
-		//.showValues(true)
-		//.tooltips(false)
-		.stacked(true)
-		.showLegend(false)
-		.barColor([d3.rgb('steelblue')])
-		.showControls(false)
-		;
+		chart = nv.models.multiBarHorizontalChart()
+			.x(function(d) {return d.label})
+			.y(function(d) {return d.value})
+			.forceY(chartRange)
+			.yDomain(chartRange)
+			.margin({top: 0, right: 110, bottom: 30, left: 80})
+			//.showValues(true)
+			//.tooltips(false)
+			.stacked(true)
+			.showLegend(false)
+			.barColor([d3.rgb('steelblue')])
+			.showControls(false)
+			;
 
-	for (i = 0; i < maxTime - 1; i++) {
-		tickInterval[i] = (minTime + i + 1) * 60;
-	}
+		for (i = 0; i < maxTime - 1; i++) {
+			tickInterval[i] = (minTime + i + 1) * 60;
+		}
 
-	chart.yAxis
-		.tickValues(tickInterval)
-		.tickFormat(formatMinutes)
+		chart.yAxis
+			.tickValues(tickInterval)
+			.tickFormat(formatMinutes)
 
-	d3.select(selection)
-		.datum(result.data)
-		.transition().duration(0)
-		.call(chart);
+		d3.select(selection)
+			.datum(result.data)
+			.transition().duration(0)
+			.call(chart);
 
-	nv.utils.windowResize(chart.update);
+		nv.utils.windowResize(chart.update);
 
-	chart.dispatch.on('stateChange', function(e) {
-		nv.log('New State:', JSON.stringify(e));
-	});
+		chart.dispatch.on('stateChange', function(e) {
+			nv.log('New State:', JSON.stringify(e));
+		});
 
-	chart.multibar.yScale().clamp(true);
-
-	$(document).ready(function() {
+		chart.multibar.yScale().clamp(true);
 		nv.addGraph(chart);
 	});
 };
