@@ -198,8 +198,11 @@ makeChart = function(result) {
 		});
 
 		chart.multibar.yScale().clamp(true);
+		console.log('charting');
 		nv.addGraph(chart);
 	});
 };
 
-loadCSV();
+$(document).ready(function(){
+	console.log('ready...');
+});
