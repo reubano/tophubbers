@@ -5,16 +5,19 @@ GraphView = require 'views/graph-view'
 module.exports = class GraphsView extends CollectionView
 	itemView: GraphView
 	listSelector: '#graph-list'
-	region: 'graphs'
+	region: 'content'
 	className: 'span12'
 	template: template
 
 	initialize: ->
 		super
+		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'dispatcher:dispatch', @render
 		@listenTo @collection, 'change', @render
 		@subscribeEvent 'graphs:clear', @clear
 
 	render: =>
+		loadCSV()
 		super
 
 	clear: ->

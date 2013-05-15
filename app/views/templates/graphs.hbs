@@ -1,2 +1,5 @@
-<ul class="unstyled" id="graph-list"></ul>
-
+{{#if_logged_in}}
+	<ul class="unstyled" id="graph-list"></ul>
+{{else}}
+	<h2 class="text-error">You must log in to see this page.</h2>
+{{/if_logged_in}}
