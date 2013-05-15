@@ -1,6 +1,7 @@
 Chaplin = require 'chaplin'
 routes = require 'routes'
 Graphs = require 'models/graphs'
+Navbar = require 'models/navbar'
 Layout = require 'views/layout'
 
 # The application object.
@@ -44,22 +45,11 @@ module.exports = class Application extends Chaplin.Application
   initLayout: ->
     @layout = new Layout {@title}
 
-  # Instantiate common controllers
-  # ------------------------------
-  initControllers: ->
-    # These controllers are active during the whole application runtime.
-    # You don’t need to instantiate all controllers here, only special
-    # controllers which do not to respond to routes. They may govern models
-    # and views which are needed the whole time, for example header, footer
-    # or navigation views.
-    # e.g. new NavigationController()
-
   # Create additional mediator properties.
   initMediator: ->
     # Add additional application-specific properties and methods
-    # e.g. Chaplin.mediator.prop = null
+    Chaplin.mediator.user = null
     Chaplin.mediator.graphs = new Graphs()
+    Chaplin.mediator.navbar = new Navbar()
     Chaplin.mediator.graphs.fetch()
-
-    # Seal the mediator.
     Chaplin.mediator.seal()
