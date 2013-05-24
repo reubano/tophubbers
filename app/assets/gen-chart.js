@@ -15,7 +15,8 @@ year = date.year();
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
 maxCacheAge = 24;
-api_base = 'http://ongeza-api.herokuapp.com/'
+// api_base = 'http://ongeza-api.herokuapp.com/'
+api_base = 'http://localhost:5000/'
 
 Storage.prototype.setObject = function(key, value) {
 	this.setItem(key, JSON.stringify(value));
