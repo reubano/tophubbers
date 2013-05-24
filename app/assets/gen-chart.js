@@ -9,12 +9,14 @@ chartRange = [minTime * 60, maxTime * 60];
 tickInterval = [];
 string = 'MM/DD/YY';
 date = moment();
-// month = date.month();
+month = date.month();
+// month = 1;
 year = date.year();
-month = 1;
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
 maxCacheAge = 24;
+api_base = 'http://ongeza-api.herokuapp.com/'
+// api_base = 'http://localhost:5000/'
 
 Storage.prototype.setObject = function(key, value) {
 	this.setItem(key, JSON.stringify(value));
@@ -78,7 +80,7 @@ loadCSV = function() {
 		(!cur_data || !cd_tstamp)
 		|| (cd_tstamp && (cd_tstamp.diff(moment(), 'hours') >= maxCacheAge))
 	) {
-		d3.json('http://ongeza-api.herokuapp.com/cur_data/', cacheCurData);
+		d3.json(api_base + 'cur_data/', cacheCurData);
 	} else {
 		groupData(cur_data);
 	}
@@ -87,7 +89,7 @@ loadCSV = function() {
 		(!miss_reps || !mr_tstamp)
 		|| (mr_tstamp && mr_tstamp.diff(moment(), 'hours') >= maxCacheAge)
 	) {
-		d3.json('http://ongeza-api.herokuapp.com/missing_reps/', cacheMissReps);
+		d3.json(api_base + 'missing_reps/', cacheMissReps);
 	} else {
 		makeBlank(miss_reps);
 	}
