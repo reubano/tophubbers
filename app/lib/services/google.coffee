@@ -53,6 +53,11 @@ module.exports = class Google extends ServiceProvider
       client_id: clientId, scope: scopes, immediate: immediate
       callback
 
+#     setTimeout ->
+#       window.gapi.auth.authorize
+#         client_id: clientId, scope: scopes, immediate: immediate
+#         callback
+
   triggerLogin: =>
     console.log 'google triggerLogin'
     @authorize @loginHandler false
