@@ -7,7 +7,8 @@ module.exports = (match) ->
   match 'tocall', 'tocall#show'
 
   # Cumulative working month graph sorted by employee num
-  match 'graphs', 'graphs#show'
+  match 'graphs', 'graphs#index'
+  match 'graphs/:id', 'graphs#show'
 
   # Data table of reps ordered by progress
   # Mint like progress bars summarizing data table for each rep

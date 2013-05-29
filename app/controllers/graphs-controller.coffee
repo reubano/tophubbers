@@ -1,6 +1,7 @@
 config = require 'config'
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
+RepGraphView = require 'views/rep-graph-view'
 GraphsView = require 'views/graphs-view'
 
 module.exports = class Controller extends Controller
@@ -28,6 +29,11 @@ module.exports = class Controller extends Controller
 			@publishEvent 'graphs:clear'
 			@collection.fetch()
 
-	show: (params) =>
+	index: (params) =>
 		console.log 'rendering graphs view'
 		@view = new GraphsView {@collection}
+
+	show: (params) =>
+		console.log 'rendering rep graph view'
+		@model = @collection.get(params.id)
+		@view = new RepGraphView {@model}
