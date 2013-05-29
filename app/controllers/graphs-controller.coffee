@@ -8,6 +8,10 @@ module.exports = class Controller extends Controller
 	adjustTitle: 'Graph list'
 	collection: Chaplin.mediator.graphs
 
+	logCollection: =>
+		console.log('this collection')
+		console.log(@collection)
+
 	cacheExpired: =>
 		# check if the cache has expired
 		ages = @collection.pluck 'age'
@@ -23,11 +27,15 @@ module.exports = class Controller extends Controller
 		diff1 != [] or diff2 != []
 
 	initialize: =>
-		if @collection.length = 0
-			@collection.fetch()
+		if @collection.length == 0
+			console.log 'before fetching graphs'
+			console.log @collection
+			console.log 'after fetching graphs'
+			@collection.fetch({success: @logCollection})
 		else if @cacheExpired()
-			@publishEvent 'graphs:clear'
-			@collection.fetch()
+			console.log 'clearing and fetching graphs'
+			# @publishEvent 'graphs:clear'
+			@collection.fetch({reset: true, success: @logCollection})
 
 	index: (params) =>
 		console.log 'rendering graphs view'
