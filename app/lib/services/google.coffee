@@ -89,4 +89,4 @@ module.exports = class Google extends ServiceProvider
     @publishEvent 'userData',
       name: response.displayName
       id: response.id
-      imageUrl: response.image.url
+      # imageUrl: response.image.url
