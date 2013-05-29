@@ -10,7 +10,6 @@ tickInterval = [];
 string = 'MM/DD/YY';
 date = moment();
 month = date.month();
-// month = 1;
 year = date.year();
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
@@ -73,6 +72,8 @@ loadCSV = function() {
 
 	cur_data = localStorage.getObject('cur_data');
 	miss_reps = localStorage.getObject('miss_reps');
+	console.log('cached miss_reps');
+	console.log(miss_reps);
 	cd_tstamp = moment(localStorage.getObject('cd_tstamp'));
 	mr_tstamp = moment(localStorage.getObject('mr_tstamp'));
 
@@ -116,6 +117,8 @@ cacheCurData = function(json) {
 };
 
 cacheMissReps = function(json) {
+	console.log('live miss_reps');
+	console.log(json);
 	localStorage.setObject('miss_reps', json);
 	localStorage.setObject('mr_tstamp', moment());
 	makeBlank(json);
@@ -175,6 +178,7 @@ loadData = function(d) {
 };
 
 makeChart = function(result) {
+	console.log('making chart ' + result.id);
 	$(document).ready(function(){
 		selection = '#' + result.id +'.view .chart svg';
 
