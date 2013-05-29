@@ -82,8 +82,12 @@ loadCSV = function() {
 			cd_tstamp
 			&& Math.abs(cd_tstamp.diff(moment(), 'hours')) >= maxCacheAge)
 	) {
+		console.log('data age: ' + Math.abs(cd_tstamp.diff(moment(), 'hours')));
+		console.log('fetching data from api');
 		d3.json(api_base + 'cur_data/', cacheCurData);
 	} else {
+		console.log('data age: ' + Math.abs(cd_tstamp.diff(moment(), 'hours')));
+		console.log('using data from cache');
 		groupData(cur_data);
 	}
 
@@ -93,8 +97,14 @@ loadCSV = function() {
 			mr_tstamp
 			&& Math.abs(mr_tstamp.diff(moment(), 'hours')) >= maxCacheAge)
 	) {
+		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
+		console.log('miss rep age: ' + age);
+		console.log('fetching missing_reps from api');
 		d3.json(api_base + 'missing_reps/', cacheMissReps);
 	} else {
+		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
+		console.log('miss rep age: ' + age);
+		console.log('using missing_reps from cache');
 		makeBlank(miss_reps);
 	}
 };
