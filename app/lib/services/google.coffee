@@ -33,7 +33,7 @@ module.exports = class Google extends ServiceProvider
 
   loadHandler: =>
     console.log 'google loadHandler'
-    gapi.client.setApiKey @apiKey
+    # gapi.client.setApiKey @apiKey
     # Remove the global load handler
     try
       # IE 8 throws an exception
@@ -48,21 +48,22 @@ module.exports = class Google extends ServiceProvider
     console.log 'google isLoaded'
     Boolean window.gapi and gapi.auth and gapi.auth.authorize
 
+  authorize: (callback, immediate) ->
+    gapi.auth.authorize
+      client_id: clientId, scope: scopes, immediate: immediate
+      callback
+
   triggerLogin: =>
     console.log 'google triggerLogin'
-    gapi.auth.authorize
-      client_id: clientId, scope: scopes, immediate: false
-      @loginHandler
+    @authorize @loginHandler false
 
   loginHandler: (authResponse) =>
     console.log 'google loginHandler'
     console.log authResponse
-    if authResponse
-      console.log 'google loginSuccessful'
-      # Publish successful login
-      @publishEvent 'loginSuccessful', {provider: this, authResponse}
 
-      # Publish the session
+    if authResponse and not authResponse.error
+      console.log 'google loginSuccessful'
+      @publishEvent 'loginSuccessful', {provider: this, authResponse}
       @publishEvent 'serviceProviderSession',
         provider: this
         accessToken: authResponse.access_token
@@ -75,9 +76,7 @@ module.exports = class Google extends ServiceProvider
 
   getLoginStatus: =>
     console.log 'google getLoginStatus'
-    gapi.auth.authorize
-      client_id: clientId, scope: scopes, immediate: true
-      @loginHandler
+    @authorize @loginHandler true
 
   getUserData: (callback) ->
     console.log 'google getUserInfo'
