@@ -15,8 +15,8 @@ year = date.year();
 currStart = moment([year, month, 1]);
 currEnd = moment(currStart).endOf('month');
 maxCacheAge = 24;
-api_base = 'http://ongeza-api.herokuapp.com/'
-// api_base = 'http://localhost:5000/'
+// api_base = 'http://ongeza-api.herokuapp.com/'
+api_base = 'http://localhost:5000/'
 
 Storage.prototype.setObject = function(key, value) {
 	this.setItem(key, JSON.stringify(value));
@@ -100,7 +100,7 @@ loadCSV = function() {
 		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
 		console.log('miss rep age: ' + age);
 		console.log('fetching missing_reps from api');
-		d3.json(api_base + 'missing_reps/', cacheMissReps);
+		d3.json(api_base + 'cur_missing_reps/', cacheMissReps);
 	} else {
 		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
 		console.log('miss rep age: ' + age);
