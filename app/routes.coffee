@@ -8,7 +8,7 @@ module.exports = (match) ->
 
   # Cumulative working month graph sorted by employee num
   match 'graphs', 'graphs#index'
-  match 'graphs/:id', 'graphs#show'
+  match 'graph/:id', 'graphs#show'
 
   # Data table of reps ordered by progress
   # Mint like progress bars summarizing data table for each rep
