@@ -2,8 +2,10 @@ Chaplin = require 'chaplin'
 Model = require 'models/base/model'
 
 module.exports = class Collection extends Chaplin.Collection
-  # Mixin a synchronization state machine
-  # _(@prototype).extend Chaplin.SyncMachine
+  _.extend @prototype, Chaplin.SyncMachine
 
-  # Use the project base model per default, not Chaplin.Model
   model: Model
+
+  initialize: (models, options) ->
+    @url = options.url if options?.url?
+    super

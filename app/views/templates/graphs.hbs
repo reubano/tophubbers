@@ -1,5 +1,8 @@
 {{#if_logged_in}}
 	<ul class="unstyled" id="graph-list"></ul>
+	<script>console.log('view rendered');</script>
+	<script>console.log('loading csv...');</script>
+	<script>loadCSV();</script>
 {{else}}
 	<h2 class="text-error">You must log in to see this page.</h2>
 {{/if_logged_in}}

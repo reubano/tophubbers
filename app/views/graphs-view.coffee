@@ -4,6 +4,7 @@ GraphView = require 'views/graph-view'
 
 module.exports = class GraphsView extends CollectionView
 	itemView: GraphView
+	autoRender: no
 	listSelector: '#graph-list'
 	region: 'content'
 	className: 'span12'
@@ -17,7 +18,6 @@ module.exports = class GraphsView extends CollectionView
 		@subscribeEvent 'graphs:clear', @clear
 
 	render: =>
-		loadCSV()
 		super
 
 	clear: ->
