@@ -10,3 +10,5 @@ module.exports = class NavbarView extends View
 
   initialize: (options) ->
     super
+    @subscribeEvent 'loginStatus', @render
+    @subscribeEvent 'dispatcher:dispatch', @render
