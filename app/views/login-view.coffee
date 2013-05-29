@@ -3,7 +3,6 @@ View = require 'views/base/view'
 template = require 'views/templates/login'
 
 module.exports = class NavbarView extends View
-  autoRender: true
   region: 'content'
   className: 'login'
   template: template

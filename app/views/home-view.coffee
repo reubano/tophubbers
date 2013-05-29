@@ -2,7 +2,7 @@ View = require 'views/base/view'
 template = require './templates/home'
 
 module.exports = class HomePageView extends View
-  autoRender: yes
+  autoRender: true
   template: template
   region: 'content'
   className: 'container-fluid'

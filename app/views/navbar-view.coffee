@@ -5,7 +5,7 @@ template = require 'views/templates/navbar'
 module.exports = class NavbarView extends View
   mediator = Chaplin.mediator
 
-  autoRender: yes
+  autoRender: true
   className: 'navbar-inner'
   region: 'navbar'
   template: template

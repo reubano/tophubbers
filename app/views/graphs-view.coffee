@@ -4,7 +4,7 @@ GraphView = require 'views/graph-view'
 
 module.exports = class GraphsView extends CollectionView
 	itemView: GraphView
-	autoRender: no
+	autoRender: true
 	listSelector: '#graph-list'
 	region: 'content'
 	className: 'span12'
