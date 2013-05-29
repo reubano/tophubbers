@@ -1,5 +1,5 @@
 View = require 'views/base/view'
-template = require './templates/home'
+template = require 'views/templates/home'
 
 module.exports = class HomePageView extends View
   autoRender: true
