@@ -21,7 +21,7 @@ module.exports = class Google extends ServiceProvider
   name: 'google'
 
   load: ->
-    console.log 'load'
+    console.log 'google load'
     return if @state() is 'resolved' or @loading
     @loading = true
 
@@ -32,7 +32,7 @@ module.exports = class Google extends ServiceProvider
     utils.loadLib 'https://apis.google.com/js/client.js?onload=googleClientLoaded', null, @reject
 
   loadHandler: =>
-    console.log 'loadHandler'
+    console.log 'google loadHandler'
     gapi.client.setApiKey @apiKey
     # Remove the global load handler
     try
@@ -45,20 +45,20 @@ module.exports = class Google extends ServiceProvider
     gapi.auth.init @resolve
 
   isLoaded: ->
-    console.log 'isLoaded'
+    console.log 'google isLoaded'
     Boolean window.gapi and gapi.auth and gapi.auth.authorize
 
   triggerLogin: =>
-    console.log 'triggerLogin'
+    console.log 'google triggerLogin'
     gapi.auth.authorize
       client_id: clientId, scope: scopes, immediate: false
       @loginHandler
 
   loginHandler: (authResponse) =>
-    console.log 'loginHandler'
+    console.log 'google loginHandler'
     console.log authResponse
     if authResponse
-      console.log 'loginSuccessful'
+      console.log 'google loginSuccessful'
       # Publish successful login
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
 
@@ -70,24 +70,24 @@ module.exports = class Google extends ServiceProvider
       @getUserData @processUserData
 
     else
-      console.log 'loginFail'
+      console.log 'google loginFail'
       @publishEvent 'loginFail', {provider: this, authResponse}
 
   getLoginStatus: =>
-    console.log 'getLoginStatus'
+    console.log 'google getLoginStatus'
     gapi.auth.authorize
       client_id: clientId, scope: scopes, immediate: true
       @loginHandler
 
   getUserData: (callback) ->
-    console.log 'getUserInfo'
+    console.log 'google getUserInfo'
     gapi.client.load 'plus', 'v1', ->
       request = gapi.client.plus.people.get {'userId': 'me'}
       request.execute callback
 
   processUserData: (response) =>
-    console.log 'processUserData'
+    console.log 'google processUserData'
     @publishEvent 'userData',
-      imageUrl: response.image.url
       name: response.displayName
       id: response.id
+      imageUrl: response.image.url
