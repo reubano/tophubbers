@@ -189,7 +189,7 @@ makeChart = function(result) {
 			.barColor([d3.rgb('steelblue')])
 			.showControls(false)
 			;
- 
+
 		for (var i = 0; i < maxTime - 1; i++) {
 			tickInterval[i] = (minTime + i + 1) * 60;
 		}
