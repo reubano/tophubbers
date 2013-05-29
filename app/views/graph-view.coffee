@@ -7,10 +7,6 @@ module.exports = class GraphView extends View
 	initialize: ->
 		super
 		@listenTo @model, 'change', @render
-		@delegate 'click', '.icon-remove-sign', @destroy
 
 	render: =>
 		super
-
-	destroy: =>
-		@model.destroy()
