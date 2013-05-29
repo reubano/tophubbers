@@ -1,0 +1,12 @@
+{{#if_logged_in}}
+	<div class="view" id="{{id}}">
+		<h2>{{first_name}} {{last_name}} ({{id}})</h2>
+		<div class="chart"><svg></svg></div>
+	</div>
+
+	<script>console.log('rep graph view rendered');</script>
+	<script>console.log('loading csv...');</script>
+	<script>loadCSV();</script>
+{{else}}
+	<h2 class="text-error">You must log in to see this page.</h2>
+{{/if_logged_in}}
