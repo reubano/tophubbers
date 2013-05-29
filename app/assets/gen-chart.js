@@ -117,8 +117,6 @@ cacheCurData = function(json) {
 };
 
 cacheMissReps = function(json) {
-	console.log('live miss_reps');
-	console.log(json);
 	localStorage.setObject('miss_reps', json);
 	localStorage.setObject('mr_tstamp', moment());
 	makeBlank(json);
