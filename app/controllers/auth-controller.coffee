@@ -8,5 +8,5 @@ module.exports = class AuthController extends Controller
 
   login: ->
     @publishEvent '!login', 'google'
-    @redirectToRoute 'home#index'
+    @redirectToRoute 'home#show'
     location.reload()
