@@ -5,7 +5,13 @@ config = require 'config'
 module.exports = class Graphs extends Collection
   model: Graph
   localStorage: new Store 'graphs-chaplin'
-  url: 'info/'
+  url: config.api + 'info/'
 
   comparator: (model) ->
     model.get('id')
+
+  parse: (response) ->
+    console.log 'parse response'
+    console.log response
+    response.data
+

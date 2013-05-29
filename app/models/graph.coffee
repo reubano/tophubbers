@@ -5,4 +5,7 @@ module.exports = class Graph extends Model
     id: ''
     first_name: ''
     last_name: ''
+    ward: ''
+    airtel: ''
+    google_id: ''
     age: (new Date).getTime() / 3600000
