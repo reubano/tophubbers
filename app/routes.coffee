@@ -1,7 +1,7 @@
 module.exports = (match) ->
   match '', 'home#show'
   match 'logout', 'auth#logout'
-  match 'auth-callback/', 'auth#callback'
+  match 'login', 'auth#login'
 
   # Dynamic checklist of reps ordered and categorized by progress
   match 'tocall', 'tocall#show'

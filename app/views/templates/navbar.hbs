@@ -13,7 +13,7 @@
 		{{/with_user}}
 	{{else}}
 		{{#with_config}}
-			<a class="nav pull-right" href="http://api.ost.io/auth/github/?origin={{show_login_url}}">
+			<a class="nav pull-right" href="{{url "auth#login"}}">
 			<button id="login" class="btn btn-primary" type="button">
 				Login
 			</button>
@@ -23,7 +23,7 @@
 	<div class="nav-collapse collapse">
 		<ul class="nav">
 			{{#each items}}
-			<li><a class="brand" href="{{href}}">{{title}}</a></li>
+			<li><a class="" href="{{href}}">{{title}}</a></li>
 			{{/each}}
 		</ul>
 	</div><!--/.nav-collapse -->
