@@ -1,6 +1,5 @@
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
-Navbar = require 'models/navbar'
 HomeView = require 'views/home-view'
 
 module.exports = class HomeController extends Controller
