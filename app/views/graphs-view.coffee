@@ -21,9 +21,11 @@ module.exports = class GraphsView extends CollectionView
 		@listenTo @collection, 'change', @render
 		@listenTo @collection, 'reset', @render
 		@subscribeEvent 'graphs:clear', @clear
+		# @subscribeEvent 'render:graphs', @drawBlanks
 
 	render: =>
 		super
+		@publishEvent 'render:graphs'
 
 	clear: ->
 		model.destroy() while model = @collection.first()
