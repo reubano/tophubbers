@@ -3,15 +3,14 @@ Graph = require 'models/graph'
 config = require 'config'
 
 module.exports = class Graphs extends Collection
-  model: Graph
-  localStorage: new Store 'graphs-chaplin'
-  url: config.api + 'info/'
+	model: Graph
+	localStorage: new Store 'graphs-chaplin'
+	url: config.api + 'info'
 
-  comparator: (model) ->
-    model.get('id')
+	comparator: (model) ->
+		model.get('id')
 
-#   parse: (response) ->
-#     console.log 'parse response'
-#     console.log response
-#     response.data
+	parse: (response) =>
+		console.log 'parse response'
+		response.data
 

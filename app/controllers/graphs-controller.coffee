@@ -5,12 +5,20 @@ RepView = require 'views/rep-view'
 GraphsView = require 'views/graphs-view'
 
 module.exports = class Controller extends Controller
-	adjustTitle: 'Graph list'
-	collection: Chaplin.mediator.graphs
+	mediator = Chaplin.mediator
 
-	logCollection: =>
-		console.log('this collection')
-		console.log(@collection)
+	adjustTitle: 'Graph list'
+	collection: mediator.graphs
+	url: config.api + 'info'
+
+	getGraphs: (callback) ->
+		$.ajax url: @url, type: 'get', dataType: 'json', success: callback
+
+	resetGraphs: (response) =>
+		console.log 'resetting collection'
+		mediator.graphs.set response.data
+		console.log mediator.graphs
+		@collection.reset(response.data)
 
 	cacheExpired: =>
 		# check if the cache has expired
@@ -27,15 +35,16 @@ module.exports = class Controller extends Controller
 		diff1 != [] or diff2 != []
 
 	initialize: =>
-		if @collection.length == 0
-			console.log 'before fetching graphs'
-			console.log @collection
-			console.log 'after fetching graphs'
-			@collection.fetch({success: @logCollection})
-		else if @cacheExpired()
-			console.log 'clearing and fetching graphs'
-			# @publishEvent 'graphs:clear'
-			@collection.fetch({reset: true, success: @logCollection})
+		if (@collection.length == 0 or @cacheExpired())
+			console.log 'collection length: ' + Chaplin.mediator.graphs.length
+			console.log 'cacheExpired: ' + @cacheExpired()
+			console.log 'fetching graphs'
+			@publishEvent 'graphs:clear'
+			@getGraphs(@resetGraphs)
+		else
+			console.log 'collection length: ' + Chaplin.mediator.graphs.length
+			console.log 'cacheExpired: ' + @cacheExpired()
+			console.log 'using cached graphs'
 
 	index: (params) =>
 		console.log 'rendering graphs view'
