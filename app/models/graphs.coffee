@@ -14,3 +14,5 @@ module.exports = class Graphs extends Collection
 		console.log 'parse response'
 		response.data
 
+	initialize: ->
+		super

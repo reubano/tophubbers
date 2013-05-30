@@ -5,3 +5,6 @@ module.exports = class User extends Model
     name: ''
     id: ''
     imageUrl: ''
+
+  initialize: ->
+    super

@@ -9,3 +9,6 @@ module.exports = class Graph extends Model
     airtel: ''
     google_id: ''
     age: (new Date).getTime() / 3600000
+
+  initialize: ->
+    super
