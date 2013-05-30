@@ -1,7 +1,7 @@
 config = require 'config'
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
-RepGraphView = require 'views/rep-graph-view'
+RepView = require 'views/rep-view'
 GraphsView = require 'views/graphs-view'
 
 module.exports = class Controller extends Controller
@@ -44,4 +44,4 @@ module.exports = class Controller extends Controller
 	show: (params) =>
 		console.log 'rendering rep graph view'
 		@model = @collection.get(params.id)
-		@view = new RepGraphView {@model}
+		@view = new RepView {@model}
