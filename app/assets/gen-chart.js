@@ -77,34 +77,35 @@ loadCSV = function() {
 	cd_tstamp = moment(localStorage.getObject('cd_tstamp'));
 	mr_tstamp = moment(localStorage.getObject('mr_tstamp'));
 
-	if (
-		(!cur_data || !cd_tstamp)
-		|| (
-			cd_tstamp
-			&& Math.abs(cd_tstamp.diff(moment(), 'hours')) >= maxCacheAge)
-	) {
-		console.log('data age: ' + Math.abs(cd_tstamp.diff(moment(), 'hours')));
+	if (cd_tstamp) {
+		var cd_age = Math.abs(cd_tstamp.diff(moment(), 'hours'))
+	} else {
+		var cd_age = maxCacheAge
+	}
+
+	if (mr_tstamp) {
+		var mr_age = Math.abs(mr_tstamp.diff(moment(), 'hours'))
+	} else {
+		var mr_age = maxCacheAge
+	}
+
+
+	if ((!cur_data || !cd_tstamp) || (cd_tstamp && cd_age >= maxCacheAge)) {
+		console.log('data age: ' + cd_age);
 		console.log('fetching data from api');
 		d3.json(api_base + 'cur_data/', cacheCurData);
 	} else {
-		console.log('data age: ' + Math.abs(cd_tstamp.diff(moment(), 'hours')));
+		console.log('data age: ' + cd_age);
 		console.log('using data from cache');
 		groupData(cur_data);
 	}
 
-	if (
-		(!miss_reps || !mr_tstamp)
-		|| (
-			mr_tstamp
-			&& Math.abs(mr_tstamp.diff(moment(), 'hours')) >= maxCacheAge)
-	) {
-		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
-		console.log('miss rep age: ' + age);
+	if ((!miss_reps || !mr_tstamp) || (mr_tstamp && mr_age >= maxCacheAge)) {
+		console.log('miss rep age: ' + mr_age);
 		console.log('fetching missing_reps from api');
 		d3.json(api_base + 'cur_missing_reps/', cacheMissReps);
 	} else {
-		var age = Math.abs(mr_tstamp.diff(moment(), 'hours'));
-		console.log('miss rep age: ' + age);
+		console.log('miss rep age: ' + mr_age);
 		console.log('using missing_reps from cache');
 		makeBlank(miss_reps);
 	}
