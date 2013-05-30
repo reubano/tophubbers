@@ -10,8 +10,8 @@ module.exports = class Graphs extends Collection
   comparator: (model) ->
     model.get('id')
 
-  parse: (response) ->
-    console.log 'parse response'
-    console.log response
-    response.data
+#   parse: (response) ->
+#     console.log 'parse response'
+#     console.log response
+#     response.data
 
