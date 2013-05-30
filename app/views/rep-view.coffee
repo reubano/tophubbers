@@ -1,8 +1,8 @@
 Chaplin = require 'chaplin'
 View = require 'views/base/view'
-template = require 'views/templates/rep-graph'
+template = require 'views/templates/rep'
 
-module.exports = class RepGraphView extends View
+module.exports = class RepView extends View
 	mediator = Chaplin.mediator
 
 	autoRender: true
