@@ -93,7 +93,7 @@ loadCSV = function() {
 	if ((!cur_data || !cd_tstamp) || (cd_tstamp && cd_age >= maxCacheAge)) {
 		console.log('data age: ' + cd_age);
 		console.log('fetching data from api');
-		d3.json(api_base + 'cur_data/', cacheCurData);
+		d3.json(api_base + 'cur_data', cacheCurData);
 	} else {
 		console.log('data age: ' + cd_age);
 		console.log('using data from cache');
@@ -103,7 +103,8 @@ loadCSV = function() {
 	if ((!miss_reps || !mr_tstamp) || (mr_tstamp && mr_age >= maxCacheAge)) {
 		console.log('miss rep age: ' + mr_age);
 		console.log('fetching missing_reps from api');
-		d3.json(api_base + 'cur_missing_reps/', cacheMissReps);
+		d3.json(api_base + 'cur_missing_reps', cacheMissReps);
+		// d3.json(api_base + 'missing_reps', cacheMissReps);
 	} else {
 		console.log('miss rep age: ' + mr_age);
 		console.log('using missing_reps from cache');
