@@ -1,6 +1,6 @@
 Chaplin = require 'chaplin'
 routes = require 'routes'
-Graphs = require 'models/graphs'
+Reps = require 'models/reps'
 Navbar = require 'models/navbar'
 Layout = require 'views/layout'
 
@@ -49,7 +49,7 @@ module.exports = class Application extends Chaplin.Application
   initMediator: ->
     # Add additional application-specific properties and methods
     Chaplin.mediator.user = null
-    Chaplin.mediator.graphs = new Graphs()
+    Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
-    Chaplin.mediator.graphs.fetch()
+    Chaplin.mediator.reps.fetch()
     Chaplin.mediator.seal()

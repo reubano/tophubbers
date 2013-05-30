@@ -1,18 +1,14 @@
 Collection = require 'models/base/collection'
-Graph = require 'models/graph'
+Rep = require 'models/rep'
 config = require 'config'
 
 module.exports = class Graphs extends Collection
-	model: Graph
-	localStorage: new Store 'graphs-chaplin'
-	url: config.api + 'info'
+	model: Rep
+	localStorage: new Store 'reps-chaplin'
 
 	comparator: (model) ->
 		model.get('id')
 
-	parse: (response) =>
-		console.log 'parse response'
-		response.data
-
 	initialize: ->
 		super
+		console.log 'initialize reps collection'
