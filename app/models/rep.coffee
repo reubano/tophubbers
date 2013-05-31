@@ -6,29 +6,10 @@ module.exports = class Graph extends Model
 	chartRange = [minTime * 60, maxTime * 60]
 
 	defaults:
-		id: ''
-		first_name: ''
-		last_name: ''
-		ward: ''
-		airtel: ''
-		google_id: ''
-		cur_work_data: ''
-		cur_feedback_data: ''
-		cur_progress_data: ''
-		prev_work_data: ''
-		prev_feedback_data: ''
-		prev_progress_data: ''
-		cur_work_chart: ''
-		cur_feedback_chart: ''
-		cur_progress_chart: ''
-		prev_work_chart: ''
-		prev_feedback_chart: ''
-		prev_progress_chart: ''
 		age: (new Date).getTime() / 3600000
 
 	initialize: ->
 		super
-		console.log 'initialize rep model'
 
 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab: (d) -> d.label
@@ -85,5 +66,5 @@ module.exports = class Graph extends Model
 
 		# nv.utils.windowResize chart.update
 		chart.dispatch.on 'stateChange', @nvlog e
-		attr.replace /data/g, "chart"
+		attr.replace /data/g, 'chart'
 		@set attr, chart

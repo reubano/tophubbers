@@ -4,7 +4,7 @@ config = require 'config'
 
 module.exports = class Graphs extends Collection
 	model: Rep
-	localStorage: new Store 'reps-chaplin'
+	localStorage: new Store 'reps-collection'
 
 	comparator: (model) ->
 		model.get('id')
