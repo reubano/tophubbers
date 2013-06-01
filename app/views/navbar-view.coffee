@@ -15,9 +15,3 @@ module.exports = class NavbarView extends View
     # console.log 'navbar-view init'
     @subscribeEvent 'loginStatus', @render
     @subscribeEvent 'dispatcher:dispatch', @render
-    @delegate 'click', '#logout', @logoutButtonClick
-
-  # Handle clicks on the logout button
-  logoutButtonClick: (event) ->
-    event.preventDefault()
-    mediator.publish '!logout'
