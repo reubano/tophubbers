@@ -23,19 +23,28 @@ module.exports = class Controller extends Controller
 		console.log 'setting collection'
 		parser = document.createElement('a')
 		parser.href = jqXHR.url
-		attr = (parser.pathname.replace /\//g, '') + '_age'
-		now = (new Date).getTime() / 3600000
+		attr = (@parser.pathname.replace /\//g, '')
+		tstamp = attr + '_tstamp'
 		@collection.set response.data, remove: false
-		@collection.at(1).save attr: now
 		_.map(@collection.models, (model) -> model.save({patch: true}))
+		@collection.at(1).set tstamp, new Date().toString()
 		console.log 'collection length: ' + @collection.length
 		console.log @collection.at(1).getAttributes()
 
 	cacheExpired: (attr) =>
 		# check if the cache has expired
-		age = @collection.at(1).get attr
-		now = (new Date).getTime() / 3600000
-		(now - age) > config.max_age
+		console.log 'checking ' + attr
+		tstamp = @collection.at(1).get attr
+
+		if tstamp
+			string = 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ'
+			mstamp = moment(tstamp, string)
+			age = mstamp.diff(moment(), 'hours')
+			console.log attr + ' age: ' + mstamp.fromNow(true)
+			age >= config.max_age
+		else
+			console.log 'no ' + attr + ' found'
+			true
 
 	repListDiffers: (reps) =>
 		# check if the current rep list differs from the server

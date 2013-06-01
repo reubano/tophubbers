@@ -4,12 +4,11 @@ module.exports = class Graph extends Model
 	minTime = 7.5
 	maxTime = 18.5
 	chartRange = [minTime * 60, maxTime * 60]
-
-	defaults:
-		age: (new Date).getTime() / 3600000
+	tickInterval = []
 
 	initialize: ->
 		super
+		@set 'created', new Date().toString() if @isNew() or not @get 'created'
 
 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab: (d) -> d.label
