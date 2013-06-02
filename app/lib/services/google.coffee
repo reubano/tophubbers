@@ -10,7 +10,7 @@ module.exports = class Google extends ServiceProvider
   # Note: This is the ID for an example Google API project.
   # You might change this to your own project ID.
   # See https://code.google.com/apis/console/
-  clientId = '486945395268'
+  clientId = '486945395268.apps.googleusercontent.com'
   apiKey = 'AIzaSyC-8OmYrW23uSmi7ok8_e5hkW_TEKNto5s'
 
   # The permissions we’re asking for. This is a space-separated list of URLs.
