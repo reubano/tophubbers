@@ -78,7 +78,7 @@ module.exports = class Google extends ServiceProvider
       @publishEvent 'loginFail', {provider: this, authResponse}
 
   getUserData: (callback) ->
-    console.log 'google getUserInfo'
+    console.log 'google getUserData'
     gapi.client.load 'plus', 'v1', ->
       request = gapi.client.plus.people.get {'userId': 'me'}
       request.execute callback
