@@ -68,6 +68,10 @@ module.exports = class Google extends ServiceProvider
       console.log 'google login successful!'
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
       @accessToken = authResponse.access_token
+      @publishEvent 'serviceProviderSession',
+         provider: this
+         accessToken: @accessToken
+
       @getUserData @processUserData
 
     else
@@ -105,7 +109,7 @@ module.exports = class Google extends ServiceProvider
     if not response or status is 'error'
       @publishEvent 'logout'
     else
-      @publishEvent 'serviceProviderSession', response
+      @publishEvent 'serviceProviderSession',
          provider: this
          userId: response.id
          accessToken: @accessToken
