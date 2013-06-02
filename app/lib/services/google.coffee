@@ -50,7 +50,7 @@ module.exports = class Google extends ServiceProvider
       window.googleClientLoaded = undefined
 
     # Initialize
-    gapi.auth.init @resolve
+    @authorize @loginHandler, true
 
   isLoaded: ->
     console.log 'google isLoaded'
@@ -101,7 +101,3 @@ module.exports = class Google extends ServiceProvider
       client_id: clientId, scope: scopes, immediate: immediate
       callback
 
-#     setTimeout ->
-#       window.gapi.auth.authorize
-#         client_id: clientId, scope: scopes, immediate: immediate
-#         callback
