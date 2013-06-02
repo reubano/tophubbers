@@ -20,6 +20,11 @@ module.exports = class Google extends ServiceProvider
 
   name: 'google'
 
+  constructor: ->
+    super
+    console.log 'google constructor'
+    @accessToken = localStorage.getItem 'accessToken'
+
   load: ->
     console.log 'google load'
     return if @state() is 'resolved' or @loading
