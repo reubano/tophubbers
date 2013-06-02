@@ -67,10 +67,7 @@ module.exports = class Google extends ServiceProvider
     if authResponse and not authResponse.error
       console.log 'google login successful!'
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
-      @publishEvent 'serviceProviderSession',
-        provider: this
-        accessToken: authResponse.access_token
-
+      @accessToken = authResponse.access_token
       @getUserData @processUserData
 
     else
@@ -91,13 +88,23 @@ module.exports = class Google extends ServiceProvider
       # id: response.id
       # imageUrl: response.image.url
 
-  getLoginStatus: =>
-    console.log 'google getLoginStatus'
-    @authorize @loginHandler true
-
   authorize: (callback, immediate) ->
     console.log 'google authorize'
     gapi.auth.authorize
       client_id: clientId, scope: scopes, immediate: immediate
       callback
 
+  getLoginStatus: (callback=@loginStatusHandler, force=false) =>
+    @getUserData callback
+
+  loginStatusHandler: (response, status) =>
+    console.log 'google loginStatusHandler'
+    console.log response
+
+    if not response or status is 'error'
+      @publishEvent 'logout'
+    else
+      @publishEvent 'serviceProviderSession', response
+         provider: this
+         userId: response.id
+         accessToken: @accessToken
