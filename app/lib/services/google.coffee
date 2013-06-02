@@ -4,7 +4,8 @@ ServiceProvider = require 'lib/services/service-provider'
 module.exports = class Google extends ServiceProvider
   # Client-Side OAuth 2.0 login with Google
   # https://code.google.com/p/google-api-javascript-client/
-  # https://code.google.com/p/google-api-javascript-client/wiki/Authentication
+  # https://code.google.com/p/google-api-javascript-client/source/browse/samples/authSample.html
+  # https://developers.google.com/api-client-library/javascript/features/authentication
 
   # Note: This is the ID for an example Google API project.
   # You might change this to your own project ID.
@@ -13,9 +14,8 @@ module.exports = class Google extends ServiceProvider
   apiKey = 'AIzaSyC-8OmYrW23uSmi7ok8_e5hkW_TEKNto5s'
 
   # The permissions we’re asking for. This is a space-separated list of URLs.
-  # See https://developers.google.com/accounts/docs/OAuth2Login#scopeparameter
-  # or https://developers.google.com/+/api/oauth
-  # and the individual Google API documentations
+  # https://developers.google.com/accounts/docs/OAuth2Login#scopeparameter
+  # https://developers.google.com/+/api/oauth
   scopes = 'https://www.googleapis.com/auth/plus.me'
 
   name: 'google'
