@@ -33,7 +33,7 @@ module.exports = class Google extends ServiceProvider
 
   loadHandler: =>
     console.log 'google loadHandler'
-    # gapi.client.setApiKey @apiKey
+    gapi.client.setApiKey @apiKey
     # Remove the global load handler
     try
       # IE 8 throws an exception
