@@ -55,7 +55,7 @@ module.exports = class Google extends ServiceProvider
 
   triggerLogin: =>
     console.log 'google triggerLogin'
-    @authorize @loginHandler false
+    @authorize @loginHandler, false
 
   loginHandler: (authResponse) =>
     console.log 'google loginHandler'
