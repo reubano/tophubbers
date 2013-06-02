@@ -76,9 +76,9 @@ module.exports = class Google extends ServiceProvider
 
   processUserData: (response) =>
     console.log 'google processUserData'
-    @publishEvent 'userData',
-      name: response.displayName
-      id: response.id
+    @publishEvent 'userData', response
+      # name: response.displayName
+      # id: response.id
       # imageUrl: response.image.url
 
   getLoginStatus: =>
