@@ -95,6 +95,7 @@ module.exports = class Google extends ServiceProvider
       callback
 
   getLoginStatus: (callback=@loginStatusHandler, force=false) =>
+    console.log 'google getLoginStatus'
     @getUserData callback
 
   loginStatusHandler: (response, status) =>
