@@ -33,11 +33,11 @@ module.exports = class Google extends ServiceProvider
     # Register load handler
     window.googleClientLoaded = @loadHandler
 
-      # No success callback, there's googleClientLoaded
-      utils.loadLib(
-        'https://apis.google.com/js/client.js?onload=googleClientLoaded',
-        null,
-        @reject)
+    # No success callback, there's googleClientLoaded
+    utils.loadLib(
+      'https://apis.google.com/js/client.js?onload=googleClientLoaded',
+      null,
+      @reject)
 
   loadHandler: =>
     console.log 'google loadHandler'
