@@ -27,17 +27,26 @@ module.exports = class Google extends ServiceProvider
 
   load: ->
     console.log 'google load'
-    return if @state() is 'resolved' or @loading
-    @loading = true
 
-    # Register load handler
-    window.googleClientLoaded = @loadHandler
+    # only load google api if no accessToken is found
+    if @accessToken
+      console.log 'accessToken found!'
+      @loginHandler true, true
+    else
+      console.log 'no accessToken!'
+      console.log 'state: ' + @state()
+      console.log 'loading: ' + @loading
+      return if @state() is 'resolved' or @loading
+      @loading = true
 
-    # No success callback, there's googleClientLoaded
-    utils.loadLib(
-      'https://apis.google.com/js/client.js?onload=googleClientLoaded',
-      null,
-      @reject)
+      # Register load handler
+      window.googleClientLoaded = @loadHandler
+
+      # No success callback, there's googleClientLoaded
+      utils.loadLib(
+        'https://apis.google.com/js/client.js?onload=googleClientLoaded',
+        null,
+        @reject)
 
   loadHandler: =>
     console.log 'google loadHandler'
@@ -60,19 +69,29 @@ module.exports = class Google extends ServiceProvider
     console.log 'google triggerLogin'
     @authorize @loginHandler, false
 
-  loginHandler: (authResponse) =>
+  loginHandler: (authResponse, returningUser=false) =>
     console.log 'google loginHandler'
     console.log authResponse
 
     if authResponse and not authResponse.error
       console.log 'google login successful!'
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
-      @accessToken = authResponse.access_token
-      @publishEvent 'serviceProviderSession',
-         provider: this
-         accessToken: @accessToken
 
-      @getUserData @processUserData
+      if returningUser
+        console.log 'google welcome back!'
+        @publishEvent 'serviceProviderSession',
+          provider: this
+          accessToken: @accessToken
+      else
+        console.log 'setting google access token'
+        @accessToken = authResponse.access_token
+        @publishEvent 'serviceProviderSession',
+          provider: this
+          accessToken: @accessToken
+
+        localStorage.setItem 'accessToken', @accessToken
+        console.log 'fetching google user data'
+        @getUserData @processUserData
 
     else
       console.log 'google loginFail'
