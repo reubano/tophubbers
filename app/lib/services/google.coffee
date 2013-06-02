@@ -48,16 +48,6 @@ module.exports = class Google extends ServiceProvider
     console.log 'google isLoaded'
     Boolean window.gapi and gapi.auth and gapi.auth.authorize
 
-  authorize: (callback, immediate) ->
-    gapi.auth.authorize
-      client_id: clientId, scope: scopes, immediate: immediate
-      callback
-
-#     setTimeout ->
-#       window.gapi.auth.authorize
-#         client_id: clientId, scope: scopes, immediate: immediate
-#         callback
-
   triggerLogin: =>
     console.log 'google triggerLogin'
     @authorize @loginHandler false
@@ -78,10 +68,6 @@ module.exports = class Google extends ServiceProvider
       console.log 'google loginFail'
       @publishEvent 'loginFail', {provider: this, authResponse}
 
-  getLoginStatus: =>
-    console.log 'google getLoginStatus'
-    @authorize @loginHandler true
-
   getUserData: (callback) ->
     console.log 'google getUserInfo'
     gapi.client.load 'plus', 'v1', ->
@@ -94,3 +80,17 @@ module.exports = class Google extends ServiceProvider
       name: response.displayName
       id: response.id
       # imageUrl: response.image.url
+
+  getLoginStatus: =>
+    console.log 'google getLoginStatus'
+    @authorize @loginHandler true
+
+  authorize: (callback, immediate) ->
+    gapi.auth.authorize
+      client_id: clientId, scope: scopes, immediate: immediate
+      callback
+
+#     setTimeout ->
+#       window.gapi.auth.authorize
+#         client_id: clientId, scope: scopes, immediate: immediate
+#         callback
