@@ -8,5 +8,4 @@ module.exports = class Controller extends RepsController
 		super
 
 	index: (params) =>
-		console.log 'rendering graphs view'
 		@view = new GraphsView {@collection}
