@@ -49,9 +49,6 @@ module.exports = class Graph extends Model
 		# http://stackoverflow.com/questions/7921164/syntax-error-when-parsing-json-string
 		JSON.stringify(data).replace(/\\"/g, '\\\\"')
 
-	displayChartData: (attr) =>
-		data = JSON.parse @get attr + '_chart_data'
-		console.log data
 
 	drawChart: (attr) =>
 		data = JSON.parse @get attr + '_chart_data'
