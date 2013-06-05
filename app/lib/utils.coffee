@@ -357,8 +357,7 @@ not found"
       obj[name] = _(utils.afterLogin).bind null, obj, func, eventType
 
   # Delegates to afterLogin, but triggers the login dialog if the user
-  # isn't logged in
-  # and calls preventDefault if an event object is passed.
+  # isn't logged in and calls preventDefault if an event object is passed.
   ensureLogin: (context, func, loginContext, eventType = 'login', args...) ->
     utils.afterLogin context, func, eventType, args...
 
