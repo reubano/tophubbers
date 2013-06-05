@@ -32,12 +32,12 @@ module.exports = class Graph extends Model
 		if d.rows
 			endValues = (label: obj.date, value: obj.start for obj in d.rows)
 			durValues = (label: obj.date, value: obj.duration for obj in d.rows)
+			endValues.push(label: obj, value: 0 for obj in d.missing)
+			durValues.push(label: obj, value: 0 for obj in d.missing)
 		else
-			endValues = []
-			durValues = []
+			endValues = (label: obj, value: 0 for obj in d.missing)
+			durValues = (label: obj, value: 0 for obj in d.missing)
 
-		endValues.push(label: obj, value: 0 for obj in d.missing)
-		durValues.push(label: obj, value: 0 for obj in d.missing)
 		endValues = _.sortBy endValues, 'label'
 		durValues = _.sortBy durValues, 'label'
 
