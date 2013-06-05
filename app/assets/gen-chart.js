@@ -69,42 +69,8 @@ formatDates = function(d) {
 allDates = _.map(dateRange(currStart, currEnd), formatDates);
 
 loadCSV = function() {
-	var cur_data, miss_reps, cd_tstamp, mr_tstamp;
-
-	cur_data = localStorage.getObject('cur_data');
-	miss_reps = localStorage.getObject('miss_reps');
-	cd_tstamp = moment(localStorage.getObject('cd_tstamp'));
-	mr_tstamp = moment(localStorage.getObject('mr_tstamp'));
-
-	if (
-		(!cur_data || !cd_tstamp)
-		|| (cd_tstamp && (cd_tstamp.diff(moment(), 'hours') >= maxCacheAge))
-	) {
-		d3.json(api_base + 'cur_data/', cacheCurData);
-	} else {
-		groupData(cur_data);
-	}
-
-	if (
-		(!miss_reps || !mr_tstamp)
-		|| (mr_tstamp && mr_tstamp.diff(moment(), 'hours') >= maxCacheAge)
-	) {
-		d3.json(api_base + 'missing_reps/', cacheMissReps);
-	} else {
-		makeBlank(miss_reps);
-	}
-};
-
-cacheCurData = function(json) {
-	localStorage.setObject('cur_data', json);
-	localStorage.setObject('cd_tstamp', moment());
-	groupData(json);
-};
-
-cacheMissReps = function(json) {
-	localStorage.setObject('miss_reps', json);
-	localStorage.setObject('mr_tstamp', moment());
-	makeBlank(json);
+	d3.json(api_base + 'cur_data/', groupData);
+	d3.json(api_base + 'missing_reps/', makeBlank);
 };
 
 groupData = function(json) {
