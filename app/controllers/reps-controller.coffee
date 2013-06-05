@@ -34,6 +34,7 @@ module.exports = class Controller extends Controller
 		attr = (@parser.pathname.replace /\//g, '')
 		tstamp = attr + '_tstamp'
 		console.log 'setting collection for ' + attr
+		console.log response.data
 		@collection.set response.data, remove: false
 		@collection.at(1).set tstamp, new Date().toString()
 		(model.save {patch: true} for model in @collection.models)
