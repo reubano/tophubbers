@@ -5,6 +5,7 @@ module.exports = class AuthController extends Controller
   logout: =>
     console.log 'logging out'
     localStorage.clear()
+    localStorage.removeItem 'accessToken'
     # Chaplin.mediator.reps = null
     @redirectToRoute 'home#show'
     @publishEvent '!logout'
