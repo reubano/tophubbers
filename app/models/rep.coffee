@@ -24,16 +24,23 @@ module.exports = class Graph extends Model
 		d = @get attr + '_data'
 
 		if not d
+			console.log 'no ' + attr + '_data found for ' + @get('id')
+			# endValues = [{label: '2013-05-01', value: 0}, {label: '2013-05-02', value: 0}]
 			return
 
 		console.log @get('id') + ': setting ' + attr + ' chart data'
-		endValues = (label: obj.date, value: obj.start for obj in d.rows)
-		endValues.push(label: obj, value: 0 for obj in d.missing)
-		endValues = _.sortBy endValues, 'label'
+		if d.rows
+			endValues = (label: obj.date, value: obj.start for obj in d.rows)
+			durValues = (label: obj.date, value: obj.duration for obj in d.rows)
+		else
+			endValues = []
+			durValues = []
 
-		durValues = (label: obj.date, value: obj.duration for obj in d.rows)
+		endValues.push(label: obj, value: 0 for obj in d.missing)
 		durValues.push(label: obj, value: 0 for obj in d.missing)
+		endValues = _.sortBy endValues, 'label'
 		durValues = _.sortBy durValues, 'label'
+
 		data = [
 			{key: 'End', values: endValues},
 			{key: 'Duration', values: durValues}]
