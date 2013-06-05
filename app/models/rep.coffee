@@ -5,14 +5,6 @@ module.exports = class Graph extends Model
 	maxTime = 18.5
 	chartRange = [minTime * 60, maxTime * 60]
 	tickInterval = []
-
-	initialize: ->
-		super
-		@set 'created', new Date().toString() if @isNew() or not @get 'created'
-		# @set 'first_name', 'Name not found in database' if not @get 'first_name'
-		# @set 'airtel', 'N/A' if not @get 'airtel'
-		# @set 'ward', 'N/A' if not @get 'ward'
-
 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab: (d) -> d.label
 	retVal: (d) -> d.value
@@ -20,6 +12,13 @@ module.exports = class Graph extends Model
 	formatMinutes: (d) ->
 		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
 		if time.substr(0,1) == '0' then time.substr(1) else time
+
+	initialize: ->
+		super
+		@set 'created', new Date().toString() if @isNew() or not @get 'created'
+		# @set 'first_name', 'Name not found in database' if not @get 'first_name'
+		# @set 'airtel', 'N/A' if not @get 'airtel'
+		# @set 'ward', 'N/A' if not @get 'ward'
 
 	getChartData: (attr) =>
 		d = @get attr + '_data'
