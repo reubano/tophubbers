@@ -50,11 +50,16 @@ module.exports = class Graph extends Model
 		JSON.stringify(data).replace(/\\"/g, '\\\\"')
 
 
-	drawChart: (attr) =>
-		data = JSON.parse @get attr + '_chart_data'
 
+	drawChart: (attr) =>
 		console.log 'drawing ' + attr + ' chart ' + @get 'id'
-		selection = '#' + @get 'id' + '.view .chart svg'
+		chart_data = @get attr + '_chart_data'
+
+		if not chart_data
+			return console.log 'no data for ' + attr + ' chart ' + @get 'id'
+
+		data = JSON.parse @get attr + '_chart_data'
+		selection = '#' + @get('id') + '.view .chart svg'
 		# alert(selection)
 
 		chart = nv.models.multiBarHorizontalChart()
