@@ -41,6 +41,10 @@ module.exports = class Graph extends Model
 
 		JSON.stringify data
 
+	displayChartData: (attr) =>
+		data = JSON.parse @get attr + '_chart_data'
+		console.log data
+
 	drawChart: (attr) =>
 		data = JSON.parse @get attr + '_chart_data'
 
