@@ -7,9 +7,11 @@ module.exports = class GraphView extends View
 
 	initialize: (options) =>
 		super
-		@listenTo @model, 'change:prev_work_chart_data', @drawChart
-		@listenTo @model, 'change', @drawChart
-		@listenTo @model, 'change', @render
+		@listenTo @model, options.change, ->
+			@drawChart options.chart
+
+		@listenTo @model, 'change', ->
+			@render options.chart
 
 	render: (attr) =>
 		super
