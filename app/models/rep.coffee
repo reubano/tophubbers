@@ -1,8 +1,8 @@
 Model = require 'models/base/model'
 
 module.exports = class Graph extends Model
- 	defaults: ->
- 		data: ''
+	defaults: ->
+		data: ''
 
 	initialize: ->
 		super
@@ -19,6 +19,7 @@ module.exports = class Graph extends Model
 			return
 
 		console.log @get('id') + ': setting ' + attr + ' chart data'
+
 		if d.rows
 			endValues = (label: obj.date, value: obj.start for obj in d.rows)
 			durValues = (label: obj.date, value: obj.duration for obj in d.rows)
@@ -36,4 +37,3 @@ module.exports = class Graph extends Model
 			{key: 'Duration', values: durValues}]
 
 		JSON.stringify(data)
-
