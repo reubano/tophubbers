@@ -37,15 +37,3 @@ module.exports = class Graph extends Model
 
 		JSON.stringify(data)
 
-	setChartData: (attr) =>
-		chart_data = @get attr + '_chart_data'
-
-		if chart_data
-			console.log 'setting ' + @get('id') + ' data to:'
-			console.log JSON.parse chart_data
-			@set data: chart_data
-			@save()
-			# console.log @get 'data'
-		else
-			console.log 'no ' + attr + '_chart_data for ' + @get('id')
-

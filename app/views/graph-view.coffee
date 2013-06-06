@@ -23,7 +23,6 @@ module.exports = class GraphView extends View
 
 		if chart_data and name
 			console.log @model.get('id') + ' has ' + attr + '_chart_data'
-			@model.setChartData(attr)
 			script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
 		else
