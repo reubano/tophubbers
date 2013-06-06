@@ -22,12 +22,11 @@ module.exports = class GraphView extends View
 		id = @model.get 'id'
 
 		if chart_data and name
-			console.log @model.get('id') + ' has ' + attr + '_chart_data'
+			console.log id + ' has ' + attr + '_chart_data'
 			script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
 		else
-			console.log @model.get('id') + ' has no ' + attr + '_chart_data' +
-				' or no name'
+			console.log id + ' has no ' + attr + '_chart_data or no name'
 
 # 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 # 	retLab: (d) -> d.label
