@@ -16,7 +16,7 @@ module.exports = class GraphsView extends CollectionView
 		@subscribeEvent 'loginStatus', -> console.log 'caught loginStatus event'
 		@subscribeEvent 'dispatcher:dispatch', -> console.log 'caught dispatcher event'
 		@listenTo @collection, 'reset', -> console.log 'caught collection reset'
-		# @listenTo @collection, 'change', -> console.log 'caught collection change'
+		# @listenTo @collection, @options.change, -> console.log 'caught collection change'
 		@subscribeEvent 'loginStatus', @render
 		# @subscribeEvent 'dispatcher:dispatch', @render
 		@listenTo @collection, 'change', @render
