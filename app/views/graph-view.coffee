@@ -2,7 +2,6 @@ View = require 'views/base/view'
 template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
-	autoRender: true
 	template: template
 
 	initialize: (options) =>

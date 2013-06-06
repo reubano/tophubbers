@@ -18,7 +18,7 @@ module.exports = class GraphsView extends CollectionView
 		@listenTo @collection, 'reset', -> console.log 'caught collection reset'
 		# @listenTo @collection, 'change', -> console.log 'caught collection change'
 		@subscribeEvent 'loginStatus', @render
-		@subscribeEvent 'dispatcher:dispatch', @render
+		# @subscribeEvent 'dispatcher:dispatch', @render
 		@listenTo @collection, 'change', @render
 		@listenTo @collection, 'reset', @render
 		@subscribeEvent 'graphs:clear', @clear

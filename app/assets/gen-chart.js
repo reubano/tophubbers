@@ -11,7 +11,6 @@ formatMinutes = function(d) {
 };
 
 makeChart = function(data, div) {
-	console.log('starting...');
 	var id = div.id
 	console.log('making chart ' + id);
 
