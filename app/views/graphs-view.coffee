@@ -24,6 +24,7 @@ module.exports = class GraphsView extends CollectionView
 		@subscribeEvent 'graphs:clear', @clear
 
 	initItemView: (model) ->
+		# new @itemView @options
 		new @itemView
 			model: model
 			autoRender: false
