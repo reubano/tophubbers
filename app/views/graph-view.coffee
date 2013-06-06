@@ -6,22 +6,37 @@ module.exports = class GraphView extends View
 
 	initialize: (options) =>
 		super
-		@listenTo @model, options.change, ->
-			@render options.chart
+		@options = options
+		@listenTo @model, options.change, @render
 
-	render: (attr) =>
+	render: =>
 		super
 		@drawChart()
 
-	drawChart: (attr) =>
-		attr = 'prev_work'
+	drawChart: =>
+		console.log 'chart html'
+		console.log @model.get 'chart'
+		attr = @options.chart
+
+		if not attr
+			console.log 'options not set'
+			return
+
 		chart_data = @model.get attr + '_chart_data'
 		name = @model.get 'first_name'
 		id = @model.get 'id'
+		selection = '#' + id + '.view .chart svg';
 
 		if chart_data and name
 			console.log id + ' has ' + attr + '_chart_data'
 			script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
+			@setHTML selection
 		else
 			console.log id + ' has no ' + attr + '_chart_data or no name'
+
+	setHTML: (selection) =>
+		console.log 'setting chart html for ' + selection
+		console.log $(selection).html
+		@model.set chart: JSON.stringify $(selection).html
+		@model.save()
