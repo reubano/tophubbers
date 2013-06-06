@@ -8,6 +8,7 @@ module.exports = class GraphView extends View
 		super
 		@options = options
 		@listenTo @model, options.change, @render
+		# @subscribeEvent 'dispatcher:dispatch', @setHTML
 
 	render: =>
 		super
@@ -25,18 +26,18 @@ module.exports = class GraphView extends View
 		chart_data = @model.get attr + '_chart_data'
 		name = @model.get 'first_name'
 		id = @model.get 'id'
-		selection = '#' + id + '.view .chart svg';
 
 		if chart_data and name
 			console.log id + ' has ' + attr + '_chart_data'
 			script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
-			@setHTML selection
+			@setHTML()
 		else
 			console.log id + ' has no ' + attr + '_chart_data or no name'
 
-	setHTML: (selection) =>
+	setHTML: =>
+		selection = '#' + @model.get('id') + '.view .chart svg';
 		console.log 'setting chart html for ' + selection
-		console.log $(selection).html
-		@model.set chart: JSON.stringify $(selection).html
+		console.log $('#E0022.view .chart svg').html()
+		@model.set chart: JSON.stringify $(selection).html()
 		@model.save()
