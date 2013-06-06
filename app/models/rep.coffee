@@ -1,9 +1,6 @@
 Model = require 'models/base/model'
 
 module.exports = class Graph extends Model
-	defaults: ->
-		data: ''
-
 	initialize: ->
 		super
 		@set 'created', new Date().toString() if @isNew() or not @get 'created'
@@ -21,13 +18,21 @@ module.exports = class Graph extends Model
 		console.log @get('id') + ': setting ' + attr + ' chart data'
 
 		if d.rows
-			endValues = (label: obj.date, value: obj.start for obj in d.rows)
-			durValues = (label: obj.date, value: obj.duration for obj in d.rows)
-			endValues.push(label: obj, value: 0 for obj in d.missing)
-			durValues.push(label: obj, value: 0 for obj in d.missing)
+			endRows = (label: obj.date, value: obj.start for obj in d.rows)
+			durRows = (label: obj.date, value: obj.duration for obj in d.rows)
 		else
-			endValues = (label: obj, value: 0 for obj in d.missing)
-			durValues = (label: obj, value: 0 for obj in d.missing)
+			endRows = []
+			durRows = []
+
+		if d.missing
+			endMiss = (label: obj, value: 0 for obj in d.missing)
+			durMiss = (label: obj, value: 0 for obj in d.missing)
+		else
+			endMiss = []
+			durMiss = []
+
+		endValues = endRows.concat endMiss
+		durValues = durRows.concat durMiss
 
 		endValues = _.sortBy endValues, 'label'
 		durValues = _.sortBy durValues, 'label'
