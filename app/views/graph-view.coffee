@@ -23,7 +23,7 @@ module.exports = class GraphView extends View
 		if chart_data and name
 			console.log @model.get('id') + ' has ' + attr + '_chart_data'
 			@model.setChartData(attr)
-			@$('#draw').html "nv.addGraph({{{chart}}})"
+			# @$('#draw').html "nv.addGraph({{{chart}}})"
 		else
 			console.log @model.get('id') + ' has no ' + attr + '_chart_data' +
 				' or no name'
