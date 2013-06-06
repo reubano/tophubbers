@@ -74,7 +74,8 @@ module.exports = class Controller extends Controller
 		chart_attr = attr + '_chart_data'
 
 		for model in @collection.models
-			if model.get(data_attr)
+			if (model.get(data_attr) and model.hasChanged(data_attr))
+			# if model.get(data_attr)
 				console.log model.get('id') + ': fetching missing chart data'
 				data = model.getChartData attr
 				console.log JSON.parse data
