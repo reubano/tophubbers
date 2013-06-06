@@ -10,8 +10,9 @@ module.exports = class GraphsView extends CollectionView
 	className: 'span12'
 	template: template
 
-	initialize: ->
+	initialize: (options) ->
 		super
+		@options = options
 		@subscribeEvent 'loginStatus', -> console.log 'caught loginStatus event'
 		@subscribeEvent 'dispatcher:dispatch', -> console.log 'caught dispatcher event'
 		@listenTo @collection, 'reset', -> console.log 'caught collection reset'
