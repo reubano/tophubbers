@@ -31,9 +31,8 @@ module.exports = class GraphsView extends CollectionView
 			change: @options.change
 
 	render: =>
-		# console.log 'rendering graphs view'
+		console.log 'rendering graphs view'
 		super
-		# @collection.drawBlanks
 
 	clear: ->
 		model.destroy() while model = @collection.first()
