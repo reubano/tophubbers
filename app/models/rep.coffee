@@ -1,14 +1,6 @@
 Model = require 'models/base/model'
 
 module.exports = class Graph extends Model
-	minTime = 7.5
-	maxTime = 18.5
-	chartRange = [minTime * 60, maxTime * 60]
-	tickInterval = []
-	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
-	retLab: (d) -> d.label
-	retVal: (d) -> d.value
-
  	defaults: ->
  		data: ''
 
@@ -18,10 +10,6 @@ module.exports = class Graph extends Model
 		# @set 'first_name', 'Name not found in database' if not @get 'first_name'
 		# @set 'airtel', 'N/A' if not @get 'airtel'
 		# @set 'ward', 'N/A' if not @get 'ward'
-
-	formatMinutes: (d) ->
-		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
-		if time.substr(0,1) == '0' then time.substr(1) else time
 
 	getChartData: (attr) =>
 		d = @get attr + '_data'
@@ -61,47 +49,3 @@ module.exports = class Graph extends Model
 		else
 			console.log 'no ' + attr + '_chart_data for ' + @get('id')
 
-	drawChart: (attr) =>
-		console.log 'drawing ' + attr + ' chart ' + @get 'id'
-		chart_data = @get attr + '_chart_data'
-
-		if not chart_data
-			return console.log 'no data for ' + attr + ' chart ' + @get 'id'
-
-		data = JSON.parse @get attr + '_chart_data'
-		selection = '#' + @get('id') + '.view .chart svg'
-		# alert(selection)
-
-		chart = nv.models.multiBarHorizontalChart()
-			.x(@retLab)
-			.y(@retVal)
-			.forceY(chartRange)
-			.yDomain(chartRange)
-			.margin(top: 0, right: 110, bottom: 30, left: 80)
-			#.showValues(true)
-			#.tooltips(false)
-			.stacked(true)
-			.showLegend(false)
-			.barColor([d3.rgb('steelblue')])
-			.showControls(false)
-
-		i = 0
-
-		while i < maxTime - 1
-			tickInterval[i] = (minTime + i + 1) * 60
-			i++
-
-		chart.yAxis
-			.tickValues(tickInterval)
-			.tickFormat(@formatMinutes)
-
-		chart.multibar.yScale().clamp true
-
-		d3.select(selection)
-			.datum(data)
-			.transition().duration(100)
-			.call(chart)
-
-		# nv.utils.windowResize chart.update
-		chart.dispatch.on 'stateChange', @nvlog
-		nv.addGraph chart
