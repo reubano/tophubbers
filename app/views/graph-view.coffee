@@ -11,11 +11,11 @@ module.exports = class GraphView extends View
 		@listenTo @model, 'change', @drawChart
 		@listenTo @model, 'change', @render
 
-	render: =>
+	render: (attr) =>
 		super
 		@drawChart()
 
-	drawChart: =>
+	drawChart: (attr) =>
 		attr = 'prev_work'
 		chart_data = @model.get attr + '_chart_data'
 		name = @model.get 'first_name'
