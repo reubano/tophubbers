@@ -9,9 +9,8 @@ module.exports = class Graph extends Model
 	retLab: (d) -> d.label
 	retVal: (d) -> d.value
 
-	formatMinutes: (d) ->
-		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
-		if time.substr(0,1) == '0' then time.substr(1) else time
+ 	defaults: ->
+ 		data: ''
 
 	initialize: ->
 		super
@@ -20,12 +19,15 @@ module.exports = class Graph extends Model
 		# @set 'airtel', 'N/A' if not @get 'airtel'
 		# @set 'ward', 'N/A' if not @get 'ward'
 
+	formatMinutes: (d) ->
+		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
+		if time.substr(0,1) == '0' then time.substr(1) else time
+
 	getChartData: (attr) =>
 		d = @get attr + '_data'
 
 		if not d
 			console.log 'no ' + attr + '_data found for ' + @get('id')
-			# endValues = [{label: '2013-05-01', value: 0}, {label: '2013-05-02', value: 0}]
 			return
 
 		console.log @get('id') + ': setting ' + attr + ' chart data'
@@ -45,9 +47,7 @@ module.exports = class Graph extends Model
 			{key: 'End', values: endValues},
 			{key: 'Duration', values: durValues}]
 
-		# escape inline quotes
-		# http://stackoverflow.com/questions/7921164/syntax-error-when-parsing-json-string
-		JSON.stringify(data).replace(/\\"/g, '\\\\"')
+		JSON.stringify(data)
 
 	setChartData: (attr) =>
 		chart_data = @get attr + '_chart_data'
@@ -56,6 +56,8 @@ module.exports = class Graph extends Model
 			console.log 'setting ' + @get('id') + ' data to:'
 			console.log JSON.parse chart_data
 			@set data: chart_data
+			@save()
+			# console.log @get 'data'
 		else
 			console.log 'no ' + attr + '_chart_data for ' + @get('id')
 
