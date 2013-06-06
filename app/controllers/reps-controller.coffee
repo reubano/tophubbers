@@ -7,13 +7,33 @@ GraphsView = require 'views/graphs-view'
 module.exports = class Controller extends Controller
 	collection: Chaplin.mediator.reps
 	res: ['rep_info', 'prev_work', 'cur_feedback']
+	# res: ['rep_info', 'cur_work', 'cur_feedback', 'cur_progress']
 	charts: ['cur_work', 'prev_work', 'cur_progress']
 	parser: document.createElement('a')
-	# res: ['rep_info', 'cur_work', 'cur_feedback', 'cur_progress']
+
+	getResList: =>
+		(item: i, tstamp: i + '_tstamp', url: config.api + i for i in @res)
 
 	getData: (url) ->
 		console.log 'fetching ' + url
-		$.ajax url: url, type: 'get', dataType: 'json', beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+		$.ajax
+			url: url
+			type: 'get'
+			dataType: 'json'
+			beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+
+	fetchAllData: =>
+		for r in @getResList()
+			@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+
+	fetchExpiredData: =>
+		for r in @getResList()
+			if (@cacheExpired r.tstamp)
+				console.log r.item + ' cache not found or expired'
+				@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+			else
+				console.log 'using cached ' + r.item + ' data'
+				@setCharts 'HTTP 200', 'success', url: r.url
 
 	failWhale: (jqXHR, textStatus, errorThrown) =>
 		@parser.href = jqXHR.url
@@ -33,7 +53,7 @@ module.exports = class Controller extends Controller
 		@parser.href = jqXHR.url
 		attr = (@parser.pathname.replace /\//g, '')
 		tstamp = attr + '_tstamp'
-		console.log 'setting collection for ' + attr
+		console.log 'setting collection with ' + attr
 		console.log response.data
 		@collection.set response.data, remove: false
 		@collection.at(1).set tstamp, new Date().toString()
@@ -60,7 +80,7 @@ module.exports = class Controller extends Controller
 				model.set chart_attr, chart
 				model.save {patch: true}
 
-		console.log @collection.at(1).getAttributes()
+		console.log @collection
 
 	cacheExpired: (attr) =>
 		# check if the cache has expired
@@ -88,22 +108,13 @@ module.exports = class Controller extends Controller
 	initialize: =>
 		console.log 'initialize reps-controller'
 
-		res_list = (item: i, tstamp: i + '_tstamp', url: config.api + i for i in @res)
-
 		if @collection.length is 0
-			console.log 'no collection so fetching graphs'
+			console.log 'no collection so fetching graphs...'
 			# @publishEvent 'graphs:clear'
-
-			for r in res_list
-				@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+			@fetchAllData()
 		else
-			for r in res_list
-				if (@cacheExpired r.tstamp)
-					console.log r.item + ' cache not found or expired'
-					@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
-				else
-					console.log 'using cached ' + r.item + ' data'
-					@setCharts 'HTTP 200', 'success', url: r.url
+			console.log 'fetching expired graphs...'
+			@fetchExpiredData()
 
 	show: (params) =>
 		@model = @collection.get params.id
@@ -111,3 +122,9 @@ module.exports = class Controller extends Controller
 
 	index: (params) =>
 		@view = new GraphsView {@collection}
+
+	refresh: (params) =>
+		console.log 'refreshing data...'
+		@fetchAllData()
+		@redirectToRoute 'reps#index'
+
