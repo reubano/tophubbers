@@ -23,6 +23,13 @@ module.exports = class GraphsView extends CollectionView
 		@listenTo @collection, 'reset', @render
 		@subscribeEvent 'graphs:clear', @clear
 
+	initItemView: (model) ->
+		new @itemView
+			model: model
+			autoRender: false
+			chart: @options.chart
+			change: @options.change
+
 	render: =>
 		# console.log 'rendering graphs view'
 		super

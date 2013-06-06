@@ -5,7 +5,7 @@ module.exports = class GraphView extends View
 	autoRender: true
 	template: template
 
-	initialize: =>
+	initialize: (options) =>
 		super
 		@listenTo @model, 'change:prev_work_chart_data', @drawChart
 		@listenTo @model, 'change', @drawChart
