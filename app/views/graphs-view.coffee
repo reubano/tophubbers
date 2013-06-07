@@ -13,10 +13,18 @@ module.exports = class GraphsView extends CollectionView
 	initialize: (options) ->
 		super
 		@options = options
-		@subscribeEvent 'loginStatus', -> console.log 'caught loginStatus event'
-		@subscribeEvent 'dispatcher:dispatch', -> console.log 'caught dispatcher event'
-		@listenTo @collection, 'reset', -> console.log 'caught collection reset'
-		# @listenTo @collection, @options.change, -> console.log 'caught collection change'
+		@subscribeEvent 'loginStatus', ->
+			console.log 'graphs-view caught loginStatus event'
+
+		@subscribeEvent 'dispatcher:dispatch', ->
+			console.log 'graphs-view caught dispatcher event'
+
+		@listenTo @collection, 'reset', ->
+			console.log 'graphs-view heard collection reset'
+
+		# @listenTo @collection, @options.change, ->
+		# 	console.log 'caught collection change'
+
 		@subscribeEvent 'loginStatus', @render
 		# @subscribeEvent 'dispatcher:dispatch', @render
 		@listenTo @collection, 'change', @render
@@ -24,7 +32,6 @@ module.exports = class GraphsView extends CollectionView
 		@subscribeEvent 'graphs:clear', @clear
 
 	initItemView: (model) ->
-		# new @itemView @options
 		new @itemView
 			model: model
 			autoRender: false

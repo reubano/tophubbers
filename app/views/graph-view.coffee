@@ -15,8 +15,8 @@ module.exports = class GraphView extends View
 		@drawChart()
 
 	drawChart: =>
-		console.log 'chart html'
-		console.log @model.get 'chart'
+		# console.log 'chart html'
+		# console.log @model.get 'chart'
 		attr = @options.chart
 
 		if not attr
@@ -29,15 +29,21 @@ module.exports = class GraphView extends View
 
 		if chart_data and name
 			console.log id + ' has ' + attr + '_chart_data'
+			# options = [chart_data, id]
+			# func = nvd3util.makeChart chart_data, id
+			# script = "<script>_.defer(makeChart, #{options});</script>"
+			# script = "<script>#{func};</script>"
 			script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
-			@setHTML()
 		else
 			console.log id + ' has no ' + attr + '_chart_data or no name'
 
+	getHTML: =>
+		id = @model.get 'id'
+		console.log 'getting chart html for ' + id
+		console.log @$('#svg').html()
+
 	setHTML: =>
-		selection = '#' + @model.get('id') + '.view .chart svg';
-		console.log 'setting chart html for ' + selection
-		console.log $('#E0022.view .chart svg').html()
-		@model.set chart: JSON.stringify $(selection).html()
-		@model.save()
+		setTimeout @getHTML, 100000
+		# @model.set chart: JSON.stringify $(selection).html()
+		# @model.save()
