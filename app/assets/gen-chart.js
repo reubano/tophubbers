@@ -1,4 +1,4 @@
-var chartRange, maxTime, minTime, tickInterval;
+var chartRange, maxTime, minTime, tickInterval, id, selection;
 
 minTime = 7.5;
 maxTime = 18.5;
@@ -11,12 +11,11 @@ formatMinutes = function(d) {
 };
 
 makeChart = function(data, div) {
-	var id = div.id
+	id = div.id
+	selection = '#' + id +'.view .chart svg';
 	console.log('making chart ' + id);
 
 	$(document).ready(function(){
-		selection = '#' + id +'.view .chart svg';
-
 		chart = nv.models.multiBarHorizontalChart()
 			.x(function(d) {return d.label})
 			.y(function(d) {return d.value})
