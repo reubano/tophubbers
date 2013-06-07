@@ -7,10 +7,7 @@ module.exports = class nvd3util
 		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
 		if time.substr(0,1) == '0' then time.substr(1) else time
 
-	getChart: (attr) =>
-		chart_data = @model.get attr + '_chart_data'
-		id = @model.get 'id'
-
+	makeChart: (chart_data, id) =>
 		if not chart_data
 			console.log 'no data for ' + attr + ' chart ' + id
 		else
