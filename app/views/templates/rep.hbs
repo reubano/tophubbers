@@ -1,8 +1,130 @@
 {{#if_logged_in}}
-	<div class="view" id="{{id}}">
+	<div class="view container-fluid" id="{{id}}">
 		<h2>{{first_name}} {{last_name}} ({{id}})</h2>
-		<div class="chart"><svg></svg></div>
+
+		<div id="work-graph" class="container-fluid">
+			<h3>Work Graph<br></h3>
+			<ul class="nav nav-tabs" id="work_tab">
+				<li class="active"><a href="#cur_work_chart" data-toggle="tab">This Month</a></li>
+				<li><a href="#prev_work_chart" data-toggle="tab">Last Month</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="cur_work_chart">
+					<div class="chart"><svg></svg></div>
+				</div>
+				<div class="tab-pane" id="prev_work_chart">
+					<div class="chart"><svg></svg></div>
+				</div>
+			</div>
+			<script>$(function() {$('#work_tab a:last').tab('show');})</script>
+			<hr>
+		</div>
+		<div id="feedback" class="container-fluid">
+			<h3>Customer Feedback<br></h3>
+			<ul class="nav nav-tabs" id="feedback_tab">
+				<li class="active"><a href="#cur_feedback_chart" data-toggle="tab">This Month</a></li>
+				<li><a href="#prev_feedback_chart" data-toggle="tab">Last Month</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="cur_feedback_chart">
+					<div class="btn-group">
+						<a class="btn btn-large btn-warning disabled">Cat 1
+							{{#times cur_feedback_data.x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 2
+							{{#times cur_feedback_data.x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 3
+							{{#times cur_feedback_data.x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 4
+							{{#times cur_feedback_data.x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+					</div>
+				</div>
+				<div class="tab-pane" id="prev_feedback_chart">
+					<div class="btn-group">
+						<a class="btn btn-large btn-warning disabled"> Cat 1
+							{{#times prev_feedback_data.x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 2
+							{{#times prev_feedback_data.x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 3
+							{{#times prev_feedback_data.x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+						<a class="btn btn-large btn-warning disabled">Cat 4
+							{{#times prev_feedback_data.x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
+						</a>
+					</div>
+				</div>
+			</div>
+			<script>$(function() {$('#feedback_tab a:last').tab('show');})</script>
+			<hr>
+		</div>
+		<div id="progress" class="container-fluid">
+			<h3>Progress<br></h3>
+			<ul class="nav nav-tabs" id="progress_tab">
+				<li class="active"><a href="#cur_progress" data-toggle="tab">This Month</a></li>
+				<li><a href="#prev_progress" data-toggle="tab">Last Month</a></li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane active" id="cur_progress">
+					<table class="table table-striped">
+						<caption>Progress Table</caption>
+						<thead><tr>
+							<th>Sales (TZS)</th>
+							<th>Visits (#)</th>
+							<th>Commission (TZS)</th>
+							<th>Points (#)</th>
+						</tr></thead>
+						<tbody><tr>
+							<td>22,000</td><td>33</td><td>3,300</td><td>33</td>
+						</tr></tbody>
+					</table>
+					<table class="table"><caption>Progress Graph</caption></table>
+					<div class="progress">
+						<div class="bar" style="width: 30%;"></div>
+						<div class="bar bar-muted" style="width: 20%;"></div>
+						<div class="bar bar-transparent" style="width: 30%;"></div>
+						<div class="bar bar-success" style="width: 1%;"></div>
+					</div>
+				</div>
+				<div class="tab-pane" id="prev_progress">
+					<table class="table table-striped">
+						<caption>Progress Table</caption>
+						<thead><tr>
+							<th>Sales (TZS)</th>
+							<th>Visits (#)</th>
+							<th>Commission (TZS)</th>
+							<th>Points (#)</th>
+						</tr></thead>
+						<tbody><tr>
+							<td>22,000</td><td>33</td><td>3,300</td><td>33</td>
+						</tr></tbody>
+					</table>
+					<table class="table"><caption>Progress Graph</caption></table>
+					<div class="progress">
+						<div class="bar" style="width: 60%;"></div>
+						<div class="bar bar-muted" style="width: 20%;"></div>
+						<div class="bar bar-transparent" style="width: 0%;"></div>
+						<div class="bar bar-success" style="width: 1%;"></div>
+					</div>
+				</div>
+				</div>
+			</div>
+			<script>$(function() {$('#progress_tab a:last').tab('show');})</script>
+			<hr>
+		</div>
+		<ul class="inline">
+			<li>Name: {{first_name}} {{last_name}}</li>
+			<li>Phone #: {{airtel}}</li>
+			<li>ID #: {{id}}</li>
+			<li>Ward: {{ward}}</li>
+		</ul>
 	</div>
+	<span id="draw"></span>
 {{else}}
 	<h2 class="text-error">You must log in to see this page.</h2>
 {{/if_logged_in}}
+

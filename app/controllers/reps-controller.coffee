@@ -120,7 +120,10 @@ module.exports = class Controller extends Controller
 
 	show: (params) =>
 		@model = @collection.get params.id
-		@view = new RepView {@model}
+		@view = new RepView
+			model: @model
+			chart: 'prev_work'
+			change: 'change:prev_work_chart_data'
 
 	index: (params) =>
 		@view = new GraphsView

@@ -59,3 +59,30 @@ Handlebars.registerHelper 'show_login_url', ->
 # Facebook image URLs
 Handlebars.registerHelper 'fb_img_url', (fbId, type) ->
   new Handlebars.SafeString utils.facebookImageURL(fbId, type)
+
+# Other helpers
+# -----------
+
+# Loop n times
+Handlebars.registerHelper 'times', (n, block) ->
+  accum = ''
+  i = 0
+  x = Math.round n
+
+  while i < x
+    accum += block.fn(i)
+    i++
+
+  accum
+
+# Loop 5 - n times
+Handlebars.registerHelper 'untimes', (n, block) ->
+  accum = ''
+  i = 0
+  x = 5 - Math.round(n)
+
+  while i < x
+    accum += block.fn(i)
+    i++
+
+  accum

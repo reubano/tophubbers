@@ -1,8 +1,8 @@
 Chaplin = require 'chaplin'
-View = require 'views/base/view'
+GraphView = require 'views/graph-view'
 template = require 'views/templates/rep'
 
-module.exports = class RepView extends View
+module.exports = class RepView extends GraphView
 	mediator = Chaplin.mediator
 
 	autoRender: true
@@ -10,10 +10,11 @@ module.exports = class RepView extends View
 	className: 'span12'
 	template: template
 
-	initialize: ->
+	initialize: (options) ->
 		@subscribeEvent 'loginStatus', @render
-		@subscribeEvent 'dispatcher:dispatch', @render
-		@listenTo @model, 'change', @render
+		@listenTo @model, options.change, @render
+		@subscribeEvent 'dispatcher:dispatch', -> console.log 'rep-view caught dispatcher event'
+		# @subscribeEvent 'dispatcher:dispatch', @render
 		super
 
 	render: =>

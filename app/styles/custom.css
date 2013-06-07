@@ -1,0 +1,21 @@
+/*
+Chart CSS
+
+Minimum height and width is a good idea to prevent negative SVG
+dimensions... For example width should be =< margin.left + margin.right
++ 1, of course 1 pixel for the entire chart would not be very useful,
+BUT should not have errors
+*/
+.chart {
+    margin: 10px;
+    min-width: 800px;
+    min-height: 350px;
+}
+
+.chart svg {height: 550px;}
+g.nv-group.nv-series-0 {fill-opacity: 0 !important;}
+g.nv-group.nv-series-1 {overflow: hidden;}
+
+/* Bootstrap CSS */
+.progress .bar-muted {opacity: 0.5 !important;}
+.progress .bar-transparent {opacity: 0 !important;}
