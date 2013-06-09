@@ -5,17 +5,17 @@ template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
 	template: template
-	listen:
-		# addedToParent: 'getChartScript'
-		addedToParent: 'addedToParentAlert'
-		# visibilityChange: 'visibilityChangeAlert'
+# 	listen:
+# 		addedToParent: 'getChartScript'
+# 		addedToParent: 'addedToParentAlert'
+# 		visibilityChange: 'visibilityChangeAlert'
 
 	initialize: (options) =>
 		super
 		@options = options
 		@listenTo @model, options.change, @render
-		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'graph-view caught dispatcher event'
+		# @subscribeEvent 'dispatcher:dispatch', ->
+		# 	console.log 'graph-view caught dispatcher event'
 
 	render: =>
 		console.log 'rendering graph view'
@@ -47,11 +47,8 @@ module.exports = class GraphView extends View
 
 		if chart_data and name
 			console.log id + ' has ' + chart_attr
-			# func = nvd3util.makeChart chart_data, id
-			# script = "<script>#{func};</script>"
 			options = [chart_data, id]
 			script = "<script>_.defer(makeChart, #{options});</script>"
-			# script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
