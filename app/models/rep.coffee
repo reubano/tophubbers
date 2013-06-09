@@ -9,13 +9,13 @@ module.exports = class Graph extends Model
 		# @set 'ward', 'N/A' if not @get 'ward'
 
 	getChartData: (attr) =>
-		d = @get attr + '_data'
+		d = @get attr
 
 		if not d
-			console.log 'no ' + attr + '_data found for ' + @get('id')
+			console.log 'no ' + attr + ' found for ' + @get('id')
 			return
 
-		console.log @get('id') + ': setting ' + attr + ' chart data'
+		console.log @get('id') + ': generating ' + attr + ' chart data...'
 
 		if d.rows
 			endRows = (label: obj.date, value: obj.start for obj in d.rows)

@@ -1,3 +1,4 @@
+config = require 'config'
 View = require 'views/base/view'
 template = require 'views/templates/graph'
 
@@ -23,20 +24,21 @@ module.exports = class GraphView extends View
 			console.log 'options not set'
 			return
 
-		chart_data = @model.get attr + '_chart_data'
+		chart_attr = attr + config.chart_suffix
+		chart_data = @model.get chart_attr
 		name = @model.get 'first_name'
 		id = @model.get 'id'
 
 		if chart_data and name
-			console.log id + ' has ' + attr + '_chart_data'
-			# options = [chart_data, id]
+			console.log id + ' has ' + chart_attr
 			# func = nvd3util.makeChart chart_data, id
-			# script = "<script>_.defer(makeChart, #{options});</script>"
 			# script = "<script>#{func};</script>"
-			script = "<script>makeChart(#{chart_data}, #{id});</script>"
+			options = [chart_data, id]
+			script = "<script>_.defer(makeChart, #{options});</script>"
+			# script = "<script>makeChart(#{chart_data}, #{id});</script>"
 			@$('#draw').html script
 		else
-			console.log id + ' has no ' + attr + '_chart_data or no name'
+			console.log id + ' has no ' + chart_attr + ' or no name'
 
 	getHTML: =>
 		id = @model.get 'id'

@@ -16,7 +16,7 @@
 					<div class="chart"><svg></svg></div>
 				</div>
 			</div>
-			<script>$(function() {$('#work_tab a:last').tab('show');})</script>
+			<script>$(function() {$('#work_tab a:first').tab('show');})</script>
 			<hr>
 		</div>
 		<div id="feedback" class="container-fluid">
@@ -28,38 +28,42 @@
 			<div class="tab-content">
 				<div class="tab-pane active" id="cur_feedback_chart">
 					<div class="btn-group">
+					{{#with cur_feedback_data}}
 						<a class="btn btn-large btn-warning disabled">Cat 1
-							{{#times cur_feedback_data.x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
+							{{#times x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 2
-							{{#times cur_feedback_data.x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
+							{{#times x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 3
-							{{#times cur_feedback_data.x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
+							{{#times x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 4
-							{{#times cur_feedback_data.x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes cur_feedback_data.x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
+							{{#times x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
 						</a>
+					{{/with}}
 					</div>
 				</div>
 				<div class="tab-pane" id="prev_feedback_chart">
 					<div class="btn-group">
+					{{#with prev_feedback_data}}
 						<a class="btn btn-large btn-warning disabled"> Cat 1
-							{{#times prev_feedback_data.x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
+							{{#times month_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_1}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 2
-							{{#times prev_feedback_data.x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
+							{{#times month_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_2}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 3
-							{{#times prev_feedback_data.x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
+							{{#times month_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_3}}<i class="icon-star"></i>{{/untimes}}
 						</a>
 						<a class="btn btn-large btn-warning disabled">Cat 4
-							{{#times prev_feedback_data.x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes prev_feedback_data.x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
+							{{#times month_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_4}}<i class="icon-star"></i>{{/untimes}}
 						</a>
+					{{/with}}
 					</div>
 				</div>
 			</div>
-			<script>$(function() {$('#feedback_tab a:last').tab('show');})</script>
+			<script>$(function() {$('#feedback_tab a:first').tab('show');})</script>
 			<hr>
 		</div>
 		<div id="progress" class="container-fluid">
@@ -79,15 +83,21 @@
 							<th>Points (#)</th>
 						</tr></thead>
 						<tbody><tr>
-							<td>22,000</td><td>33</td><td>3,300</td><td>33</td>
+						{{#with cur_progress}}
+							<td>{{sales}}</td><td>{{visits}}</td>
+							<td>{{commission}}</td><td>{{pts}}</td>
+						{{/with}}
 						</tr></tbody>
 					</table>
 					<table class="table"><caption>Progress Graph</caption></table>
 					<div class="progress">
-						<div class="bar" style="width: 30%;"></div>
-						<div class="bar bar-muted" style="width: 20%;"></div>
-						<div class="bar bar-transparent" style="width: 30%;"></div>
-						<div class="bar bar-success" style="width: 1%;"></div>
+					{{#with cur_progress}}
+						<div class="bar" style="width: {{pre}}%;"></div>
+						<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
+						<div class="bar" style="width: {{post}}%;"></div>
+						<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
+						<div class="bar bar-success" style="width: {{end}}%;"></div>
+					{{/with}}
 					</div>
 				</div>
 				<div class="tab-pane" id="prev_progress">
@@ -100,20 +110,26 @@
 							<th>Points (#)</th>
 						</tr></thead>
 						<tbody><tr>
-							<td>22,000</td><td>33</td><td>3,300</td><td>33</td>
+						{{#with prev_progress}}
+							<td>{{sales}}</td><td>{{visits}}</td>
+							<td>{{commission}}</td><td>{{pts}}</td>
+						{{/with}}
 						</tr></tbody>
 					</table>
 					<table class="table"><caption>Progress Graph</caption></table>
 					<div class="progress">
-						<div class="bar" style="width: 60%;"></div>
-						<div class="bar bar-muted" style="width: 20%;"></div>
-						<div class="bar bar-transparent" style="width: 0%;"></div>
-						<div class="bar bar-success" style="width: 1%;"></div>
+					{{#with prev_progress}}
+						<div class="bar" style="width: {{pre}}%;"></div>
+						<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
+						<div class="bar" style="width: {{post}}%;"></div>
+						<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
+						<div class="bar bar-success" style="width: {{end}}%;"></div>
+					{{/with}}
 					</div>
 				</div>
 				</div>
 			</div>
-			<script>$(function() {$('#progress_tab a:last').tab('show');})</script>
+			<script>$(function() {$('#progress_tab a:first').tab('show');})</script>
 			<hr>
 		</div>
 		<ul class="inline">

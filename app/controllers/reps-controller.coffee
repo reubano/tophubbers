@@ -6,10 +6,9 @@ GraphsView = require 'views/graphs-view'
 
 module.exports = class Controller extends Controller
 	collection: Chaplin.mediator.reps
-	res: ['rep_info', 'prev_work', 'cur_feedback']
-	# res: ['rep_info', 'cur_work', 'cur_feedback', 'cur_progress']
-	charts: ['cur_work', 'prev_work', 'cur_progress']
 	parser: document.createElement('a')
+	to_chart: 'work_data'
+	res: ['rep_info', 'work_data', 'feedback_data', 'progress_data', 'score']
 
 	getResList: =>
 		(item: i, tstamp: i + '_tstamp', url: config.api + i for i in @res)
@@ -37,7 +36,6 @@ module.exports = class Controller extends Controller
 
 	failWhale: (jqXHR, textStatus, errorThrown) =>
 		@parser.href = jqXHR.url
-		attr = @parser.pathname.replace /\//g, ''
 		console.log 'failed to fetch ' + jqXHR.url
 		console.log 'error: ' + errorThrown if errorThrown
 
@@ -63,24 +61,28 @@ module.exports = class Controller extends Controller
 
 	setCharts: (response, textStatus, jqXHR) =>
 		@parser.href = jqXHR.url
-		attr = (@parser.pathname.replace /\//g, '')
+		source = (@parser.pathname.replace /\//g, '')
 
-		if attr in @charts
-			console.log 'setting chart data for ' + attr
+		if source == @to_chart
+			console.log 'setting chart data for ' + source
 		else
+			console.log source + ' not chartable'
 			return
 
-		data_attr = attr + '_data'
-		chart_attr = attr + '_chart_data'
+		data_attrs = ['cur_work_data', 'prev_work_data']
 
 		for model in @collection.models
-			if (model.get(data_attr) and model.hasChanged(data_attr))
-			# if model.get(data_attr)
-				console.log model.get('id') + ': fetching missing chart data'
-				data = model.getChartData attr
-				console.log JSON.parse data
-				model.set chart_attr, data
-				model.save {patch: true}
+			for attr in data_attrs
+				# if (model.get(attr) and model.hasChanged(attr))
+				if model.get(attr)
+					chart_attr = attr + config.chart_suffix
+					console.log model.get('id') + ': fetching missing chart data'
+					data = model.getChartData attr
+					console.log JSON.parse data
+					model.set chart_attr, data
+					model.save {patch: true}
+				else
+					console.log model.get('id') + ': chart data unchanged'
 
 		console.log @collection
 
@@ -111,25 +113,25 @@ module.exports = class Controller extends Controller
 		console.log 'initialize reps-controller'
 
 		if @collection.length is 0
-			console.log 'no collection so fetching graphs...'
+			console.log 'no collection so fetching all data...'
 			# @publishEvent 'graphs:clear'
 			@fetchAllData()
 		else
-			console.log 'fetching expired graphs...'
+			console.log 'fetching expired data...'
 			@fetchExpiredData()
 
 	show: (params) =>
 		@model = @collection.get params.id
 		@view = new RepView
 			model: @model
-			chart: 'prev_work'
-			change: 'change:prev_work_chart_data'
+			chart: 'prev_work_data'
+			change: 'change:prev_work_data_c'
 
 	index: (params) =>
 		@view = new GraphsView
 			collection: @collection
-			chart: 'prev_work'
-			change: 'change:prev_work_chart_data'
+			chart: 'prev_work_data'
+			change: 'change:prev_work_data_c'
 
 	refresh: (params) =>
 		console.log 'refreshing data...'
