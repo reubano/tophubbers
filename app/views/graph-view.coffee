@@ -1,5 +1,5 @@
 config = require 'config'
-nvd3util = require 'lib/nvd3util'
+# nvd3util = require 'lib/nvd3util'
 View = require 'views/base/view'
 template = require 'views/templates/graph'
 
@@ -48,15 +48,14 @@ module.exports = class GraphView extends View
 
 		if chart_data and name
 			console.log id + ' has ' + chart_attr
-			nvd3util.makeChart chart_data, id
+			# func = nvd3util.makeChart chart_data, id
 			# script = "<script>#{func};</script>"
-			# options = [chart_data, id]
-			# script = "<script>_.defer(makeChart, #{options});</script>"
+			options = [chart_data, id]
+			script = "<script>_.defer(makeChart, #{options});</script>"
 			# script = "<script>makeChart(#{chart_data}, #{id});</script>"
-			# @$('#draw').html script
+			@$('#draw').html script
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
-
 
 	setHTML: =>
 		id = @model.get 'id'
