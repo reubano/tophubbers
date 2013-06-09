@@ -15,9 +15,6 @@ module.exports = class GraphView extends View
 		@listenTo @model, options.change, @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'graph-view caught dispatcher event'
-		@subscribeEvent 'addedToParent', ->
-			console.log 'graph-view caught addedToParent event'
-		# @subscribeEvent 'addedToParent', @drawChart
 
 	render: =>
 		super
@@ -27,9 +24,6 @@ module.exports = class GraphView extends View
 
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
-
-	alertChart: ->
-		console.log 'graph-view heard addedToDOM'
 
 	drawChart: =>
 		console.log 'graph-view heard addedToParent'
