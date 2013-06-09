@@ -1,4 +1,5 @@
 config = require 'config'
+nvd3util = require 'lib/nvd3util'
 View = require 'views/base/view'
 template = require 'views/templates/graph'
 

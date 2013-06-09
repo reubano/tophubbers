@@ -1,4 +1,7 @@
-module.exports = class nvd3util
+Chaplin = require 'chaplin'
+nvd3util = Chaplin.utils.beget Chaplin.utils
+
+_(nvd3util).extend
 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab: (d) -> d.label
 	retVal: (d) ->	d.value
@@ -7,16 +10,17 @@ module.exports = class nvd3util
 		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
 		if time.substr(0,1) == '0' then time.substr(1) else time
 
-	makeChart: (chart_data, id) =>
-		if not chart_data
+	makeChart: (data, id) =>
+		if not data
 			console.log 'no data for ' + attr + ' chart ' + id
 		else
+			console.log 'making chart ' + id
+
 			i = 0
 			minTime = 7.5
 			maxTime = 18.5
 			chartRange = [minTime * 60, maxTime * 60]
 			tickInterval = []
-			data = JSON.parse chart_data
 			selection = '#' + id + '.view .chart svg'
 
 			while i < maxTime - 1
@@ -49,4 +53,6 @@ module.exports = class nvd3util
 
 			# nv.utils.windowResize chart.update
 			chart.dispatch.on 'stateChange', @nvlog
-			chart
+			nv.addGraph chart
+
+module.exports = nvd3util
