@@ -46,10 +46,13 @@ module.exports = class GraphView extends View
 		console.log 'getting chart script for ' + id
 
 		if chart_data and name
+			classes = @options.classes
+			chart_class = classes[0]
 			console.log id + ' has ' + chart_attr
 			options = [chart_data, id]
 			script = "<script>_.defer(makeChart, #{options});</script>"
-			@$('#draw').html script
+			selection = '#draw-' + chart_class
+			@$(selection).html script
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
 
