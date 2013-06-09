@@ -44,12 +44,12 @@ module.exports = class GraphView extends View
 
 		if chart_data and name
 			console.log id + ' has ' + chart_attr
-			# func = nvd3util.makeChart chart_data, id
+			nvd3util.makeChart chart_data, id
 			# script = "<script>#{func};</script>"
-			options = [chart_data, id]
-			script = "<script>_.defer(makeChart, #{options});</script>"
+			# options = [chart_data, id]
+			# script = "<script>_.defer(makeChart, #{options});</script>"
 			# script = "<script>makeChart(#{chart_data}, #{id});</script>"
-			@$('#draw').html script
+			# @$('#draw').html script
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
 
