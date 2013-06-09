@@ -27,91 +27,95 @@
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="cur_feedback">
-					<div class="btn-group">
-						<table class="table"><caption>Feedback Summary</caption></table>
-						{{#with cur_feedback_data}}
-						<a class="btn btn-large btn-warning disabled">Cat 1
-							{{#times x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 2
-							{{#times x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 3
-							{{#times x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 4
-							{{#times x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						{{/with}}
-						<table class="table table-striped">
-							<caption>Progress Table</caption>
-							<thead><tr>
-								<th>Sales (TZS)</th>
-								<th>Visits (#)</th>
-								<th>Commission (TZS)</th>
-								<th>Points (#)</th>
-							</tr></thead>
-							<tbody><tr>
-							{{#with cur_progress}}
-								<td>{{sales}}</td><td>{{visits}}</td>
-								<td>{{commission}}</td><td>{{pts}}</td>
+					<table class="table"><caption>Feedback Summary</caption></table>
+					<div class="btn-toolbar pagination-centered">
+						<div class="btn-group">
+							{{#with cur_feedback_data}}
+							<a class="btn btn-large btn-warning disabled">Cat 1
+								{{#times x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 2
+								{{#times x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 3
+								{{#times x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 4
+								{{#times x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}
+							</a>
 							{{/with}}
-							</tr></tbody>
-						</table>
-						<table class="table"><caption>Progress Graph</caption></table>
-						<div class="progress">
-						{{#with cur_progress}}
-							<div class="bar" style="width: {{pre}}%;"></div>
-							<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
-							<div class="bar" style="width: {{post}}%;"></div>
-							<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
-							<div class="bar bar-success" style="width: {{end}}%;"></div>
-						{{/with}}
 						</div>
+					</div>
+					<table class="table table-striped">
+						<caption>Progress Table</caption>
+						<thead><tr>
+							<th>Sales (TZS)</th>
+							<th>Visits (#)</th>
+							<th>Commission (TZS)</th>
+							<th>Points (#)</th>
+						</tr></thead>
+						<tbody><tr>
+						{{#with cur_progress}}
+							<td>{{sales}}</td><td>{{visits}}</td>
+							<td>{{commission}}</td><td>{{pts}}</td>
+						{{/with}}
+						</tr></tbody>
+					</table>
+					<table class="table"><caption>Progress Graph</caption></table>
+					<div class="progress">
+					{{#with cur_progress}}
+						<div class="bar" style="width: {{pre}}%;"></div>
+						<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
+						<div class="bar" style="width: {{post}}%;"></div>
+						<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
+						<div class="bar bar-success" style="width: {{end}}%;"></div>
+					{{/with}}
 					</div>
 				</div>
 				<div class="tab-pane" id="prev_feedback">
-					<div class="btn-group">
-						<table class="table"><caption>Feedback Summary</caption></table>
-						{{#with prev_feedback_data}}
-						<a class="btn btn-large btn-warning disabled"> Cat 1
-							{{#times month_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_1}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 2
-							{{#times month_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_2}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 3
-							{{#times month_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_3}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						<a class="btn btn-large btn-warning disabled">Cat 4
-							{{#times month_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_4}}<i class="icon-star"></i>{{/untimes}}
-						</a>
-						{{/with}}
-						<table class="table table-striped">
-							<caption>Progress Table</caption>
-							<thead><tr>
-								<th>Sales (TZS)</th>
-								<th>Visits (#)</th>
-								<th>Commission (TZS)</th>
-								<th>Points (#)</th>
-							</tr></thead>
-							<tbody><tr>
-							{{#with prev_progress}}
-								<td>{{sales}}</td><td>{{visits}}</td>
-								<td>{{commission}}</td><td>{{pts}}</td>
+					<table class="table"><caption>Feedback Summary</caption></table>
+					<div class="btn-toolbar pagination-centered">
+						<div class="btn-group">
+							{{#with prev_feedback_data}}
+							<a class="btn btn-large btn-warning disabled"> Cat 1
+								{{#times month_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_1}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 2
+								{{#times month_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_2}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 3
+								{{#times month_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_3}}<i class="icon-star"></i>{{/untimes}}
+							</a>
+							<a class="btn btn-large btn-warning disabled">Cat 4
+								{{#times month_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes month_cat_4}}<i class="icon-star"></i>{{/untimes}}
+							</a>
 							{{/with}}
-							</tr></tbody>
-						</table>
-						<table class="table"><caption>Progress Graph</caption></table>
-						<div class="progress">
-						{{#with prev_progress}}
-							<div class="bar" style="width: {{pre}}%;"></div>
-							<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
-							<div class="bar" style="width: {{post}}%;"></div>
-							<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
-							<div class="bar bar-success" style="width: {{end}}%;"></div>
-						{{/with}}
 						</div>
+					</div>
+					<table class="table table-striped">
+						<caption>Progress Table</caption>
+						<thead><tr>
+							<th>Sales (TZS)</th>
+							<th>Visits (#)</th>
+							<th>Commission (TZS)</th>
+							<th>Points (#)</th>
+						</tr></thead>
+						<tbody><tr>
+						{{#with prev_progress}}
+							<td>{{sales}}</td><td>{{visits}}</td>
+							<td>{{commission}}</td><td>{{pts}}</td>
+						{{/with}}
+						</tr></tbody>
+					</table>
+					<table class="table"><caption>Progress Graph</caption></table>
+					<div class="progress">
+					{{#with prev_progress}}
+						<div class="bar" style="width: {{pre}}%;"></div>
+						<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
+						<div class="bar" style="width: {{post}}%;"></div>
+						<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
+						<div class="bar bar-success" style="width: {{end}}%;"></div>
+					{{/with}}
 					</div>
 				</div>
 			</div>
