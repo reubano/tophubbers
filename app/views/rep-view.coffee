@@ -11,12 +11,14 @@ module.exports = class RepView extends GraphView
 	template: template
 
 	initialize: (options) ->
-		@subscribeEvent 'loginStatus', @render
 		@listenTo @model, options.change, @render
-		@subscribeEvent 'dispatcher:dispatch', -> console.log 'rep-view caught dispatcher event'
+		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'dispatcher:dispatch', ->
+			console.log 'rep-view caught dispatcher event'
 		# @subscribeEvent 'dispatcher:dispatch', @render
 		super
 
 	render: =>
+		console.log 'rendering rep view'
 		user = mediator.user
 		super
