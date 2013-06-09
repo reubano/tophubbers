@@ -6,12 +6,14 @@ module.exports = class GraphView extends View
 	template: template
 	listen:
 		addedToParent: 'drawChart'
+		visibilityChange: 'visibilityChangeAlert'
 
 	initialize: (options) =>
 		super
 		@options = options
 		@listenTo @model, options.change, @render
-		# @subscribeEvent 'dispatcher:dispatch', @setHTML
+		@subscribeEvent 'dispatcher:dispatch', ->
+			console.log 'graph-view caught dispatcher event'
 
 	render: =>
 		super
@@ -19,11 +21,14 @@ module.exports = class GraphView extends View
 		# _.defer @drawChart
 		# @drawChart()
 
+	visibilityChangeAlert: ->
+		console.log 'graph-view heard visibilityChange'
+
 	alertChart: ->
-		console.log 'heard addedToDOM'
+		console.log 'graph-view heard addedToDOM'
 
 	drawChart: =>
-		console.log 'heard addedToParent'
+		console.log 'graph-view heard addedToParent'
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
 		attr = @options.chart

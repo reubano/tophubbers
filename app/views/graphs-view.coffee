@@ -13,12 +13,16 @@ module.exports = class GraphsView extends CollectionView
 	listen:
 		addedToParent: 'addedToParentAlert'
 		addedToDOM: 'addedToDOMAlert'
+		visibilityChange: 'visibilityChangeAlert'
 
 	addedToParentAlert: ->
 		console.log 'graphs-view heard addedToParent'
 
 	addedToDOMAlert: ->
 		console.log 'graphs-view heard addedToDOM'
+
+	visibilityChangeAlert: ->
+		console.log 'graphs-view heard visibilityChange'
 
 	initialize: (options) ->
 		super
