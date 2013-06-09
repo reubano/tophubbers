@@ -10,9 +10,8 @@ formatMinutes = function(d) {
 	return time.substr(0,1) == '0' ? time.substr(1) : time;
 };
 
-makeChart = function(data, div) {
-	id = div.id
-	selection = '#' + id + '.view .chart-cur svg';
+makeChart = function(data, id, chart_class) {
+	selection = '#' + id + '.view .' + chart_class + ' svg';
 	console.log('making chart ' + id);
 
 	chart = nv.models.multiBarHorizontalChart()

@@ -43,16 +43,20 @@ module.exports = class GraphView extends View
 		chart_data = @model.get chart_attr
 		name = @model.get 'first_name'
 		id = @model.get 'id'
+		id_string = JSON.stringify id
 		console.log 'getting chart script for ' + id
 
 		if chart_data and name
 			classes = @options.classes
 			chart_class = classes[0]
 			console.log id + ' has ' + chart_attr
-			options = [chart_data, id]
-			script = "<script>_.defer(makeChart, #{options});</script>"
-			selection = '#draw-' + chart_class
-			@$(selection).html script
+
+			for chart_class in classes
+				chart_class_string = JSON.stringify chart_class
+				options = [chart_data, id_string, chart_class_string]
+				selection = '#draw-' + chart_class
+				script = "<script>_.defer(makeChart, #{options});</script>"
+				@$(selection).html script
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
 
