@@ -50,5 +50,5 @@ makeChart = function(data, div) {
 		nv.log('New State:', JSON.stringify(e));
 	});
 
-		nv.addGraph(chart);
+	nv.addGraph(chart);
 };
