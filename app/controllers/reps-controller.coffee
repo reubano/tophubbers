@@ -21,8 +21,8 @@ module.exports = class Controller extends Controller
 			dataType: 'json'
 			beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
 
-	fetchAllData: =>
-		for r in @getResList()
+	fetchData: (list) =>
+		for r in list
 			@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
 
 	fetchExpiredData: =>
@@ -115,7 +115,7 @@ module.exports = class Controller extends Controller
 		if @collection.length is 0
 			console.log 'no collection so fetching all data...'
 			# @publishEvent 'graphs:clear'
-			@fetchAllData()
+			@fetchData(@getResList())
 		else
 			console.log 'fetching expired data...'
 			@fetchExpiredData()
@@ -135,6 +135,6 @@ module.exports = class Controller extends Controller
 
 	refresh: (params) =>
 		console.log 'refreshing data...'
-		@fetchAllData()
+		@fetchData([to_chart])
 		@redirectToRoute 'reps#index'
 
