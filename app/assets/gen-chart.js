@@ -15,42 +15,40 @@ makeChart = function(data, div) {
 	selection = '#' + id +'.view .chart svg';
 	console.log('making chart ' + id);
 
-	$(document).ready(function(){
-		chart = nv.models.multiBarHorizontalChart()
-			.x(function(d) {return d.label})
-			.y(function(d) {return d.value})
-			.forceY(chartRange)
-			.yDomain(chartRange)
-			.margin({top: 0, right: 110, bottom: 30, left: 80})
-			//.showValues(true)
-			//.tooltips(false)
-			.stacked(true)
-			.showLegend(false)
-			.barColor([d3.rgb('steelblue')])
-			.showControls(false)
-			;
+	chart = nv.models.multiBarHorizontalChart()
+		.x(function(d) {return d.label})
+		.y(function(d) {return d.value})
+		.forceY(chartRange)
+		.yDomain(chartRange)
+		.margin({top: 0, right: 110, bottom: 30, left: 80})
+		//.showValues(true)
+		//.tooltips(false)
+		.stacked(true)
+		.showLegend(false)
+		.barColor([d3.rgb('steelblue')])
+		.showControls(false)
+		;
 
-		for (var i = 0; i < maxTime - 1; i++) {
-			tickInterval[i] = (minTime + i + 1) * 60;
-		}
+	for (var i = 0; i < maxTime - 1; i++) {
+		tickInterval[i] = (minTime + i + 1) * 60;
+	}
 
-		chart.yAxis
-			.tickValues(tickInterval)
-			.tickFormat(formatMinutes)
+	chart.yAxis
+		.tickValues(tickInterval)
+		.tickFormat(formatMinutes)
 
-		chart.multibar.yScale().clamp(true);
+	chart.multibar.yScale().clamp(true);
 
-		d3.select(selection)
-			.datum(data)
-			.transition().duration(100)
-			.call(chart);
+	d3.select(selection)
+		.datum(data)
+		.transition().duration(100)
+		.call(chart);
 
-		// nv.utils.windowResize(chart.update);
+	// nv.utils.windowResize(chart.update);
 
-		chart.dispatch.on('stateChange', function(e) {
-			nv.log('New State:', JSON.stringify(e));
-		});
+	chart.dispatch.on('stateChange', function(e) {
+		nv.log('New State:', JSON.stringify(e));
+	});
 
 		nv.addGraph(chart);
-	});
 };
