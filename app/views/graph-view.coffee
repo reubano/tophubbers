@@ -4,6 +4,8 @@ template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
 	template: template
+	listen:
+		addedToParent: 'drawChart'
 
 	initialize: (options) =>
 		super
@@ -13,9 +15,15 @@ module.exports = class GraphView extends View
 
 	render: =>
 		super
-		@drawChart()
+		@attach()
+		# _.defer @drawChart
+		# @drawChart()
+
+	alertChart: ->
+		console.log 'heard addedToDOM'
 
 	drawChart: =>
+		console.log 'heard addedToParent'
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
 		attr = @options.chart

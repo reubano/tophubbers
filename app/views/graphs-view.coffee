@@ -10,6 +10,16 @@ module.exports = class GraphsView extends CollectionView
 	className: 'span12'
 	template: template
 
+	listen:
+		addedToParent: 'addedToParentAlert'
+		addedToDOM: 'addedToDOMAlert'
+
+	addedToParentAlert: ->
+		console.log 'graphs-view heard addedToParent'
+
+	addedToDOMAlert: ->
+		console.log 'graphs-view heard addedToDOM'
+
 	initialize: (options) ->
 		super
 		@options = options
@@ -35,6 +45,7 @@ module.exports = class GraphsView extends CollectionView
 		new @itemView
 			model: model
 			autoRender: false
+			autoAttach: false
 			chart: @options.chart
 			change: @options.change
 
