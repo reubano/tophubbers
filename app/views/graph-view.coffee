@@ -6,8 +6,9 @@ template = require 'views/templates/graph'
 module.exports = class GraphView extends View
 	template: template
 	listen:
-		addedToParent: 'drawChart'
-		visibilityChange: 'visibilityChangeAlert'
+		# addedToParent: 'getChartScript'
+		addedToParent: 'addedToParentAlert'
+		# visibilityChange: 'visibilityChangeAlert'
 
 	initialize: (options) =>
 		super
@@ -17,16 +18,19 @@ module.exports = class GraphView extends View
 			console.log 'graph-view caught dispatcher event'
 
 	render: =>
+		console.log 'rendering graph view'
 		super
 		@attach()
-		# _.defer @drawChart
-		# @drawChart()
+		_.defer @getChartScript
+		# @getChartScript()
 
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
 
-	drawChart: =>
+	addedToParentAlert: ->
 		console.log 'graph-view heard addedToParent'
+
+	getChartScript: =>
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
 		attr = @options.chart
@@ -39,6 +43,7 @@ module.exports = class GraphView extends View
 		chart_data = @model.get chart_attr
 		name = @model.get 'first_name'
 		id = @model.get 'id'
+		console.log 'getting chart script for ' + id
 
 		if chart_data and name
 			console.log id + ' has ' + chart_attr
