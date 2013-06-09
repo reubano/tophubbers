@@ -53,12 +53,15 @@ module.exports = class GraphView extends View
 		else
 			console.log id + ' has no ' + chart_attr + ' or no name'
 
-	getHTML: =>
-		id = @model.get 'id'
-		console.log 'getting chart html for ' + id
-		console.log @$('#svg').html()
 
 	setHTML: =>
-		setTimeout @getHTML, 100000
-		# @model.set chart: JSON.stringify $(selection).html()
-		# @model.save()
+		id = @model.get 'id'
+		html = @$('#svg').html()
+		console.log 'getting chart html for ' + id
+
+		if html
+			console.log html
+			@model.set chart: html
+			@model.save()
+		else
+			console.log 'no html found'
