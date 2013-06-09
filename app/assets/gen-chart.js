@@ -12,7 +12,7 @@ formatMinutes = function(d) {
 
 makeChart = function(data, div) {
 	id = div.id
-	selection = '#' + id +'.view .chart svg';
+	selection = '#' + id + '.view .chart svg';
 	console.log('making chart ' + id);
 
 	chart = nv.models.multiBarHorizontalChart()
