@@ -125,12 +125,14 @@ module.exports = class Controller extends Controller
 		@view = new RepView
 			model: @model
 			chart: 'prev_work_data'
+			classes: ['chart-cur', 'chart-prev']
 			change: 'change:prev_work_data_c'
 
 	index: (params) =>
 		@view = new GraphsView
 			collection: @collection
 			chart: 'prev_work_data'
+			classes: ['chart-cur']
 			change: 'change:prev_work_data_c'
 
 	refresh: (params) =>

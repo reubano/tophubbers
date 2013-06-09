@@ -51,6 +51,7 @@ module.exports = class GraphsView extends CollectionView
 			autoRender: false
 			autoAttach: false
 			chart: @options.chart
+			classes: @options.classes
 			change: @options.change
 
 	render: =>
