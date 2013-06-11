@@ -1,4 +1,24 @@
 module.exports = class Momentous
+	constructor: (placeholder, options=false, controller=false) ->
+		@placeholder = $ placeholder.html dropdownTemplate
+		@events = $ this
+		@options = options
+		@dateFormat = @options.dateFormat or 'MM-DD-YYYY'
+		@daysView = @placeholder.find '.days-view'
+		@monthsView = @placeholder.find '.months-view'
+		@curView = @placeholder.find '.days-view'
+		@input = @placeholder.find '.momentous-input'
+		@calButton = @placeholder.find '.momentous-cal-button'
+		@dropdown = @placeholder.find '.momentous-dropdown'
+		@viewButton = @dropdown.find '.view-button'
+
+		@placeholder.addClass 'momentous-container'
+
+		@input.bind 'click', @toggle
+		@calButton.bind 'click', @toggle
+		@dropdown.find('.dir-button').bind 'click', @directionClickHandler
+		@viewButton.bind 'click', @viewClickHandler
+
 	dropdownTemplate =	"""
 		<div class='input-append'>
 			<input class='momentous-input' type='text' name='momentous' id='momentous' value='' readonly>
@@ -30,26 +50,6 @@ module.exports = class Momentous
 			</div>
 		</div>
 	"""
-
-	constructor: (placeholder, options=false, controller=false) ->
-		@placeholder = $ placeholder.html dropdownTemplate
-		@events = $ this
-		@options = options
-		@dateFormat = @options.dateFormat or 'MM-DD-YYYY'
-		@daysView = @placeholder.find '.days-view'
-		@monthsView = @placeholder.find '.months-view'
-		@curView = @placeholder.find '.days-view'
-		@input = @placeholder.find '.momentous-input'
-		@calButton = @placeholder.find '.momentous-cal-button'
-		@dropdown = @placeholder.find '.momentous-dropdown'
-		@viewButton = @dropdown.find '.view-button'
-
-		@placeholder.addClass 'momentous-container'
-
-		@input.bind 'click', @toggle
-		@calButton.bind 'click', @toggle
-		@dropdown.find('.dir-button').bind 'click', @directionClickHandler
-		@viewButton.bind 'click', @viewClickHandler
 
 	init: =>
 		# defaults
