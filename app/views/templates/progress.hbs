@@ -1,0 +1,21 @@
+{{#if first_name}}
+<div class="row-fluid" id="{{id}}">
+	<div class="span4">
+		<a href="rep/{{id}}">
+			<label>{{first_name}} {{last_name}} (score: {{score}}, points: {{cur_progress.pts}})</label>
+		</a>
+	</div>
+
+	<div class="span8">
+		<div class="progress">
+		{{#with cur_progress}}
+			<div class="bar" style="width: {{pre}}%;"></div>
+			<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
+			<div class="bar" style="width: {{post}}%;"></div>
+			<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
+			<div class="bar bar-success" style="width: {{end}}%;"></div>
+		{{/with}}
+		</div>
+	</div>
+</div>
+{{/if}}
