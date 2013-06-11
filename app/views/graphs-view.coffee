@@ -1,9 +1,9 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/graphs'
-GraphView = require 'views/graph-view'
+View = require 'views/graph-view'
 
 module.exports = class GraphsView extends CollectionView
-	itemView: GraphView
+	itemView: View
 	autoRender: true
 	listSelector: '#graph-list'
 	region: 'content'
@@ -26,6 +26,7 @@ module.exports = class GraphsView extends CollectionView
 
 	initialize: (options) ->
 		super
+		console.log 'initialize graphs-view'
 		@options = options
 		@subscribeEvent 'loginStatus', ->
 			console.log 'graphs-view caught loginStatus event'
@@ -36,12 +37,8 @@ module.exports = class GraphsView extends CollectionView
 		@listenTo @collection, 'reset', ->
 			console.log 'graphs-view heard collection reset'
 
-		# @listenTo @collection, @options.change, ->
-		# 	console.log 'caught collection change'
-
 		@subscribeEvent 'loginStatus', @render
 		# @subscribeEvent 'dispatcher:dispatch', @render
-		@listenTo @collection, 'change', @render
 		@listenTo @collection, 'reset', @render
 		@subscribeEvent 'graphs:clear', @clear
 
@@ -50,13 +47,12 @@ module.exports = class GraphsView extends CollectionView
 			model: model
 			autoRender: false
 			autoAttach: false
-			chart: @options.chart
-			classes: @options.classes
-			change: @options.change
+			attrs: @options.attrs
 
 	render: =>
-		console.log 'rendering graphs view'
 		super
+		console.log 'rendering graphs view'
+		@collection.sort()
 
 	clear: ->
 		model.destroy() while model = @collection.first()

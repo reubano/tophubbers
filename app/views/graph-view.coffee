@@ -12,17 +12,20 @@ module.exports = class GraphView extends View
 
 	initialize: (options) =>
 		super
+		console.log 'initialize graph-view'
 		@options = options
-		@listenTo @model, options.change, @render
+		@id = @model.get 'id'
+		@listenTo @model, 'change', @render
+		# @listenTo @model, 'change', ->
+		# 	console.log 'caught collection change'
 		# @subscribeEvent 'dispatcher:dispatch', ->
 		# 	console.log 'graph-view caught dispatcher event'
 
 	render: =>
-		console.log 'rendering graph view'
 		super
+		console.log 'rendering graph view for ' + @id
 		@attach()
 		_.defer @getChartScript
-		# @getChartScript()
 
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
@@ -30,40 +33,41 @@ module.exports = class GraphView extends View
 	addedToParentAlert: ->
 		console.log 'graph-view heard addedToParent'
 
-	getChartScript: =>
+	getChartScript: (force=true) =>
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
-		attr = @options.chart
+		attrs = @options.attrs
 
-		if not attr
-			console.log 'options not set'
-			return
+		for attr in attrs
+			chart_class = 'chart-' + attr[0..2]
+			selection = '#' + @id + '.view .' + chart_class + ' svg';
+			# rendered = @$(selection).html()
+			rendered = false
 
-		chart_attr = attr + config.chart_suffix
-		chart_data = @model.get chart_attr
-		name = @model.get 'first_name'
-		id = @model.get 'id'
-		id_string = JSON.stringify id
-		console.log 'getting chart script for ' + id
+			if (rendered and not @model.hasChanged(attr) and not force)
+				console.log @id + ' ' + attr + " hasn't changed"
+				return
 
-		if chart_data and name
-			classes = @options.classes
-			chart_class = classes[0]
-			console.log id + ' has ' + chart_attr
+			chart_attr = attr + config.chart_suffix
+			chart_data = @model.get chart_attr
+			name = @model.get 'first_name'
+			console.log 'getting chart script for ' + @id
 
-			for chart_class in classes
-				chart_class_string = JSON.stringify chart_class
-				options = [chart_data, id_string, chart_class_string]
-				selection = '#draw-' + chart_class
+			if chart_data and name
+				console.log @id + ' has ' + chart_attr
+				selection_string = JSON.stringify selection
+				options = [chart_data, selection_string]
+				draw = '#draw-' + chart_class
+				tab = '#' + chart_class + '-tab'
 				script = "<script>_.defer(makeChart, #{options});</script>"
-				@$(selection).html script
-		else
-			console.log id + ' has no ' + chart_attr + ' or no name'
+				# @$(tab).click()
+				@$(draw).html script
+			else
+				console.log @id + ' has no ' + chart_attr + ' or no name'
 
 	setHTML: =>
-		id = @model.get 'id'
 		html = @$('#svg').html()
-		console.log 'getting chart html for ' + id
+		console.log 'getting chart html for ' + @id
 
 		if html
 			console.log html

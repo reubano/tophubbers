@@ -1,12 +1,23 @@
 Model = require 'models/base/model'
 
 module.exports = class Graph extends Model
+	defaults:
+		called: no
+
 	initialize: ->
 		super
-		@set 'created', new Date().toString() if @isNew() or not @get 'created'
+		@set created: new Date().toString() if @isNew() or not @get 'created'
+		@set score_sort: @get 'score' if not @get 'score_sort'
 		# @set 'first_name', 'Name not found in database' if not @get 'first_name'
 		# @set 'airtel', 'N/A' if not @get 'airtel'
 		# @set 'ward', 'N/A' if not @get 'ward'
+
+	toggle: ->
+		@set called: not @get 'called'
+		console.log 'called: ' + @get 'called'
+		console.log 'score: ' + if @get('called') then 0 else @get 'score'
+		score_sort = if @get('called') then 0 else @get 'score'
+		@set score_sort: JSON.stringify score_sort
 
 	getChartData: (attr) =>
 		d = @get attr

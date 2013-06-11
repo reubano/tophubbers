@@ -10,9 +10,9 @@ formatMinutes = function(d) {
 	return time.substr(0,1) == '0' ? time.substr(1) : time;
 };
 
-makeChart = function(data, id, chart_class) {
-	selection = '#' + id + '.view .' + chart_class + ' svg';
-	console.log('making chart ' + id);
+makeChart = function(data, selection, resize=false) {
+	// tab = '#' + chart_class + '-tab'
+	console.log('making ' + selection);
 
 	chart = nv.models.multiBarHorizontalChart()
 		.x(function(d) {return d.label})
@@ -43,11 +43,15 @@ makeChart = function(data, id, chart_class) {
 		.transition().duration(100)
 		.call(chart);
 
-	// nv.utils.windowResize(chart.update);
+	if (resize !== false) {
+		nv.utils.windowResize(chart.update);
+	}
 
 	chart.dispatch.on('stateChange', function(e) {
 		nv.log('New State:', JSON.stringify(e));
 	});
 
+	// $(tab).click()
 	nv.addGraph(chart);
+	// return chart
 };

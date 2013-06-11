@@ -6,9 +6,15 @@ module.exports = class Graphs extends Collection
 	model: Rep
 	localStorage: new Store 'reps-collection'
 
-	comparator: (model) ->
-		model.get('id')
+	allAreCalled: ->
+		@getCalled().length is @length
 
-	initialize: ->
+	getCalled: ->
+		@where called: yes
+
+	getActive: ->
+		@where called: no
+
+	initialize: (options) ->
 		super
 		console.log 'initialize reps collection'
