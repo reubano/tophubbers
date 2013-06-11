@@ -48,15 +48,20 @@ module.exports = class GraphView extends View
 		for attr in @attrs
 			chart_class = 'chart-' + attr[0..2]
 			selection = '#' + @id + '.view .' + chart_class + ' svg'
+			svg_attr = attr + config.svg_suffix
+			svg = if @model.get svg_attr then @model.get svg_attr else false
 			rendered = if @$(selection).html() then true else false
 			changed = @model.hasChanged attr
 			text = @id + ' ' + attr + ' '
 
 			console.log text + 'is rendered: ' + rendered
 			console.log text + 'has changed: ' + changed
+			console.log text + 'has cached svg: ' + if svg then 'true' else 'false'
 
 			if (rendered and not changed and not force)
 				console.log @id + ' ' + attr + " hasn't changed and already rendered"
+			else if (svg and not changed)
+				@$(selection).parent().html svg
 			else
 				draw = @$ '#draw-' + chart_class
 				chart_attr = attr + config.chart_suffix
@@ -68,6 +73,7 @@ module.exports = class GraphView extends View
 					console.log @id + ' has ' + chart_attr
 					nvd3 = new nvd3util chart_data, selection, draw
 					nvd3.init()
+					@model.set svg_attr, nvd3.svg()
 					# tab = '#' + chart_class + '-tab'
 					# @$(tab).click()
 				else

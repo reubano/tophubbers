@@ -5,5 +5,6 @@ config =
 	to_chart: 'work_data'
 	data_attrs: ['cur_work_data', 'prev_work_data']
 	chart_suffix: '_c'
+	svg_suffix: '_svg'
 
 module.exports = config
