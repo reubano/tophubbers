@@ -7401,7 +7401,7 @@ nv.models.multiBarHorizontalChart = function() {
 
 
   function chart(selection) {
-    if (selection === undefined) return;
+    if (!selection) return;
 
     selection.each(function(data) {
       var container = d3.select(this),
