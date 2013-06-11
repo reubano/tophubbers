@@ -5,7 +5,7 @@ module.exports = class HomePageView extends View
   autoRender: true
   template: template
   region: 'content'
-  className: 'container-fluid'
+  className: 'span12'
 
   initialize: ->
     @subscribeEvent 'loginStatus', @render
