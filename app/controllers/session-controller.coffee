@@ -1,7 +1,7 @@
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
 User = require 'models/user'
-LoginView = require 'views/login-view'
+View = require 'views/login-view'
 Provider = require 'lib/services/google'
 
 module.exports = class SessionController extends Controller
@@ -14,7 +14,7 @@ module.exports = class SessionController extends Controller
 
   # Was the login status already determined?
   loginStatusDetermined: false
-  loginView: null
+  View: null
   serviceProviderName: null
 
   initialize: ->
@@ -50,7 +50,7 @@ module.exports = class SessionController extends Controller
     console.log 'session-controller showLoginView'
     return if @loginView
     @loadServiceProviders()
-    @loginView = new LoginView
+    @loginView = new View
 
   # Handler for the global !login event
   # Delegate the login to the selected service provider
