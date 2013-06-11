@@ -1,21 +1,26 @@
 config = require 'config'
-# nvd3util = require 'lib/nvd3util'
+nvd3util = require 'lib/nvd3util'
 View = require 'views/base/view'
 template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
 	template: template
-# 	listen:
+#  	listen:
 # 		addedToParent: 'getChartScript'
 # 		addedToParent: 'addedToParentAlert'
 # 		visibilityChange: 'visibilityChangeAlert'
 
+
 	initialize: (options) =>
 		super
 		console.log 'initialize graph-view'
-		@options = options
+		@attrs = options.attrs
 		@id = @model.get 'id'
-		@listenTo @model, 'change', @render
+		change = 'change:' + attr
+
+		for attr in @attrs
+			@listenTo @model, change, @render
+			@listenTo @model, change, @modelChangeAlert
 		# @listenTo @model, 'change', ->
 		# 	console.log 'caught collection change'
 		# @subscribeEvent 'dispatcher:dispatch', ->
@@ -27,43 +32,46 @@ module.exports = class GraphView extends View
 		@attach()
 		_.defer @getChartScript
 
+	modelChangeAlert: ->
+		console.log 'graph-view heard modelChange'
+
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
 
 	addedToParentAlert: ->
 		console.log 'graph-view heard addedToParent'
 
-	getChartScript: (force=true) =>
+	getChartScript: (force=false) =>
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
-		attrs = @options.attrs
 
-		for attr in attrs
+		for attr in @attrs
 			chart_class = 'chart-' + attr[0..2]
-			selection = '#' + @id + '.view .' + chart_class + ' svg';
-			# rendered = @$(selection).html()
-			rendered = false
+			selection = '#' + @id + '.view .' + chart_class + ' svg'
+			rendered = if @$(selection).html() then true else false
+			changed = @model.hasChanged attr
+			text = @id + ' ' + attr + ' '
 
-			if (rendered and not @model.hasChanged(attr) and not force)
-				console.log @id + ' ' + attr + " hasn't changed"
-				return
+			console.log text + 'is rendered: ' + rendered
+			console.log text + 'has changed: ' + changed
 
-			chart_attr = attr + config.chart_suffix
-			chart_data = @model.get chart_attr
-			name = @model.get 'first_name'
-			console.log 'getting chart script for ' + @id
-
-			if chart_data and name
-				console.log @id + ' has ' + chart_attr
-				selection_string = JSON.stringify selection
-				options = [chart_data, selection_string]
-				draw = '#draw-' + chart_class
-				tab = '#' + chart_class + '-tab'
-				script = "<script>_.defer(makeChart, #{options});</script>"
-				# @$(tab).click()
-				@$(draw).html script
+			if (rendered and not changed and not force)
+				console.log @id + ' ' + attr + " hasn't changed and already rendered"
 			else
-				console.log @id + ' has no ' + chart_attr + ' or no name'
+				draw = @$ '#draw-' + chart_class
+				chart_attr = attr + config.chart_suffix
+				chart_data = JSON.parse @model.get chart_attr
+				name = @model.get 'first_name'
+				console.log 'getting chart script for ' + @id
+
+				if chart_data and name
+					console.log @id + ' has ' + chart_attr
+					nvd3 = new nvd3util chart_data, selection, draw
+					nvd3.init()
+					# tab = '#' + chart_class + '-tab'
+					# @$(tab).click()
+				else
+					console.log @id + ' has no ' + chart_attr + ' or no name'
 
 	setHTML: =>
 		html = @$('#svg').html()
