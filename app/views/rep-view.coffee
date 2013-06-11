@@ -1,3 +1,4 @@
+Momentous = require 'lib/momentous'
 Chaplin = require 'chaplin'
 View = require 'views/graph-view'
 template = require 'views/templates/rep'
@@ -25,7 +26,13 @@ module.exports = class RepView extends View
 	render: =>
 		super
 		console.log 'rendering rep view'
+		@renderDatepicker()
 		user = mediator.user
+
+	renderDatepicker: =>
+		momentous = new Momentous @.$('#datepicker')
+		momentous.init()
+		console.log momentous
 
 	networkFormSubmit: =>
 		data = @.$('#network-form').serializeArray()
