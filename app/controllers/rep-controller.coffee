@@ -1,6 +1,7 @@
+config = require 'config'
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
-RepView = require 'views/rep-view'
+View = require 'views/rep-view'
 
 module.exports = class Controller extends Controller
 	adjustTitle: 'Ongeza Rep View'
@@ -8,26 +9,26 @@ module.exports = class Controller extends Controller
 	collection: Chaplin.mediator.reps
 
 	initialize: =>
-		console.log 'initialize reps-controller'
+		console.log 'initialize rep-controller'
+
+	show: (params) =>
+		@id = params.id
+		console.log 'show route id is ' + @id
 
 		if @collection.length is 0
 			console.log 'no collection so fetching all data...'
 			# @publishEvent 'graphs:clear'
-			@fetchData(@res)
+			@fetchData(@res, @id)
 		else
 			console.log 'fetching expired data...'
-			@fetchExpiredData()
+			@fetchExpiredData(@res, @id)
 
-	show: (params) =>
-		@model = @collection.get params.id
-		@view = new RepView
-			model: @model
-			chart: 'prev_work_data'
-			classes: ['chart-cur', 'chart-prev']
-			change: 'change:prev_work_data_c'
+		@view = new View
+			model: @collection.get @id
+			attrs: config.data_attrs
 
 	refresh: (params) =>
 		console.log 'refreshing data...'
-		@fetchData(@res)
-		@redirectToRoute 'reps#show'
+		@redirectToRoute 'rep#show', id: params.id
+		@fetchData(@res, params.id)
 
