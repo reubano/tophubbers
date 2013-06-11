@@ -86,9 +86,10 @@ module.exports = class Controller extends Chaplin.Controller
 
 			for model in models
 				for attr in data_attrs
-					if (model.get(attr) and model.hasChanged(attr))
+					chart_attr = attr + config.chart_suffix
+
+					if (not model.get(chart_attr) or model.hasChanged(attr))
 					# if model.get(attr)
-						chart_attr = attr + config.chart_suffix
 						console.log model.get('id') + ': fetching missing chart data'
 						data = model.getChartData attr
 						console.log JSON.parse data

@@ -4,7 +4,7 @@ View = require 'views/tocalls-view'
 
 module.exports = class Controller extends Controller
 	adjustTitle: 'Ongeza Call List'
-	res: ['score']
+	res: ['rep_info', 'score']
 	collection: Chaplin.mediator.reps
 
 	initialize: =>

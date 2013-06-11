@@ -4,7 +4,7 @@ View = require 'views/progresses-view'
 
 module.exports = class Controller extends Controller
 	adjustTitle: 'Ongeza Rep Progress'
-	res: ['score', 'progress_data']
+	res: ['rep_info', 'score', 'progress_data']
 	collection: Chaplin.mediator.reps
 
 	initialize: =>

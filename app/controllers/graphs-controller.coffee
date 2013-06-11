@@ -5,7 +5,7 @@ View = require 'views/graphs-view'
 
 module.exports = class Controller extends Controller
 	adjustTitle: 'Ongeza Work Graph'
-	res: ['work_data']
+	res: ['rep_info', 'work_data']
 	data_attrs: [config.data_attrs[0]]
 	collection: Chaplin.mediator.reps
 
