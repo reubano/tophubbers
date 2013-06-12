@@ -40,7 +40,6 @@ module.exports = class GraphsView extends CollectionView
 		@subscribeEvent 'loginStatus', @render
 		# @subscribeEvent 'dispatcher:dispatch', @render
 		@listenTo @collection, 'reset', @render
-		@subscribeEvent 'graphs:clear', @clear
 
 	initItemView: (model) ->
 		new @itemView

@@ -5,10 +5,10 @@ template = require 'views/templates/graph'
 
 module.exports = class GraphView extends View
 	template: template
-#  	listen:
-# 		addedToParent: 'getChartScript'
-# 		addedToParent: 'addedToParentAlert'
-# 		visibilityChange: 'visibilityChangeAlert'
+#	listen:
+#		addedToParent: 'getChartScript'
+#		addedToParent: 'addedToParentAlert'
+#		visibilityChange: 'visibilityChangeAlert'
 
 	initialize: (options) =>
 		super

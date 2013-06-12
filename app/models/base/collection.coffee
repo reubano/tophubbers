@@ -9,5 +9,6 @@ module.exports = class Collection extends Chaplin.Collection
   initialize: (models, options) ->
     console.log 'initialize base collection'
     @url = options.url if options?.url?
+    # @comparator = options.comparator if options?.comparator?
     super
 

@@ -11,6 +11,7 @@ module.exports = class nvd3util
 
 	init: =>
 		@draw.html @makeChart()
+		# console.log 'nvd3util init done!'
 		# nv.addGraph chart
 
 	formatMinutes: (d) ->

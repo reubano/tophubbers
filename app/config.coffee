@@ -6,5 +6,8 @@ config =
 	data_attrs: ['cur_work_data', 'prev_work_data']
 	chart_suffix: '_c'
 	svg_suffix: '_svg'
+# 	attrs: ['cur_work', 'prev_work']
+# 	data_suffix: '_data'
+# 	chart_suffix: '_chart_data'
 
 module.exports = config
