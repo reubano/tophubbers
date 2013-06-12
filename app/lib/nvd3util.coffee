@@ -9,9 +9,6 @@ module.exports = class nvd3util
 	retLab: (data) -> data.label
 	retVal: (data) -> data.value
 
-	svg: =>
-		$(@selection).parent().html()
-
 	init: =>
 		@draw.html @makeChart()
 		# nv.addGraph chart
