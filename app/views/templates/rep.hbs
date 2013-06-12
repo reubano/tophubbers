@@ -11,16 +11,16 @@
 		<div id="work-graph">
 			<h3>Work Graph<br></h3>
 			<ul class="nav nav-tabs" id="work_tab">
-				<li class="active"><a href="#chart-cur-tab" data-toggle="tab">This Month</a></li>
-				<li><a href="#chart-pre-tab" data-toggle="tab">Last Month</a></li>
+				<li id="chart-cur-tab" class="active"><a href="#chart-cur-cont" data-toggle="tab">This Month</a></li>
+				<li id="chart-pre-tab" class=""><a href="#chart-pre-cont" data-toggle="tab">Last Month</a></li>
 			</ul>
 			<div class="tab-content">
-				<div class="tab-pane active" id="chart-cur-tab">
+				<div class="tab-pane active" id="chart-cur-cont">
 					<div class="chart chart-cur">
 						<svg height="350" width="800" id="svg-cur"></svg>
 					</div>
 				</div>
-				<div class="tab-pane" id="chart-pre-tab">
+				<div class="tab-pane active" id="chart-pre-cont">
 					<div class="chart chart-pre">
 						<svg height="350" width="800" id="svg-cur"></svg>
 					</div>
