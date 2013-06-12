@@ -15,13 +15,20 @@ module.exports = class RepView extends View
 
 	initialize: (options) ->
 		super
+		console.log 'initialize rep-view'
+		@attrs = options.attrs
+
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
-		@listenTo @model, options.change, @render
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
 		# @subscribeEvent 'dispatcher:dispatch', @render
+
+		for prefix in ['change:cur_', 'change:prev_']
+			@listenTo @model, prefix + 'work_data_c', @render
+			@listenTo @model, prefix + 'feedback_data', @render
+			@listenTo @model, prefix + 'progress', @render
 
 	render: =>
 		super
