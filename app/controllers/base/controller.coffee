@@ -54,13 +54,18 @@ module.exports = class Controller extends Chaplin.Controller
 		console.log 'failed to fetch ' + jqXHR.url
 		console.log 'error: ' + errorThrown if errorThrown
 
-	resetReps: (response, textStatus, jqXHR) =>
-		@parser.href = jqXHR.url
-		attr = @parser.pathname.replace /\//g, ''
-		console.log 'resetting collection for ' + attr
-		(@collection.create rep for rep in response.data)
-		console.log 'collection length: ' + @collection.length
+	saveCollection: =>
+		console.log 'saving collection'
+		(model.save {patch: true} for model in @collection.models)
+
+	displayCollection: =>
+		console.log @collection
 		console.log @collection.at(1).getAttributes()
+
+	saveTstamp: (tstamp) =>
+		console.log 'saving ' + tstamp
+		date = new Date().toString()
+		(model.set tstamp, date for model in @collection.models)
 
 	setReps: (response, textStatus, jqXHR) =>
 		@parser.href = jqXHR.url
@@ -69,10 +74,10 @@ module.exports = class Controller extends Chaplin.Controller
 		console.log 'setting collection with ' + attr
 		console.log response.data
 		@collection.set response.data, remove: false
-		@collection.at(1).set tstamp, new Date().toString()
-		(model.save {patch: true} for model in @collection.models)
+		@saveTstamp(tstamp)
+		@saveCollection()
 		console.log 'collection length: ' + @collection.length
-		console.log @collection.at(1).getAttributes()
+		@displayCollection()
 
 	setCharts: (response, textStatus, jqXHR) =>
 		@parser.href = jqXHR.url
@@ -87,20 +92,22 @@ module.exports = class Controller extends Chaplin.Controller
 			for model in models
 				for attr in data_attrs
 					chart_attr = attr + config.chart_suffix
+					id = model.get 'id'
 
 					if (not model.get(chart_attr) or model.hasChanged(attr))
 					# if model.get(attr)
-						console.log model.get('id') + ': fetching missing chart data'
+						console.log id + ': fetching missing chart data'
 						data = model.getChartData attr
 						console.log JSON.parse data
 						model.set chart_attr, data
 						model.save {patch: true}
 					else
-						console.log model.get('id') + ': ' + attr + ' unchanged'
+						text = id + ': ' + chart_attr + ' present and '
+						console.log text + attr + ' unchanged'
 		else
 			console.log source + ' not chartable'
 
-		console.log @collection
+		@displayCollection()
 
 	cacheExpired: (attr) =>
 		# check if the cache has expired
