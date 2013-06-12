@@ -1,3 +1,4 @@
+
 /* Inspired by Lee Byron's test data generator. */
 function stream_layers(n, m, o) {
   if (arguments.length < 3) o = 0;
@@ -31,3 +32,4 @@ function stream_waves(n, m) {
 function stream_index(d, i) {
   return {x: i, y: Math.max(0, d)};
 }
+
