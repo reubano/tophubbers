@@ -1,9 +1,8 @@
 Collection = require 'models/base/collection'
-Rep = require 'models/rep'
-config = require 'config'
+Model = require 'models/rep'
 
-module.exports = class Graphs extends Collection
-	model: Rep
+module.exports = class Reps extends Collection
+	model: Model
 	localStorage: new Store 'reps-collection'
 
 	allAreCalled: ->

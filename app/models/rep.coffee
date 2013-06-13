@@ -1,6 +1,6 @@
 Model = require 'models/base/model'
 
-module.exports = class Graph extends Model
+module.exports = class Rep extends Model
 	defaults:
 		called: no
 
@@ -8,9 +8,6 @@ module.exports = class Graph extends Model
 		super
 		@set created: new Date().toString() if @isNew() or not @get 'created'
 		@set score_sort: @get 'score' if not @get 'score_sort'
-		# @set 'first_name', 'Name not found in database' if not @get 'first_name'
-		# @set 'airtel', 'N/A' if not @get 'airtel'
-		# @set 'ward', 'N/A' if not @get 'ward'
 
 	toggle: ->
 		@set called: not @get 'called'

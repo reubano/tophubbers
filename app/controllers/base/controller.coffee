@@ -2,7 +2,6 @@ config = require 'config'
 Chaplin = require 'chaplin'
 SiteView = require 'views/site-view'
 NavbarView = require 'views/navbar-view'
-Navbar = require 'models/navbar'
 
 module.exports = class Controller extends Chaplin.Controller
 	model: Chaplin.mediator.navbar
