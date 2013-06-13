@@ -38,7 +38,7 @@ module.exports = class GraphView extends View
 	addedToParentAlert: ->
 		console.log 'graph-view heard addedToParent'
 
-	getChartScript: (ignore_svg=false, force=false) =>
+	getChartScript: (ignore_svg=false) =>
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
 
@@ -59,7 +59,7 @@ module.exports = class GraphView extends View
 			# console.log text + 'has changed: ' + changed
 			# console.log text + 'has cached svg: ' + if svg then 'true' else 'false'
 
-			if (rendered and not changed and not force)
+			if (rendered and not changed)
 				console.log text + "hasn't changed and already rendered"
 			else if (svg and not changed and not ignore_svg)
 				console.log 'drawing ' + text + 'chart from cache'
