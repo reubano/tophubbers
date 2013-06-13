@@ -17,6 +17,7 @@ module.exports = class RepView extends View
 		super
 		console.log 'initialize rep-view'
 		@attrs = options.attrs
+		# @id = @model.get 'id'
 
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
@@ -32,9 +33,17 @@ module.exports = class RepView extends View
 
 	render: =>
 		super
+		_.defer @removeActive
 		console.log 'rendering rep view'
 		@renderDatepicker()
 		user = mediator.user
+
+	removeActive: =>
+		# Hack to get the chart to render in the inactive tab
+		# http://stackoverflow.com/a/11816438
+		chart_class = 'chart-' + @attrs[1][0..2]
+		tab = '#' + chart_class + '-cont'
+		@$(tab).removeClass 'active'
 
 	renderDatepicker: =>
 		momentous = new Momentous @.$('#datepicker')
