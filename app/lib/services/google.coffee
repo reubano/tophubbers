@@ -1,3 +1,4 @@
+Chaplin = require 'chaplin'
 utils = require 'lib/utils'
 ServiceProvider = require 'lib/services/service-provider'
 
@@ -23,30 +24,22 @@ module.exports = class Google extends ServiceProvider
   constructor: ->
     super
     console.log 'google constructor'
-    @accessToken = localStorage.getItem 'accessToken'
 
-  load: ->
+  load: =>
     console.log 'google load'
+    console.log 'state: ' + @state()
+    console.log 'loading: ' + @loading
+    return if @state() is 'resolved' or @loading
+    @loading = true
 
-    # only load google api if no accessToken is found
-    if @accessToken
-      console.log 'accessToken found!'
-      @loginHandler true, true
-    else
-      console.log 'no accessToken!'
-      console.log 'state: ' + @state()
-      console.log 'loading: ' + @loading
-      return if @state() is 'resolved' or @loading
-      @loading = true
+    # Register load handler
+    window.googleClientLoaded = @loadHandler
 
-      # Register load handler
-      window.googleClientLoaded = @loadHandler
-
-      # No success callback, there's googleClientLoaded
-      utils.loadLib(
-        'https://apis.google.com/js/client.js?onload=googleClientLoaded',
-        null,
-        @reject)
+    # No success callback, there's googleClientLoaded
+    utils.loadLib(
+      'https://apis.google.com/js/client.js?onload=googleClientLoaded',
+      null,
+      @reject)
 
   loadHandler: =>
     console.log 'google loadHandler'
@@ -69,47 +62,35 @@ module.exports = class Google extends ServiceProvider
     console.log 'google triggerLogin'
     @authorize @loginHandler, false
 
-  loginHandler: (authResponse, returningUser=false) =>
+  loginHandler: (authResponse) =>
     console.log 'google loginHandler'
+    console.log 'authResponse below'
     console.log authResponse
 
     if authResponse and not authResponse.error
       console.log 'google login successful!'
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
-
-      if returningUser
-        console.log 'google welcome back!'
-        @publishEvent 'serviceProviderSession',
-          provider: this
-          accessToken: @accessToken
-      else
-        console.log 'setting google access token'
-        @accessToken = authResponse.access_token
-        @publishEvent 'serviceProviderSession',
-          provider: this
-          accessToken: @accessToken
-
-        localStorage.setItem 'accessToken', @accessToken
-        console.log 'fetching google user data'
-        @getUserData @processUserData
-
+      @publishSession authResponse, authResponse.access_token
+      @getUserData @processUserData
     else
       console.log 'google loginFail'
       @publishEvent 'loginFail', {provider: this, authResponse}
 
   getUserData: (callback) ->
-    console.log 'google getUserData'
+    console.log 'fetching google user data'
     gapi.client.load 'plus', 'v1', ->
       request = gapi.client.plus.people.get {'userId': 'me'}
       request.execute callback
 
-  processUserData: (response) =>
+  processUserData: (userData) =>
     console.log 'google processUserData'
-    console.log response
-    @publishEvent 'userData', response
-      # name: response.displayName
-      # id: response.id
-      # imageUrl: response.image.url
+    console.log userData
+    @publishEvent 'userData',
+      id: 1
+      name: userData.displayName
+      firstName: userData.name.givenName
+      lastName: userData.name.familyName
+      gid: userData.id
 
   authorize: (callback, immediate) ->
     console.log 'google authorize'
@@ -124,11 +105,13 @@ module.exports = class Google extends ServiceProvider
   loginStatusHandler: (response, status) =>
     console.log 'google loginStatusHandler'
     console.log response
+    @publishSession response, response.access_token
 
+  publishSession: (response, accessToken) =>
     if not response or status is 'error'
       @publishEvent 'logout'
     else
       @publishEvent 'serviceProviderSession',
-         provider: this
-         userId: response.id
-         accessToken: @accessToken
+        provider: this
+        userId: response.id
+        accessToken: accessToken

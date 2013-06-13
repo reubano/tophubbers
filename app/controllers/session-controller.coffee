@@ -6,6 +6,11 @@ Provider = require 'lib/services/google'
 
 module.exports = class SessionController extends Controller
   mediator = Chaplin.mediator
+  mediator.user = mediator.users.get(1)
+
+  collection: mediator.users
+  user: mediator.user
+
 
   # Service provider instances as static properties
   # This just hardcoded here to avoid async loading of service providers.
@@ -20,30 +25,35 @@ module.exports = class SessionController extends Controller
   initialize: ->
     @subscribeEvent 'serviceProviderSession', @serviceProviderSession
     @subscribeEvent 'logout', @logout
-    @subscribeEvent 'userData', @userData
+    @subscribeEvent 'userData', @updateUser
     @subscribeEvent '!showLogin', @showLoginView
     @subscribeEvent '!login', @triggerLogin
     @subscribeEvent '!logout', @triggerLogout
 
-    # Determine the logged-in state
-    @getSession()
+    console.log 'initialize SessionController'
+
+    if @user and @user.get 'accessToken'
+      console.log 'user found in SessionController'
+      name = @user.get 'firstName'
+      console.log 'welcome back ' + name + '!'
+      @publishLogin()
+    else
+      console.log 'no user in SessionController'
+      @getSession()
 
   # Load the libraries of all service providers
   loadServiceProviders: ->
     for name, serviceProvider of SessionController.serviceProviders
       serviceProvider.load()
 
-  # Instantiate the user with the given data
-  createUser: (userData) ->
-    console.log 'session-controller createUser'
-    mediator.user = new User userData
-
   # Try to get an existing session from one of the login providers
   getSession: ->
     console.log 'session-controller getSession'
     @loadServiceProviders()
     for name, serviceProvider of SessionController.serviceProviders
+      console.log 'getting session'
       serviceProvider.done serviceProvider.getLoginStatus
+      console.log 'done getting session'
 
   # Handler for the global !showLogin event
   showLoginView: ->
@@ -74,17 +84,21 @@ module.exports = class SessionController extends Controller
     @serviceProviderName = session.provider.name
     @disposeLoginView()
 
-    # Transform session into user attributes and create a user
+    # Transform session into user attributes and updates a user
     session.id = session.userId
     delete session.userId
-    @createUser session
+    @updateUser
+      id: 1
+      provider: session.provider.name
+      accessToken: session.accessToken
+
     @publishLogin()
 
   # Publish an event to notify all application components of the login
   publishLogin: ->
     console.log 'session-controller publishLogin'
     @loginStatusDetermined = true
-    @publishEvent 'login', mediator.user
+    @publishEvent 'login', @user
     @publishEvent 'loginStatus', true
 
   # Logout
@@ -96,16 +110,26 @@ module.exports = class SessionController extends Controller
 
   # Handler for the global logout event
   logout: =>
+    console.log 'session-controller logging out'
     @loginStatusDetermined = true
     @disposeUser()
     @serviceProviderName = null
     @showLoginView()
     @publishEvent 'loginStatus', false
 
-  # Handler for the global userData event
-  # -------------------------------------
-  userData: (data) ->
-    mediator.user.set data
+  saveUser: =>
+    console.log 'saving collection'
+    @collection.get(1).save {patch: true}
+    @user = @collection.get(1)
+
+  # Update the user with the given data and handles the global userData event
+  updateUser: (userData) =>
+    console.log 'session-controller updateUser'
+    @collection.set userData
+    @saveUser()
+    mediator.user = @user
+    console.log @collection
+    console.log @user.getAttributes()
 
   # Disposal
   # --------
@@ -115,6 +139,6 @@ module.exports = class SessionController extends Controller
     @loginView = null
 
   disposeUser: ->
-    return unless mediator.user
-    mediator.user.dispose()
+    return unless @user
+    @user.destroy()
     mediator.user = null
