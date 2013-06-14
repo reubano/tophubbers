@@ -17,7 +17,7 @@ module.exports = class Google extends ServiceProvider
   # The permissions we’re asking for. This is a space-separated list of URLs.
   # https://developers.google.com/accounts/docs/OAuth2Login#scopeparameter
   # https://developers.google.com/+/api/oauth
-  scopes = 'https://www.googleapis.com/auth/plus.me'
+  scopes = 'https://www.googleapis.com/auth/userinfo.email'
 
   name: 'google'
 
@@ -82,15 +82,23 @@ module.exports = class Google extends ServiceProvider
       request = gapi.client.plus.people.get {'userId': 'me'}
       request.execute callback
 
-  processUserData: (userData) =>
+    gapi.client.load 'oauth2', 'v2', ->
+      request = gapi.client.oauth2.userinfo.get()
+      request.execute callback
+
+  processUserData: (data) =>
     console.log 'google processUserData'
-    console.log userData
-    @publishEvent 'userData',
-      id: 1
-      name: userData.displayName
-      firstName: userData.name.givenName
-      lastName: userData.name.familyName
-      gid: userData.id
+    console.log data
+    userData = {}
+
+    hash =
+      name: 'displayName'
+      email: 'email'
+      gid: 'id'
+
+    (userData[key] = data[value] for key, value of hash when data[value])
+    userData.id = 1
+    @publishEvent 'userData', userData
 
   authorize: (callback, immediate) ->
     console.log 'google authorize'

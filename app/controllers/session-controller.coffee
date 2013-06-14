@@ -34,7 +34,7 @@ module.exports = class SessionController extends Controller
 
     if @user and @user.get 'accessToken'
       console.log 'user found in SessionController'
-      name = @user.get 'firstName'
+      name = @user.get 'name'
       console.log 'welcome back ' + name + '!'
       @publishLogin()
     else
