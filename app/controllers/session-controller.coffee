@@ -36,6 +36,8 @@ module.exports = class SessionController extends Controller
       console.log 'user found in SessionController'
       name = @user.get 'name'
       console.log 'welcome back ' + name + '!'
+      console.log @user
+      @user.setAccess()
       @publishLogin()
     else
       console.log 'no user in SessionController'
@@ -128,6 +130,7 @@ module.exports = class SessionController extends Controller
     @collection.set userData
     @saveUser()
     mediator.user = @user
+    @user.setAccess()
     console.log @collection
     console.log @user.getAttributes()
 

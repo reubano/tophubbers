@@ -48,6 +48,27 @@ Handlebars.registerHelper 'if_logged_in', (options) ->
   else
     options.inverse(this)
 
+# Choose block by user role (returns true if role is at least that level
+Handlebars.registerHelper 'if_admin', (options) ->
+  allowed = mediator.user.get('role') is 'admin'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_manager', (options) ->
+  allowed = mediator.user.get('role') is 'admin' or 'manager'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_support', (options) ->
+  allowed = mediator.user.get('role') is 'admin' or 'manager' or 'support'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_sales', (options) ->
+  allowed = mediator.user.get('role') is 'admin' or 'manager' or 'support' or 'sales'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_guest', (options) ->
+  allowed = mediator.user.get('role') is 'guest'
+  if allowed then options.fn(this) else options.inverse(this)
+
 Handlebars.registerHelper 'show_login_url', ->
   {protocol, host} = window.location
   path = Chaplin.helpers.reverse 'auth#callback'

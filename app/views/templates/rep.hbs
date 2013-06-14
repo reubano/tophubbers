@@ -209,6 +209,7 @@
 			<script>$(function() {$('#feedback_tab a:first').tab('show');})</script>
 			<hr>
 		</div>
+		{{#if_manager}}
 		<div id="forms">
 			<h3>Forms<br></h3>
 			<legend>Review Form for {{first_name}} {{last_name}}</legend>
@@ -289,6 +290,7 @@
 			</form>
 			<hr>
 		</div>
+		{{/if_manager}}
 		<div id="rep-info">
 			<ul class="inline">
 				<li>Name: {{first_name}} {{last_name}}</li>
