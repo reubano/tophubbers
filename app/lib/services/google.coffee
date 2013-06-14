@@ -106,15 +106,6 @@ module.exports = class Google extends ServiceProvider
       client_id: clientId, scope: scopes, immediate: immediate
       callback
 
-  getLoginStatus: (callback=@loginStatusHandler, force=false) =>
-    console.log 'google getLoginStatus'
-    @getUserData callback
-
-  loginStatusHandler: (response, status) =>
-    console.log 'google loginStatusHandler'
-    console.log response
-    @publishSession response, response.access_token
-
   publishSession: (response, accessToken) =>
     if not response or status is 'error'
       @publishEvent 'logout'

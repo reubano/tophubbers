@@ -13,7 +13,7 @@ module.exports = class ServiceProvider
 
     utils.deferMethods
       deferred: this
-      methods: ['triggerLogin', 'getLoginStatus']
+      methods: ['triggerLogin']
       onDeferral: @load
 
   # Disposal
