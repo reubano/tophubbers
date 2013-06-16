@@ -1,6 +1,7 @@
 module.exports = (match) ->
   match '', 'home#show'
-  match ':login', 'home#show'
+  match 'home', 'home#show'
+  match 'home/:login', 'home#show'
   match 'logout', 'auth#logout'
   match 'login', 'auth#login'
   match 'refresh/graphs', 'graphs#refresh'
