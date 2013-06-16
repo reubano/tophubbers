@@ -17,7 +17,7 @@ module.exports = class RepView extends View
 
 	initialize: (options) ->
 		super
-		console.log 'initialize rep-view'
+		console.log 'initialize rep-view for ' + @id
 		@attrs = options.attrs
 		@id = @model.get 'id'
 		@name = @user.get 'name'
@@ -37,7 +37,7 @@ module.exports = class RepView extends View
 	render: =>
 		super
 		_.defer @removeActive
-		console.log 'rendering rep view'
+		console.log 'rendering rep view for ' + @id
 		@renderDatepicker '#review-datepicker'
 		@renderDatepicker '#network-datepicker'
 
