@@ -96,12 +96,13 @@ module.exports = class RepView extends View
 		console.log url
 		$.post({url: url, dataType: "html"}).done(@success).fail(@failWhale)
 
-	failWhale: (jqXHR, textStatus, errorThrown) =>
-		console.log 'failed to post form'
-		console.log jqXHR.status + ': ' + textStatus
-		console.log 'error: ' + errorThrown if errorThrown
-		@$('#fail-modal').modal()
 
 	success: (data, textStatus, jqXHR) =>
 		console.log 'successfully posted form!'
 		@$('#success-modal').modal()
+
+	failWhale: (jqXHR, textStatus, errorThrown) =>
+		console.log 'failed to post form'
+		console.log textStatus + ': ' + jqXHR.status
+		console.log 'error: ' + errorThrown if errorThrown
+		@$('#fail-modal').modal()
