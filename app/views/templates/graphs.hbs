@@ -1,13 +1,20 @@
 {{#if_logged_in}}
-	<div class="control-group">
-		<div class="controls">
-			<a class="btn" href="refresh/graphs">
-				<i class="icon-refresh"></i> Refresh Graphs
-			</a>
+	{{#if_manager}}
+		<div class="control-group">
+			<div class="controls">
+				<a class="btn" href="/refresh/graphs">
+					<i class="icon-refresh"></i> Refresh Data
+				</a>
+				<a class="btn" href="/graphs/true">
+					<i class="icon-refresh"></i> Redraw Graphs
+				</a>
+			</div>
 		</div>
-	</div>
 
-	<ul class="unstyled" id="graph-list"></ul>
+		<ul class="unstyled" id="graph-list"></ul>
+	{{else}}
+		<h2 class="text-error">You are not authorized to see this page.</h2>
+	{{/if_manager}}
 {{else}}
 	<h2 class="text-error">You must log in to see this page.</h2>
 {{/if_logged_in}}

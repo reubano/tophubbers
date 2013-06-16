@@ -1,13 +1,17 @@
 {{#if_logged_in}}
-	<div class="control-group">
-		<div class="controls">
-			<a class="btn" href="refresh/progresses">
-				<i class="icon-refresh"></i> Refresh Data
-			</a>
+	{{#if_manager}}
+		<div class="control-group">
+			<div class="controls">
+				<a class="btn" href="/refresh/progresses">
+					<i class="icon-refresh"></i> Refresh Data
+				</a>
+			</div>
 		</div>
-	</div>
 
-	<h2>Points Progress</h2><ul class="unstyled" id="progress-list"></ul>
+		<h2>Points Progress</h2><ul class="unstyled" id="progress-list"></ul>
+	{{else}}
+		<h2 class="text-error">You are not authorized to see this page.</h2>
+	{{/if_manager}}
 {{else}}
 	<h2 class="text-error">You must log in to see this page.</h2>
 {{/if_logged_in}}

@@ -1,12 +1,16 @@
 {{#if_logged_in}}
-	<div class="control-group">
-		<div class="controls">
-			<a class="btn" href="refresh/tocalls">
-				<i class="icon-refresh"></i> Refresh Scores
-			</a>
+	{{#if_manager}}
+		<div class="control-group">
+			<div class="controls">
+				<a class="btn" href="/refresh/tocalls">
+					<i class="icon-refresh"></i> Refresh Scores
+				</a>
+			</div>
 		</div>
-	</div>
-	<h2>Call List</h2><ul class="unstyled" id="tocall-list"></ul>
+		<h2>Call List</h2><ul class="unstyled" id="tocall-list"></ul>
+	{{else}}
+		<h2 class="text-error">You are not authorized to see this page.</h2>
+	{{/if_manager}}
 {{else}}
 	<h2 class="text-error">You must log in to see this page.</h2>
 {{/if_logged_in}}
