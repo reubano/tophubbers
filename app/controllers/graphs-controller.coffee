@@ -22,11 +22,14 @@ module.exports = class Controller extends Controller
 	comparator: (model) ->
 		model.get('id')
 
-	index: =>
+	index: (params) =>
+		@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
+
 		@collection.comparator = @comparator
 		@view = new View
 			collection: @collection
 			attrs: @data_attrs
+			ignore_svg: @ignore_svg
 
 	refresh: =>
 		console.log 'refreshing data...'

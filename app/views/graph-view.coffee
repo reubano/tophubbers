@@ -12,9 +12,11 @@ module.exports = class GraphView extends View
 
 	initialize: (options) =>
 		super
-		console.log 'initialize graph-view'
 		@attrs = options.attrs
+		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
+		console.log 'initialize graph-view for ' + @id
+		console.log 'ignore_svg: ' + @ignore_svg
 
 		for attr in @attrs
 			change = 'change:' + attr + config.chart_suffix
@@ -27,7 +29,7 @@ module.exports = class GraphView extends View
 		super
 		console.log 'rendering graph view for ' + @id
 		@attach()
-		_.defer @getChartScript
+		_.defer @getChartScript, @ignore_svg
 
 	modelChangeAlert: ->
 		console.log 'graph-view heard modelChange'
@@ -38,7 +40,7 @@ module.exports = class GraphView extends View
 	addedToParentAlert: ->
 		console.log 'graph-view heard addedToParent'
 
-	getChartScript: (ignore_svg=false) =>
+	getChartScript: (ignore_svg) =>
 		# console.log 'chart html'
 		# console.log @model.get 'chart'
 
@@ -70,7 +72,7 @@ module.exports = class GraphView extends View
 				chart_data = JSON.parse chart_json
 				nvd3 = new nvd3util chart_data, selection, draw
 				nvd3.init()
-				_.defer @setSVG
+				_.defer @setSVG, attr
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 

@@ -13,6 +13,7 @@ module.exports = class Controller extends Controller
 
 	show: (params) =>
 		@id = params.id
+		@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
 		console.log 'show route id is ' + @id
 
 		if @collection.length is 0
@@ -26,6 +27,7 @@ module.exports = class Controller extends Controller
 		@view = new View
 			model: @collection.get @id
 			attrs: config.data_attrs
+			ignore_svg: @ignore_svg
 
 	refresh: (params) =>
 		console.log 'refreshing data...'
