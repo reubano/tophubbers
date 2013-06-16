@@ -4,7 +4,7 @@ View = require 'views/graph-view'
 template = require 'views/templates/rep'
 
 module.exports = class RepView extends View
-	response = '/formResponse?draftResponse=%5B%5D%0D%0A'
+	response = 'draftResponse=%5B%5D%0D%0A'
 	history = '&pageHistory=0'
 	base = 'https://docs.google.com/forms/d/'
 	mediator = Chaplin.mediator
@@ -59,8 +59,8 @@ module.exports = class RepView extends View
 		month = date[0..1]
 		day = date[3...5]
 		year = date[6..]
-		key = '1dq25yvpMKDxpXB8EKf0R-Ss9awgJQ3s4ZTrxUhVSRk4'
 		reason = encodeURIComponent data[1].value
+		key = '1dq25yvpMKDxpXB8EKf0R-Ss9awgJQ3s4ZTrxUhVSRk4/formResponse?'
 		day = '&entry.550366252_day=' + day
 		month = '&entry.550366252_month=' + month
 		year = '&entry.550366252_year=' + year
@@ -80,7 +80,7 @@ module.exports = class RepView extends View
 		month = date[0..1]
 		day = date[3...5]
 		year = date[6..]
-		key = '1NUy1KZTgjFqMXp6HPe1G5nr2AaiFe_FfRltT9sMsAek'
+		key = '1NUy1KZTgjFqMXp6HPe1G5nr2AaiFe_FfRltT9sMsAek/formResponse?'
 		day = '&entry.1240672778_day=' + day
 		month = '&entry.1240672778_month=' + month
 		year = '&entry.1240672778_year=' + year
