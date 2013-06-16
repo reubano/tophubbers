@@ -33,6 +33,6 @@ module.exports = class Controller extends Controller
 
 	refresh: =>
 		console.log 'refreshing data...'
-		@redirectToRoute 'graphs#index'
 		@fetchData(@res, false, @data_attrs)
+		@redirectToRoute 'graphs#index'
 

@@ -18,7 +18,6 @@ module.exports = class Controller extends Controller
 
 		if @collection.length is 0
 			console.log 'no collection so fetching all data...'
-			# @publishEvent 'graphs:clear'
 			@fetchData(@res, @id)
 		else
 			console.log 'fetching expired data...'
@@ -31,6 +30,6 @@ module.exports = class Controller extends Controller
 
 	refresh: (params) =>
 		console.log 'refreshing data...'
-		@redirectToRoute 'rep#show', id: params.id
 		@fetchData(@res, params.id)
+		@redirectToRoute 'rep#show', id: params.id
 
