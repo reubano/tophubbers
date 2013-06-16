@@ -11,14 +11,12 @@ module.exports = class ServiceProvider
     # Mixin a Deferred
     _(this).extend $.Deferred()
 
-    utils.deferMethods
-      deferred: this
-      methods: ['triggerLogin']
-      onDeferral: @load
+#     utils.deferMethods
+#       deferred: this
+#       methods: ['triggerLogin']
 
   # Disposal
   # --------
-
   disposed: false
 
   dispose: ->

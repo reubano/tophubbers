@@ -17,9 +17,12 @@ module.exports = class Google extends ServiceProvider
   # The permissions we’re asking for. This is a space-separated list of URLs.
   # https://developers.google.com/accounts/docs/OAuth2Login#scopeparameter
   # https://developers.google.com/+/api/oauth
+  # scopes = 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email'
+  # scopes = 'https://www.googleapis.com/auth/plus.me'
   scopes = 'https://www.googleapis.com/auth/userinfo.email'
 
   name: 'google'
+  failed: false
 
   constructor: ->
     super
@@ -72,16 +75,22 @@ module.exports = class Google extends ServiceProvider
       @publishEvent 'loginSuccessful', {provider: this, authResponse}
       @publishSession authResponse, authResponse.access_token
       @getUserData @processUserData
+    else if not @failed
+      @failed = true
+      console.log "couldn't auto login... triggering popup"
+      @triggerLogin()
     else
-      console.log 'google loginFail'
+      console.log 'google login failed'
       @publishEvent 'loginFail', {provider: this, authResponse}
 
   getUserData: (callback) ->
     console.log 'fetching google user data'
+    # returns name and id (among other things)
     gapi.client.load 'plus', 'v1', ->
       request = gapi.client.plus.people.get {'userId': 'me'}
       request.execute callback
 
+    # returns email and id
     gapi.client.load 'oauth2', 'v2', ->
       request = gapi.client.oauth2.userinfo.get()
       request.execute callback
@@ -96,6 +105,7 @@ module.exports = class Google extends ServiceProvider
       email: 'email'
       gid: 'id'
 
+    # used to merge the results of the api calls returned by getUserData
     (userData[key] = data[value] for key, value of hash when data[value])
     userData.id = 1
     @publishEvent 'userData', userData
