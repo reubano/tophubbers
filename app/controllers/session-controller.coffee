@@ -22,7 +22,7 @@ module.exports = class SessionController extends Controller
   View: null
   serviceProviderName: null
 
-  initialize: ->
+  initialize: (params) ->
     @subscribeEvent 'serviceProviderSession', @serviceProviderSession
     @subscribeEvent 'logout', @logout
     @subscribeEvent 'userData', @updateUser
@@ -41,7 +41,10 @@ module.exports = class SessionController extends Controller
       @publishLogin()
     else
       console.log 'no user in SessionController'
-      @getSession()
+
+      # login unless params.login is false
+      if not params?.login? or not params.login
+        @getSession()
 
   # Load the libraries of all service providers
   loadServiceProviders: ->

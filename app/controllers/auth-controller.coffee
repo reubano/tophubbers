@@ -5,7 +5,7 @@ module.exports = class AuthController extends Controller
   logout: =>
     console.log 'auth-controller logging out'
     localStorage.clear()
-    @redirectToRoute 'home#show'
+    @redirectToRoute 'home#show', login: false
     @publishEvent '!logout'
 
   login: =>
