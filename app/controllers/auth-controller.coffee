@@ -2,9 +2,13 @@ Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
 
 module.exports = class AuthController extends Controller
+  mediator = Chaplin.mediator
+
+  collection: Chaplin.mediator.users
+
   logout: =>
     console.log 'auth-controller logging out'
-    localStorage.clear()
+    @collection.get(1).destroy()
     @redirectToRoute 'home#show', login: false
     @publishEvent '!logout'
 
