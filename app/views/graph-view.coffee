@@ -76,12 +76,16 @@ module.exports = class GraphView extends View
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
-	setSVG: =>
-		for attr in @attrs
-			chart_class = 'chart-' + attr[0..2]
-			parent = '#' + @id + '.view .' + chart_class
+	setSVG: (attr) =>
+		chart_class = 'chart-' + attr[0..2]
+		parent = '#' + @id + '.view .' + chart_class
+		text = ' ' + @id + ' ' + attr + ' '
+
+		if @$(parent).html()
 			svg_attr = attr + config.svg_suffix
-			text = ' ' + @id + ' ' + attr + ' '
 			console.log 'setting' + text + 'svg'
 			@model.set svg_attr, @$(parent).html().replace(/\"/g, '\'')
 			@model.save()
+		else
+			console.log 'html blank for ' + parent
+			# setTimeout @setSVG, attr
