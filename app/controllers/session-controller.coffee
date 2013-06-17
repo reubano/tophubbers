@@ -134,6 +134,7 @@ module.exports = class SessionController extends Controller
     @saveUser()
     mediator.user = @user
     @user.setAccess()
+    @publishEvent 'userUpdated', @user
     console.log @collection
     console.log @user.getAttributes()
 

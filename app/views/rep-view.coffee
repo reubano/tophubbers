@@ -7,19 +7,16 @@ module.exports = class RepView extends View
 	response = 'draftResponse=%5B%5D%0D%0A'
 	history = '&pageHistory=0'
 	base = 'https://docs.google.com/forms/d/'
-	mediator = Chaplin.mediator
 
 	autoRender: true
 	region: 'content'
 	className: 'span12'
 	template: template
-	user: mediator.users.get(1)
 
 	initialize: (options) ->
 		super
 		@attrs = options.attrs
 		@id = @model.get 'id'
-		@name = @user.get 'name'
 		console.log 'initialize rep-view for ' + @id
 		console.log 'options:'
 		console.log options
@@ -27,6 +24,7 @@ module.exports = class RepView extends View
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'userUpdated', @setUserName
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
 		# @subscribeEvent 'dispatcher:dispatch', @render
@@ -35,6 +33,9 @@ module.exports = class RepView extends View
 			@listenTo @model, prefix + 'work_data_c', @render
 			@listenTo @model, prefix + 'feedback_data', @render
 			@listenTo @model, prefix + 'progress', @render
+
+	setUserName: (user) =>
+		@name = user.get 'name'
 
 	render: =>
 		super
