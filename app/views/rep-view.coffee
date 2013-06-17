@@ -73,7 +73,7 @@ module.exports = class RepView extends View
 		console.log 'posting form data...'
 		console.log data
 		console.log url
-		$.post({url: url, dataType: "html"}).done(@success).fail(@failWhale)
+		$.post(url).always(@getGithub)
 
 	reviewFormSubmit: =>
 		data = @.$('#review-form').serializeArray()
@@ -97,7 +97,15 @@ module.exports = class RepView extends View
 		console.log 'posting form data...'
 		console.log data
 		console.log url
-		$.post({url: url, dataType: "html"}).done(@success).fail(@failWhale)
+		$.post(url).always(@getGithub)
+
+	getGithub: =>
+		# posting to google will always return a failure status b.c.
+		# of the same-origin-policy
+		# github is cors enabled and doesn't suffer from this drawback so we
+		# use this as a proxy for determining if the form posted
+		# http://stackoverflow.com/questions/3076414
+		$.get('https://api.github.com').done(@success).fail(@failWhale)
 
 	success: (data, textStatus, jqXHR) =>
 		console.log 'successfully posted form!'
