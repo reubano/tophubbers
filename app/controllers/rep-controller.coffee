@@ -21,12 +21,19 @@ module.exports = class Controller extends Controller
 		if @collection.length is 0
 			console.log 'no collection so fetching all data...'
 			@fetchData(@res, @id)
+			@subscribeEvent 'repsSet', ->
+				@showView @collection.get @id
+				@unsubscribeEvent 'repsSet', -> null
 		else
 			console.log 'fetching expired data...'
 			@fetchExpiredData(@res, @id)
+			@showView @collection.get @id
 
+	showView: (model) =>
+		console.log 'rendering showView'
+		console.log 'ignore_svg is ' + @ignore_svg
 		@view = new View
-			model: @collection.get @id
+			model: model
 			attrs: config.data_attrs
 			ignore_svg: @ignore_svg
 

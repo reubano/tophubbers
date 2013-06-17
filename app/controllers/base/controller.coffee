@@ -76,6 +76,7 @@ module.exports = class Controller extends Chaplin.Controller
 		@collection.set response.data, remove: false
 		@saveTstamp(tstamp)
 		@saveCollection()
+		@publishEvent 'repsSet'
 		console.log 'collection length: ' + @collection.length
 		@displayCollection()
 
