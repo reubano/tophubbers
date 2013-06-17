@@ -81,12 +81,15 @@ module.exports = class GraphView extends View
 		chart_class = 'chart-' + attr[0..2]
 		parent = '#' + @id + '.view .' + chart_class
 		text = ' ' + @id + ' ' + attr + ' '
+		html = @$(parent).html()
+		bad = 'opacity: 0.000001;'
 
-		if @$(parent).html()
+		if html and html.indexOf(bad) < 0 and html.length > 25
 			svg_attr = attr + config.svg_suffix
 			console.log 'setting' + text + 'svg'
-			@model.set svg_attr, @$(parent).html().replace(/\"/g, '\'')
+			svg = html.replace(/\"/g, '\'')
+			@model.set svg_attr, svg
 			@model.save()
 		else
-			console.log 'html blank for ' + parent
+			console.log 'html blank or malformed for ' + parent
 			# setTimeout @setSVG, attr
