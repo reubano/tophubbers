@@ -6,6 +6,8 @@ module.exports = class GraphsView extends CollectionView
 	itemView: View
 	autoRender: true
 	listSelector: '#graph-list'
+	fallbackSelector: '.fallback'
+	loadingSelector: '.loading'
 	region: 'content'
 	className: 'span12'
 	template: template
