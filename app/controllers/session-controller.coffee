@@ -65,7 +65,7 @@ module.exports = class SessionController extends Controller
     console.log 'session-controller showLoginView'
     return if @loginView
     @loadServiceProviders()
-    @loginView = new View
+    @loginView = new View()
 
   # Handler for the global !login event
   # Delegate the login to the selected service provider
