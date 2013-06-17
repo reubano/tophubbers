@@ -10,11 +10,13 @@ module.exports = class Controller extends Controller
 
 	initialize: =>
 		console.log 'initialize rep-controller'
+		console.log @collection
 
 	show: (params) =>
 		@id = params.id
 		@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
 		console.log 'show route id is ' + @id
+		console.log 'ignore_svg is ' + @ignore_svg
 
 		if @collection.length is 0
 			console.log 'no collection so fetching all data...'

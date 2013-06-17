@@ -17,10 +17,12 @@ module.exports = class RepView extends View
 
 	initialize: (options) ->
 		super
-		console.log 'initialize rep-view for ' + @id
 		@attrs = options.attrs
 		@id = @model.get 'id'
 		@name = @user.get 'name'
+		console.log 'initialize rep-view for ' + @id
+		console.log 'options:'
+		console.log options
 
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit

@@ -16,6 +16,8 @@ module.exports = class GraphView extends View
 		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
 		console.log 'initialize graph-view for ' + @id
+		console.log 'options:'
+		console.log options
 		console.log 'ignore_svg: ' + @ignore_svg
 
 		for attr in @attrs
@@ -64,6 +66,7 @@ module.exports = class GraphView extends View
 			if (svg and not changed and not ignore_svg)
 				console.log 'drawing ' + text + 'chart from cache'
 				@$(parent).html svg
+				# console.log svg.indexOf('opacity: 0.000001;') < 0
 			else if chart_json and name
 				console.log 'getting ' + text + 'script'
 				draw = @$ '#draw-' + chart_class

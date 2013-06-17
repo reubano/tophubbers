@@ -9,14 +9,14 @@ module.exports = class TocallView extends View
 		super
 		@listenTo @model, 'change', @render
 		@subscribeEvent 'loginStatus', @render
-		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'tocall-view caught dispatcher event'
-		# @subscribeEvent 'dispatcher:dispatch', @render
+# 		@subscribeEvent 'dispatcher:dispatch', ->
+# 			console.log 'tocall-view caught dispatcher event'
+# 		@subscribeEvent 'dispatcher:dispatch', @render
 		@delegate 'click', '.toggle', @toggle
 
 	render: =>
 		super
-		console.log 'rendering tocall view'
+		# console.log 'rendering tocall view'
 		@$el.removeClass 'text-error text-success muted'
 
 		if @model.get 'called'
