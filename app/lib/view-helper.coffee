@@ -52,15 +52,15 @@ Handlebars.registerHelper 'if_admin', (options) ->
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_manager', (options) ->
-  allowed = mediator.user.get('role') is 'admin' or 'manager'
+  allowed = mediator.user.get('role') in ['admin', 'manager']
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_support', (options) ->
-  allowed = mediator.user.get('role') is 'admin' or 'manager' or 'support'
+  allowed = mediator.user.get('role') in ['admin', 'manager', 'support']
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_sales', (options) ->
-  allowed = mediator.user.get('role') is 'admin' or 'manager' or 'support' or 'sales'
+  allowed = mediator.user.get('role') in ['admin', 'manager', 'support', 'sales']
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_guest', (options) ->
