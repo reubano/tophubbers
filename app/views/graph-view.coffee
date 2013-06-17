@@ -53,7 +53,7 @@ module.exports = class GraphView extends View
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.get svg_attr then @model.get svg_attr else false
-			rendered = if @$(selection).html() then true else false
+			# rendered = if @$(selection).html() then true else false
 			changed = @model.hasChanged attr
 			text = @id + ' ' + attr + ' '
 
@@ -61,9 +61,7 @@ module.exports = class GraphView extends View
 			# console.log text + 'has changed: ' + changed
 			# console.log text + 'has cached svg: ' + if svg then 'true' else 'false'
 
-			if (rendered and not changed)
-				console.log text + "hasn't changed and already rendered"
-			else if (svg and not changed and not ignore_svg)
+			if (svg and not changed and not ignore_svg)
 				console.log 'drawing ' + text + 'chart from cache'
 				@$(parent).html svg
 			else if chart_json and name
