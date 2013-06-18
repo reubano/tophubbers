@@ -21,7 +21,7 @@ module.exports = class Momentous
 
 	dropdownTemplate =	"""
 		<div class='input-append'>
-			<input class='momentous-input' type='text' name='momentous' id='momentous' value='' readonly>
+			<input class='momentous-input' type='text' name='date' id='momentous' value='' readonly>
 			<button class='btn momentous-cal-button' type='button'>
 				<i class='icon-calendar'></i>
 			</button>

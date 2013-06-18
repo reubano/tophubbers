@@ -3,6 +3,18 @@ config = require 'config'
 utils = require 'lib/utils'
 mediator = Chaplin.mediator
 
+today = moment()
+month = today.month()
+year = today.year()
+currStart = moment([year, month, 1])
+currEnd = moment(currStart).endOf('month')
+prevStart = moment(currStart).subtract('months', 1)
+prevEnd = moment(prevStart).endOf('month')
+
+isBetween = (date, start, ended) ->
+  (date.isBefore(ended) && date.isAfter(start)) || date.isSame(start) || date.isSame(ended)
+
+# prevStart.isBefore(currEnd) && prevStart.isAfter(currStart)
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers
 # --------------------------------
@@ -38,6 +50,11 @@ Handlebars.registerHelper 'with_user', (options) ->
   context = mediator.user or {}
   Handlebars.helpers.with.call(this, context, options)
 
+# Evaluate block with context being forms
+Handlebars.registerHelper 'with_forms', (options) ->
+  context = mediator.forms or {}
+  Handlebars.helpers.with.call(this, context, options)
+
 # Conditional evaluation
 # ----------------------
 
@@ -67,10 +84,18 @@ Handlebars.registerHelper 'if_guest', (options) ->
   allowed = mediator.user.get('role') is 'guest'
   if allowed then options.fn(this) else options.inverse(this)
 
-Handlebars.registerHelper 'show_login_url', ->
-  {protocol, host} = window.location
-  path = Chaplin.helpers.reverse 'auth#callback'
-  encodeURIComponent "#{protocol}//#{host}#{path}"
+Handlebars.registerHelper 'if_cur_month', (date, options) ->
+  momented = moment date, 'MM-DD-YYYY'
+  between = isBetween(momented, currStart, currEnd)
+  if between then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_prev_month', (date, options) ->
+  momented = moment date, 'MM-DD-YYYY'
+  between = isBetween(momented, prevStart, prevEnd)
+  if between then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_cur_rep', (id, options) ->
+  if id == mediator.rep_id then options.fn(this) else options.inverse(this)
 
 # URL helpers
 # -----------
