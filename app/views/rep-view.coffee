@@ -20,6 +20,7 @@ module.exports = class RepView extends View
 		super
 		@attrs = options.attrs
 		@id = @model.get 'id'
+		mediator.rep_id = @id
 		console.log 'initialize rep-view for ' + @id
 		console.log 'options:'
 		console.log options

@@ -79,7 +79,7 @@ Handlebars.registerHelper 'if_prev_month', (date, options) ->
   if '' < date < '' then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_rep', (id, options) ->
-  if id == 'E0008' then options.fn(this) else options.inverse(this)
+  if id == mediator.rep_id then options.fn(this) else options.inverse(this)
 
 # URL helpers
 # -----------
