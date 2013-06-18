@@ -3,6 +3,18 @@ config = require 'config'
 utils = require 'lib/utils'
 mediator = Chaplin.mediator
 
+today = moment()
+month = today.month()
+year = today.year()
+currStart = moment([year, month, 1])
+currEnd = moment(currStart).endOf('month')
+prevStart = moment(currStart).subtract('months', 1)
+prevEnd = moment(prevStart).endOf('month')
+
+isBetween = (date, start, ended) ->
+  (date.isBefore(ended) && date.isAfter(start)) || date.isSame(start) || date.isSame(ended)
+
+# prevStart.isBefore(currEnd) && prevStart.isAfter(currStart)
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers
 # --------------------------------
@@ -73,10 +85,14 @@ Handlebars.registerHelper 'if_guest', (options) ->
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_month', (date, options) ->
-  if '06-01-2013' < date < '06-30-2013' then options.fn(this) else options.inverse(this)
+  momented = moment date, 'MM-DD-YYYY'
+  between = isBetween(momented, currStart, currEnd)
+  if between then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_prev_month', (date, options) ->
-  if '' < date < '' then options.fn(this) else options.inverse(this)
+  momented = moment date, 'MM-DD-YYYY'
+  between = isBetween(momented, prevStart, prevEnd)
+  if between then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_rep', (id, options) ->
   if id == mediator.rep_id then options.fn(this) else options.inverse(this)
