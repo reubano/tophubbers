@@ -1,0 +1,160 @@
+.momentous-container
+	position: relative
+	width: 264px
+	display: inline-block
+
+	.input-append
+		margin: 0
+		border: 1px
+		padding: 6px, 4px
+
+	.momentous-input
+		text-align: center
+		width: 180px
+		// font-size: 16px
+		height: 32px
+		padding: 0px
+		margin: 0px
+		// font-weight: bold
+		// background: #fff
+		color: #222
+		cursor: pointer
+
+	.momentous-cal-button
+		height: 34px
+		width: 40px
+
+	.momentous-dropdown
+		position: absolute
+		top: 34px
+		background: white
+		display: block
+		width: 240px
+		border: solid 1px #ccc
+		border-radius: 4px
+		display: none
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+
+		.momentous-nav
+			height: 20px
+			padding: 8px 0px 8px 8px
+
+			.view-button
+				display: inline-block
+				text-align: center
+				width: 140px
+
+			span
+				height: 17px
+				padding: 8px
+				border-radius: 4px
+				cursor: pointer
+				line-height: 16px
+				font-weight: bold
+
+				&:hover
+					background: #efefef
+
+		th.cur-view
+			text-align: center
+
+		table
+			margin: 6px
+			font-size: 14px
+
+			th.dow
+				cursor: default
+				font-size: 12px
+				width: 25px
+				height: 26px
+
+			tr
+
+				td
+					text-align: center
+					overflow: hidden
+					border: none
+
+					&.day
+						height: 0
+						padding: 6px 0
+
+					&.lastMonth, &.nextMonth
+						color: #bbb
+
+			tr:not(.week)
+
+				td
+					text-align: center
+					border-radius: 4px
+					cursor: pointer
+					overflow: hidden
+					border: none
+
+					&:not(.active):hover
+						background: #efefef
+
+					&.active
+						background: #222
+						color: #fff
+
+					&.startDate
+						background: #222
+						color: white
+						border-radius: 4px 0 0 4px
+
+					&.endDate
+						background: #222
+						color: white
+						border-radius: 0 4px 4px 0
+
+					&.inDateRange
+						background: #eee
+						border-radius: 0
+						border-bottom: solid 1px white
+
+			tr.week
+				border-radius: none
+
+				&.active
+					background: #222
+					color: #fff
+
+				&:not(.active):hover
+					background: #efefef
+					cursor: pointer
+
+				td
+					text-align: center
+
+				td:nth-child(1)
+					border-radius: 4px 0 0 4px
+
+				td:nth-child(7)
+					border-radius 0 4px 4px 0
+
+		.months-view
+			ul
+				list-style: none
+				padding: 14px 0 0 0px
+				margin: 0px
+
+				li
+					float: left
+					padding: 18px 12px
+					width: 26px
+					border-radius: 4px
+					margin: 0 0 8px 8px
+					cursor: pointer
+
+					&.active
+						background: #222
+						color: #fff
+
+					&:not(.active):hover
+						background: #efefef

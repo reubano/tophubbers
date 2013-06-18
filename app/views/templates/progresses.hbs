@@ -2,18 +2,13 @@
 	{{#if_manager}}
 		<div class="control-group">
 			<div class="controls">
-				<a class="btn" href="/refresh/graphs">
+				<a class="btn" href="/refresh/progresses">
 					<i class="icon-refresh"></i> Refresh Data
-				</a>
-				<a class="btn" href="/graphs/true">
-					<i class="icon-refresh"></i> Redraw Graphs
 				</a>
 			</div>
 		</div>
 
-		<ul class="unstyled" id="graph-list"></ul>
-		<p class="loading">Loading…</p>
-		<p class="fallback">No graphs found</p>
+		<h2>Points Progress</h2><ul class="unstyled" id="progress-list"></ul>
 	{{else}}
 		<h2 class="text-error">You are not authorized to see this page.</h2>
 	{{/if_manager}}

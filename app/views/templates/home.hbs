@@ -1,0 +1,16 @@
+{{#if_logged_in}}
+	<h1 class="text-info">Chose an activity below.</h1>
+
+	{{#each items}}
+	<hr>
+	<div class="row-fluid">
+		<a href="{{href}}">
+			<button class="btn btn-primary btn-large" type="button">
+				{{desc}}
+			</button>
+		</a>
+	</div>
+	{{/each}}
+{{else}}
+	<h1 class="text-info">Welcome to the Ongeza Sales App. Please login above.</h1>
+{{/if_logged_in}}

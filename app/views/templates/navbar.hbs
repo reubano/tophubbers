@@ -1,3 +1,30 @@
-<div class="container">
-    <a class="brand" href="#">Work Graphs</a>
+<div class="container-fluid">
+	<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+		{{#each items}}<span class="icon-bar"></span>{{/each}}
+	</a>
+	<a class="brand" href="{{main.href}}">{{main.title}}</a>
+	{{#if_logged_in}}
+		{{#with_user}}
+			<a class="nav pull-right" href="{{url "auth#logout"}}">
+				<button id="logout" class="btn btn-danger" type="button">
+					Logout
+				</button>
+			</a>
+		{{/with_user}}
+	{{else}}
+		{{#with_config}}
+			<a class="nav pull-right" href="{{url "auth#login"}}">
+			<button id="login" class="btn btn-primary" type="button">
+				Login
+			</button>
+			</a>
+		{{/with_config}}
+	{{/if_logged_in}}
+	<div class="nav-collapse collapse">
+		<ul class="nav">
+			{{#each items}}
+			<li><a href="{{href}}">{{title}}</a></li>
+			{{/each}}
+		</ul>
+	</div><!--/.nav-collapse -->
 </div>

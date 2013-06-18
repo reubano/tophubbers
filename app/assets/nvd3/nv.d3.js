@@ -135,7 +135,11 @@ d3.time.monthEnds = d3_time_range(d3.time.monthEnd, function(date) {
     gravity = gravity || 's';
     dist = dist || 20;
 
-    var body = parentContainer ? parentContainer : document.getElementsByTagName('body')[0];
+    var body = parentContainer;
+    if ( !parentContainer || parentContainer.tagName.match(/g|svg/i)) {
+        //If the parent element is an SVG element, place tooltip in the <body> element.
+        body = document.getElementsByTagName('body')[0];
+    }
 
     container.innerHTML = content;
     container.style.left = 0;
@@ -352,6 +356,19 @@ nv.utils.pjax = function(links, content) {
   });
 }
 
+/* For situations where we want to approximate the width in pixels for an SVG:text element.
+Most common instance is when the element is in a display:none; container. 
+Forumla is : text.length * font-size * constant_factor
+*/
+nv.utils.calcApproxTextWidth = function (svgTextElem) {
+    if (svgTextElem instanceof d3.selection) {
+        var fontSize = parseInt(svgTextElem.style("font-size").replace("px",""));
+        var textLength = svgTextElem.text().length;
+
+        return textLength * fontSize * 0.5; 
+    }
+    return 0;
+};
 nv.models.axis = function() {
 
   //============================================================
@@ -649,7 +666,7 @@ nv.models.axis = function() {
 
       //highlight zero line ... Maybe should not be an option and should just be in CSS?
       if (highlightZero)
-        g.selectAll('.tick')
+        g.selectAll('line.tick')
           .filter(function(d) { return !parseFloat(Math.round(d*100000)/1000000) }) //this is because sometimes the 0 tick is a very small fraction, TODO: think of cleaner technique
             .classed('zero', true);
 
@@ -1634,7 +1651,7 @@ nv.models.bulletChart = function() {
       //------------------------------------------------------------
 
       dispatch.on('tooltipShow', function(e) {
-        e.key = data[0].title;
+        e.key = d.title;
         if (tooltips) showTooltip(e, that.parentNode);
       });
 
@@ -1789,6 +1806,7 @@ nv.models.cumulativeLineChart = function() {
     , state = { index: 0, rescaleY: rescaleY }
     , defaultState = null
     , noData = 'No Data Available.'
+    , average = function(d) { return d.average }
     , dispatch = d3.dispatch('tooltipShow', 'tooltipHide', 'stateChange', 'changeState')
     ;
 
@@ -1986,6 +2004,7 @@ nv.models.cumulativeLineChart = function() {
       gEnter.append('g').attr('class', 'nv-y nv-axis');
       gEnter.append('g').attr('class', 'nv-background');
       gEnter.append('g').attr('class', 'nv-linesWrap');
+      gEnter.append('g').attr('class', 'nv-avgLinesWrap');
       gEnter.append('g').attr('class', 'nv-legendWrap');
       gEnter.append('g').attr('class', 'nv-controlsWrap');
 
@@ -2048,8 +2067,6 @@ nv.models.cumulativeLineChart = function() {
             .text(tempDisabled.map(function(d) { return d.key }).join(', ') + ' values cannot be calculated for this time period.');
       }
 
-
-
       //------------------------------------------------------------
       // Main Chart Component(s)
 
@@ -2067,16 +2084,51 @@ nv.models.cumulativeLineChart = function() {
         .height(availableHeight)
         .color(data.map(function(d,i) {
           return d.color || color(d, i);
-        }).filter(function(d,i) { return !data[i].disabled && !data[i].tempDisabled }));
+        }).filter(function(d,i) { return !data[i].disabled && !data[i].tempDisabled; }));
 
 
 
       var linesWrap = g.select('.nv-linesWrap')
-          .datum(data.filter(function(d) { return !d.disabled && !d.tempDisabled }));
+          .datum(data.filter(function(d) { return  !d.disabled && !d.tempDisabled }));
 
       //d3.transition(linesWrap).call(lines);
       linesWrap.call(lines);
 
+      /*Handle average lines [AN-612] ----------------------------*/
+
+      //Store a series index number in the data array.
+      data.forEach(function(d,i) {
+            d.seriesIndex = i;
+      });
+
+      var avgLineData = data.filter(function(d) {
+          return !d.disabled && !!average(d);
+      });
+
+      var avgLines = g.select(".nv-avgLinesWrap").selectAll("line")
+              .data(avgLineData, function(d) { return d.key; });
+
+      avgLines.enter()
+              .append('line')
+              .style('stroke-width',2)
+              .style('stroke-dasharray','10,10')
+              .style('stroke',function (d,i) {
+                  return lines.color()(d,d.seriesIndex);
+              })
+              .attr('x1',0)
+              .attr('x2',availableWidth)
+              .attr('y1', function(d) { return y(average(d)); })
+              .attr('y2', function(d) { return y(average(d)); });
+
+      avgLines
+              .attr('x1',0)
+              .attr('x2',availableWidth)
+              .attr('y1', function(d) { return y(average(d)); })
+              .attr('y2', function(d) { return y(average(d)); });
+
+      avgLines.exit().remove();
+
+      //Create index line -----------------------------------------
 
       var indexLine = linesWrap.selectAll('.nv-indexLine')
           .data([index]);
@@ -2350,6 +2402,12 @@ nv.models.cumulativeLineChart = function() {
     return chart;
   };
 
+  chart.average = function(_) {
+     if(!arguments.length) return average;
+     average = _;
+     return chart;
+  };
+
   //============================================================
 
 
@@ -2360,6 +2418,9 @@ nv.models.cumulativeLineChart = function() {
   /* Normalize the data according to an index point. */
   function indexify(idx, data) {
     return data.map(function(line, i) {
+      if (!line.values) {
+         return line;
+      }
       var v = lines.y()(line.values[idx], idx);
 
       //TODO: implement check below, and disable series if series loses 100% or more cause divide by 0 issue
@@ -3534,9 +3595,13 @@ nv.models.indentedTree = function() {
 
       // NEW ALIGNING CODE, TODO: clean up
       if (align) {
+
         var seriesWidths = [];
         series.each(function(d,i) {
-              seriesWidths.push(d3.select(this).select('text').node().getComputedTextLength() + 28); // 28 is ~ the width of the circle plus some padding
+              var legendText = d3.select(this).select('text');
+              var svgComputedTextLength = legendText.node().getComputedTextLength() 
+                                         || nv.utils.calcApproxTextWidth(legendText);
+              seriesWidths.push(svgComputedTextLength + 28); // 28 is ~ the width of the circle plus some padding
             });
 
         //nv.log('Series Widths: ', JSON.stringify(seriesWidths));
@@ -3811,9 +3876,9 @@ nv.models.line = function() {
             return d3.svg.area()
                 .interpolate(interpolate)
                 .defined(defined)
-                .x(function(d,i) { return x(getX(d,i)) })
-                .y0(function(d,i) { return y(getY(d,i)) })
-                .y1(function(d,i) { return y( y.domain()[0] <= 0 ? y.domain()[1] >= 0 ? 0 : y.domain()[1] : y.domain()[0] ) })
+                .x(function(d,i) { return x0(getX(d,i)) })
+                .y0(function(d,i) { return y0(getY(d,i)) })
+                .y1(function(d,i) { return y0( y.domain()[0] <= 0 ? y.domain()[1] >= 0 ? 0 : y.domain()[1] : y.domain()[0] ) })
                 //.y1(function(d,i) { return y0(0) }) //assuming 0 is within y domain.. may need to tweak this
                 .apply(this, [d.values])
           });
@@ -3822,9 +3887,9 @@ nv.models.line = function() {
             return d3.svg.area()
                 .interpolate(interpolate)
                 .defined(defined)
-                .x(function(d,i) { return x(getX(d,i)) })
-                .y0(function(d,i) { return y(getY(d,i)) })
-                .y1(function(d,i) { return y( y.domain()[0] <= 0 ? y.domain()[1] >= 0 ? 0 : y.domain()[1] : y.domain()[0] ) })
+                .x(function(d,i) { return x0(getX(d,i)) })
+                .y0(function(d,i) { return y0(getY(d,i)) })
+                .y1(function(d,i) { return y0( y.domain()[0] <= 0 ? y.domain()[1] >= 0 ? 0 : y.domain()[1] : y.domain()[0] ) })
                 //.y1(function(d,i) { return y0(0) }) //assuming 0 is within y domain.. may need to tweak this
                 .apply(this, [d.values])
           });
@@ -4003,7 +4068,7 @@ nv.models.lineChart = function() {
     // New addition to calculate position if SVG is scaled with viewBox, may move TODO: consider implementing everywhere else
     if (offsetElement) {
       var svg = d3.select(offsetElement).select('svg');
-      var viewBox = svg.attr('viewBox');
+      var viewBox = (svg.node()) ? svg.attr('viewBox') : null;
       if (viewBox) {
         viewBox = viewBox.split(' ');
         var ratio = parseInt(svg.style('width')) / viewBox[2];
@@ -4035,7 +4100,7 @@ nv.models.lineChart = function() {
                              - margin.top - margin.bottom;
 
 
-      chart.update = function() { container.transition().call(chart) };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
       //set state.disabled
@@ -4187,8 +4252,7 @@ nv.models.lineChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        // container.transition().call(chart);
-        chart.update();
+        selection.transition().call(chart);
       });
 
 /*
@@ -4418,7 +4482,7 @@ nv.models.linePlusBarChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
       //set state.disabled
@@ -4611,7 +4675,7 @@ nv.models.linePlusBarChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -4862,7 +4926,7 @@ nv.models.lineWithFocusChart = function() {
                              - margin.top - margin.bottom - height2,
           availableHeight2 = height2 - margin2.top - margin2.bottom;
 
-      chart.update = function() { container.transition().call(chart) };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
 
@@ -5101,7 +5165,7 @@ nv.models.lineWithFocusChart = function() {
           });
         }
 
-        container.transition().call(chart);
+        selection.transition().call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -5442,7 +5506,7 @@ nv.models.linePlusBarWithFocusChart = function() {
                              - margin.top - margin.bottom - height2,
           availableHeight2 = height2 - margin2.top - margin2.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
 
@@ -5691,7 +5755,7 @@ nv.models.linePlusBarWithFocusChart = function() {
           });
         }
 
-        chart.update();
+        selection.call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -6021,7 +6085,6 @@ nv.models.multiBar = function() {
     , barColor = null // adding the ability to set the color for each rather than the whole group
     , disabled // used in conjunction with barColor to communicate from multiBarHorizontalChart what series are disabled
     , delay = 1200
-    , drawTime = 500
     , xDomain
     , yDomain
     , dispatch = d3.dispatch('chartClick', 'elementClick', 'elementDblClick', 'elementMouseover', 'elementMouseout')
@@ -6163,10 +6226,11 @@ nv.models.multiBar = function() {
       groups.enter().append('g')
           .style('stroke-opacity', 1e-6)
           .style('fill-opacity', 1e-6);
-      d3.transition(groups.exit())
-          //.style('stroke-opacity', 1e-6)
-          //.style('fill-opacity', 1e-6)
+
+
+      groups.exit()
         .selectAll('rect.nv-bar')
+        .transition()
         .delay(function(d,i) { return i * delay/ data[0].values.length })
           .attr('y', function(d) { return stacked ? y0(d.y0) : y0(0) })
           .attr('height', 0)
@@ -6262,7 +6326,7 @@ nv.models.multiBar = function() {
 
 
       if (stacked)
-        d3.transition(bars).duration(drawTime)
+            bars.transition()
             .delay(function(d,i) { return i * delay / data[0].values.length })
             .attr('y', function(d,i) {
 
@@ -6272,21 +6336,21 @@ nv.models.multiBar = function() {
               return Math.max(Math.abs(y(d.y + (stacked ? d.y0 : 0)) - y((stacked ? d.y0 : 0))),1);
             })
             .each('end', function() {
-              d3.select(this).transition().duration(drawTime)
+              d3.transition(d3.select(this))
                 .attr('x', function(d,i) {
                   return stacked ? 0 : (d.series * x.rangeBand() / data.length )
                 })
                 .attr('width', x.rangeBand() / (stacked ? 1 : data.length) );
             })
       else
-        d3.transition(bars).duration(drawTime)
+        d3.transition(bars)
           .delay(function(d,i) { return i * delay/ data[0].values.length })
             .attr('x', function(d,i) {
               return d.series * x.rangeBand() / data.length
             })
             .attr('width', x.rangeBand() / data.length)
             .each('end', function() {
-              d3.select(this).transition().duration(drawTime)
+              d3.transition(d3.select(this))
                 .attr('y', function(d,i) {
                   return getY(d,i) < 0 ?
                           y(0) :
@@ -6427,12 +6491,6 @@ nv.models.multiBar = function() {
     return chart;
   };
 
-  chart.drawTime = function(_) {
-    if (!arguments.length) return drawTime;
-    drawTime = _;
-    return chart;
-  };
-
   //============================================================
 
 
@@ -6452,13 +6510,14 @@ nv.models.multiBarChart = function() {
     , controls = nv.models.legend()
     ;
 
-  var margin = {top: 30, right: 20, bottom: 30, left: 60}
+  var margin = {top: 30, right: 20, bottom: 50, left: 60}
     , width = null
     , height = null
     , color = nv.utils.defaultColor()
     , showControls = true
     , showLegend = true
     , reduceXTicks = true // if false a tick will show for every data point
+    , staggerLabels = false
     , rotateLabels = 0
     , tooltips = true
     , tooltip = function(key, x, y, e, graph) {
@@ -6480,7 +6539,7 @@ nv.models.multiBarChart = function() {
   xAxis
     .orient('bottom')
     .tickPadding(7)
-    .highlightZero(true)
+    .highlightZero(false)
     .showMaxMin(false)
     .tickFormat(function(d) { return d })
     ;
@@ -6519,7 +6578,7 @@ nv.models.multiBarChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart) };
+      chart.update = function() { selection.transition().call(chart) };
       chart.container = this;
 
       //set state.disabled
@@ -6673,6 +6732,27 @@ nv.models.multiBarChart = function() {
           .selectAll('line, text')
           .style('opacity', 1)
 
+      if (staggerLabels) {
+          var getTranslate = function(x,y) {
+              return "translate(" + x + "," + y + ")";
+          };
+
+          var staggerUp = 5, staggerDown = 17;  //pixels to stagger by
+          // Issue #140
+          xTicks
+            .selectAll("text")
+            .attr('transform', function(d,i,j) { 
+                return  getTranslate(0, (j % 2 == 0 ? staggerUp : staggerDown));
+              });
+
+          var totalInBetweenTicks = d3.selectAll(".nv-x.nv-axis .nv-wrap g g text")[0].length;
+          g.selectAll(".nv-x.nv-axis .nv-axisMaxMin text")
+            .attr("transform", function(d,i) {
+                return getTranslate(0, (i === 0 || totalInBetweenTicks % 2 !== 0) ? staggerDown : staggerUp);
+            });
+      }
+
+
       if (reduceXTicks)
         xTicks
           .filter(function(d,i) {
@@ -6720,7 +6800,7 @@ nv.models.multiBarChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart);
       });
 
       controls.dispatch.on('legendClick', function(d,i) {
@@ -6743,7 +6823,7 @@ nv.models.multiBarChart = function() {
         state.stacked = multibar.stacked();
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -6861,6 +6941,12 @@ nv.models.multiBarChart = function() {
     rotateLabels = _;
     return chart;
   }
+
+  chart.staggerLabels = function(_) {
+    if (!arguments.length) return staggerLabels;
+    staggerLabels = _;
+    return chart;
+  };
 
   chart.tooltip = function(_) {
     if (!arguments.length) return tooltip;
@@ -7401,7 +7487,7 @@ nv.models.multiBarHorizontalChart = function() {
 
 
   function chart(selection) {
-    if (selection === undefined) return;
+    if (!selection) return;
 
     selection.each(function(data) {
       var container = d3.select(this),
@@ -7412,7 +7498,7 @@ nv.models.multiBarHorizontalChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart) };
+      chart.update = function() { selection.transition().call(chart) };
       chart.container = this;
 
       //set state.disabled
@@ -7598,7 +7684,7 @@ nv.models.multiBarHorizontalChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart);
       });
 
       controls.dispatch.on('legendClick', function(d,i) {
@@ -7621,7 +7707,7 @@ nv.models.multiBarHorizontalChart = function() {
         state.stacked = multibar.stacked();
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -7825,9 +7911,6 @@ nv.models.multiChart = function() {
       var container = d3.select(this),
           that = this;
 
-      chart.update = function() { container.transition().call(chart); };
-      chart.container = this;
-
       var availableWidth = (width  || parseInt(container.style('width')) || 960)
                              - margin.left - margin.right,
           availableHeight = (height || parseInt(container.style('height')) || 400)
@@ -8026,7 +8109,7 @@ nv.models.multiChart = function() {
             return d;
           });
         }
-        chart.update();
+        selection.transition().call(chart);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -8034,6 +8117,9 @@ nv.models.multiChart = function() {
       });
 
     });
+
+    chart.update = function() { chart(selection) };
+    chart.container = this;
 
     return chart;
   }
@@ -9017,7 +9103,7 @@ nv.models.pieChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection); };
       chart.container = this;
 
       //set state.disabled
@@ -9133,7 +9219,7 @@ nv.models.pieChart = function() {
         state.disabled = data[0].map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        selection.transition().call(chart)
       });
 
       pie.dispatch.on('elementMouseout.tooltip', function(e) {
@@ -9151,7 +9237,7 @@ nv.models.pieChart = function() {
           state.disabled = e.disabled;
         }
 
-        chart.update();
+        selection.call(chart);
       });
 
       //============================================================
@@ -9345,7 +9431,7 @@ nv.models.scatter = function() {
               })
             );
 
-      x   .domain(xDomain || d3.extent(seriesData.map(function(d) { return d.x }).concat(forceX)))
+      x   .domain(xDomain || d3.extent(seriesData.map(function(d) { return d.x; }).concat(forceX)))
 
       if (padData && data[0])
         x.range([(availableWidth * padDataOuter +  availableWidth) / (2 *data[0].values.length), availableWidth - availableWidth * (1 + padDataOuter) / (2 * data[0].values.length)  ]);
@@ -9370,6 +9456,14 @@ nv.models.scatter = function() {
         y.domain()[0] ?
             y.domain([y.domain()[0] + y.domain()[0] * 0.01, y.domain()[1] - y.domain()[1] * 0.01])
           : y.domain([-1,1]);
+
+      if ( isNaN(x.domain()[0])) {
+          x.domain([-1,1]);
+      }
+
+      if ( isNaN(y.domain()[0])) {
+          y.domain([-1,1]);
+      }
 
 
       x0 = x0 || x;
@@ -9417,8 +9511,16 @@ nv.models.scatter = function() {
             return group.values
               .map(function(point, pointIndex) {
                 // *Adding noise to make duplicates very unlikely
-                // **Injecting series and point index for reference
-                return [x(getX(point,pointIndex)) * (Math.random() / 1e12 + 1)  , y(getY(point,pointIndex)) * (Math.random() / 1e12 + 1), groupIndex, pointIndex, point]; //temp hack to add noise untill I think of a better way so there are no duplicates
+                // *Injecting series and point index for reference
+                /* *Adding a 'jitter' to the points, because there's an issue in d3.geom.voronoi.
+                */
+                var pX = getX(point,pointIndex) + Math.random() * 1e-7;
+                var pY = getY(point,pointIndex) + Math.random() * 1e-7;
+
+                return [x(pX), 
+                        y(pY), 
+                        groupIndex, 
+                        pointIndex, point]; //temp hack to add noise untill I think of a better way so there are no duplicates
               })
               .filter(function(pointArray, pointIndex) {
                 return pointActive(pointArray[4], pointIndex); // Issue #237.. move filter to after map, so pointIndex is correct!
@@ -9485,7 +9587,12 @@ nv.models.scatter = function() {
               .attr('class', function(d,i) { return 'nv-path-'+i; });
           pointPaths.exit().remove();
           pointPaths
-              .attr('d', function(d) { return 'M' + d.data.join('L') + 'Z'; });
+              .attr('d', function(d) {
+                if (d.data.length === 0) 
+                    return 'M 0 0'
+                else 
+                    return 'M' + d.data.join('L') + 'Z'; 
+              });
 
           pointPaths
               .on('click', function(d) {
@@ -9994,7 +10101,7 @@ nv.models.scatterChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
       //set state.disabled
@@ -10255,7 +10362,7 @@ nv.models.scatterChart = function() {
           pauseFisheye = false;
         }
 
-        chart.update();
+        chart(selection);
       });
 
       legend.dispatch.on('legendClick', function(d,i, that) {
@@ -10272,7 +10379,7 @@ nv.models.scatterChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        chart(selection);
       });
 
       /*
@@ -10588,7 +10695,7 @@ nv.models.scatterPlusLineChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
       //set state.disabled
@@ -10864,7 +10971,7 @@ nv.models.scatterPlusLineChart = function() {
           pauseFisheye = false;
         }
 
-        chart.update();
+        chart(selection);
       });
 
       legend.dispatch.on('legendClick', function(d,i, that) {
@@ -10881,7 +10988,7 @@ nv.models.scatterPlusLineChart = function() {
         state.disabled = data.map(function(d) { return !!d.disabled });
         dispatch.stateChange(state);
 
-        chart.update();
+        chart(selection);
       });
 
       /*
@@ -10921,7 +11028,7 @@ nv.models.scatterPlusLineChart = function() {
           state.disabled = e.disabled;
         }
 
-        chart.update();
+        selection.call(chart);
       });
 
       //============================================================
@@ -11295,7 +11402,7 @@ nv.models.sparklinePlus = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      var currentValue = sparkline.y()(data[data.length-1], data.length-1);
+      
 
       chart.update = function() { chart(selection) };
       chart.container = this;
@@ -11321,6 +11428,8 @@ nv.models.sparklinePlus = function() {
       } else {
         container.selectAll('.nv-noData').remove();
       }
+
+      var currentValue = sparkline.y()(data[data.length-1], data.length-1);
 
       //------------------------------------------------------------
 
@@ -11368,7 +11477,7 @@ nv.models.sparklinePlus = function() {
 
 
       var valueWrap = g.select('.nv-valueWrap');
-
+      
       var value = valueWrap.selectAll('.nv-currentValue')
           .data([currentValue]);
 
@@ -11965,7 +12074,7 @@ nv.models.stackedAreaChart = function() {
           availableHeight = (height || parseInt(container.style('height')) || 400)
                              - margin.top - margin.bottom;
 
-      chart.update = function() { container.transition().call(chart); };
+      chart.update = function() { chart(selection) };
       chart.container = this;
 
       //set state.disabled
@@ -12155,7 +12264,7 @@ nv.models.stackedAreaChart = function() {
         dispatch.stateChange(state);
 
         //selection.transition().call(chart);
-        chart.update();
+        chart(selection);
       });
 
       legend.dispatch.on('legendClick', function(d,i) {
@@ -12172,7 +12281,7 @@ nv.models.stackedAreaChart = function() {
         dispatch.stateChange(state);
 
         //selection.transition().call(chart);
-        chart.update();
+        chart(selection);
       });
 
       controls.dispatch.on('legendClick', function(d,i) {
@@ -12200,7 +12309,7 @@ nv.models.stackedAreaChart = function() {
         dispatch.stateChange(state);
 
         //selection.transition().call(chart);
-        chart.update();
+        chart(selection);
       });
 
       dispatch.on('tooltipShow', function(e) {
@@ -12222,7 +12331,7 @@ nv.models.stackedAreaChart = function() {
           stacked.style(e.style);
         }
 
-        chart.update();
+        selection.call(chart);
       });
 
     });

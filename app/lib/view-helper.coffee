@@ -1,4 +1,7 @@
 Chaplin = require 'chaplin'
+config = require 'config'
+utils = require 'lib/utils'
+mediator = Chaplin.mediator
 
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers
@@ -24,3 +27,81 @@ Handlebars.registerHelper 'without', (context, options) ->
 # Get Chaplin-declared named routes. {{#url "like" "105"}}{{/url}}
 Handlebars.registerHelper 'url', (routeName, params..., options) ->
   Chaplin.helpers.reverse routeName, params
+
+# Evaluate block with context being config
+Handlebars.registerHelper 'with_config', (options) ->
+  context = config
+  Handlebars.helpers.with.call(this, context, options)
+
+# Evaluate block with context being current user
+Handlebars.registerHelper 'with_user', (options) ->
+  context = mediator.user or {}
+  Handlebars.helpers.with.call(this, context, options)
+
+# Conditional evaluation
+# ----------------------
+
+# Choose block by user login status
+Handlebars.registerHelper 'if_logged_in', (options) ->
+  allowed = mediator.user
+  if allowed then options.fn(this) else options.inverse(this)
+
+# Choose block by user role (returns true if role is at least that level
+Handlebars.registerHelper 'if_admin', (options) ->
+  allowed = mediator.user.get('role') is 'admin'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_manager', (options) ->
+  allowed = mediator.user.get('role') in ['admin', 'manager']
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_support', (options) ->
+  allowed = mediator.user.get('role') in ['admin', 'manager', 'support']
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_sales', (options) ->
+  allowed = mediator.user.get('role') in ['admin', 'manager', 'support', 'sales']
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_guest', (options) ->
+  allowed = mediator.user.get('role') is 'guest'
+  if allowed then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'show_login_url', ->
+  {protocol, host} = window.location
+  path = Chaplin.helpers.reverse 'auth#callback'
+  encodeURIComponent "#{protocol}//#{host}#{path}"
+
+# URL helpers
+# -----------
+
+# Facebook image URLs
+Handlebars.registerHelper 'fb_img_url', (fbId, type) ->
+  new Handlebars.SafeString utils.facebookImageURL(fbId, type)
+
+# Other helpers
+# -----------
+
+# Loop n times
+Handlebars.registerHelper 'times', (n, block) ->
+  accum = ''
+  i = 0
+  x = Math.round n
+
+  while i < x
+    accum += block.fn(i)
+    i++
+
+  accum
+
+# Loop 5 - n times
+Handlebars.registerHelper 'untimes', (n, block) ->
+  accum = ''
+  i = 0
+  x = 5 - Math.round(n)
+
+  while i < x
+    accum += block.fn(i)
+    i++
+
+  accum
