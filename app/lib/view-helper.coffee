@@ -38,6 +38,11 @@ Handlebars.registerHelper 'with_user', (options) ->
   context = mediator.user or {}
   Handlebars.helpers.with.call(this, context, options)
 
+# Evaluate block with context being forms
+Handlebars.registerHelper 'with_forms', (options) ->
+  context = mediator.forms or {}
+  Handlebars.helpers.with.call(this, context, options)
+
 # Conditional evaluation
 # ----------------------
 
@@ -67,10 +72,14 @@ Handlebars.registerHelper 'if_guest', (options) ->
   allowed = mediator.user.get('role') is 'guest'
   if allowed then options.fn(this) else options.inverse(this)
 
-Handlebars.registerHelper 'show_login_url', ->
-  {protocol, host} = window.location
-  path = Chaplin.helpers.reverse 'auth#callback'
-  encodeURIComponent "#{protocol}//#{host}#{path}"
+Handlebars.registerHelper 'if_cur_month', (date, options) ->
+  if '06-01-2013' < date < '06-30-2013' then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_prev_month', (date, options) ->
+  if '' < date < '' then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_cur_rep', (id, options) ->
+  if id == 'E0008' then options.fn(this) else options.inverse(this)
 
 # URL helpers
 # -----------
