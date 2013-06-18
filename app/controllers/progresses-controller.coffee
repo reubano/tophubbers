@@ -18,7 +18,7 @@ module.exports = class Controller extends Controller
 			@fetchExpiredData(@res)
 
 	comparator: (model) ->
-		- model.get 'score'
+		model.get 'score'
 
 	index: =>
 		@collection.comparator = @comparator
