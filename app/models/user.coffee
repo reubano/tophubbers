@@ -2,7 +2,7 @@ Model = require 'models/base/model'
 
 module.exports = class User extends Model
 	admins = ['reubano@gmail.com', 'patrick.fischer@ongeza.com',
-		'mustafa.pirbhai@ongeza.com']
+		'mustafa.pirbhai@ongeza.com', 'reuben.cummings@ongeza.com']
 
 	managers = ['deogratius.haule@ongeza.com', 'wesley.muyenze@ongeza.com',
 		'jackson.urio@ongeza.com']

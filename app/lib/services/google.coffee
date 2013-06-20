@@ -17,9 +17,9 @@ module.exports = class Google extends ServiceProvider
   # The permissions we’re asking for. This is a space-separated list of URLs.
   # https://developers.google.com/accounts/docs/OAuth2Login#scopeparameter
   # https://developers.google.com/+/api/oauth
-  # scopes = 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email'
+  scopes = 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
   # scopes = 'https://www.googleapis.com/auth/plus.me'
-  scopes = 'https://www.googleapis.com/auth/userinfo.email'
+  # scopes = 'https://www.googleapis.com/auth/userinfo.email'
 
   name: 'google'
   failed: false
@@ -85,12 +85,17 @@ module.exports = class Google extends ServiceProvider
 
   getUserData: (callback) ->
     console.log 'fetching google user data'
-    # returns name and id (among other things)
-    gapi.client.load 'plus', 'v1', ->
-      request = gapi.client.plus.people.get {'userId': 'me'}
-      request.execute callback
+    # returns name and id (among other things) if they have google+ and
+    # scope includes 'https://www.googleapis.com/auth/plus.me'
+#     gapi.client.load 'plus', 'v1', ->
+#       request = gapi.client.plus.people.get {'userId': 'me'}
+#       request.execute callback
 
-    # returns email and id
+    # returns email and id for any google account if scope includes
+    # 'https://www.googleapis.com/auth/userinfo.email'
+    #
+    # returns name and id for any google account if scope includes
+    # 'https://www.googleapis.com/auth/userinfo.profile'
     gapi.client.load 'oauth2', 'v2', ->
       request = gapi.client.oauth2.userinfo.get()
       request.execute callback
@@ -100,13 +105,14 @@ module.exports = class Google extends ServiceProvider
     console.log data
     userData = {}
 
-    hash =
-      name: 'displayName'
-      email: 'email'
-      gid: 'id'
+    hash = [
+      ['name', 'name'],
+      ['name', 'displayName'],
+      ['email', 'email'],
+      ['gid', 'id']]
 
-    # used to merge the results of the api calls returned by getUserData
-    (userData[key] = data[value] for key, value of hash when data[value])
+    # used to merge the results of multiple api calls returned by getUserData
+    (userData[i[0]] = data[i[1]] for i in hash when data[i[1]])
     userData.id = 1
     @publishEvent 'userData', userData
 
