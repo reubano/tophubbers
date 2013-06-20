@@ -94,6 +94,7 @@ module.exports = class RepView extends View
 		console.log 'saving form data...'
 		console.log json
 		@forms.create json
+		@render()
 		console.log @forms
 		@success()
 #		console.log url
