@@ -72,7 +72,7 @@ module.exports = class GraphView extends View
 				chart_data = JSON.parse chart_json
 				nvd3 = new nvd3util chart_data, selection, draw
 				nvd3.init()
-				_.defer @setSVG, attr
+				_.defer(@setSVG, attr) if not svg and not changed
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
@@ -83,7 +83,7 @@ module.exports = class GraphView extends View
 		html = @$(parent).html()
 		bad = 'opacity: 0.000001;'
 
-		if html and html.indexOf(bad) < 0 and html.length > 25
+		if html and html.indexOf(bad) < 0 and html.length > 40
 			svg_attr = attr + config.svg_suffix
 			console.log 'setting' + text + 'svg'
 			svg = html.replace(/\"/g, '\'')
