@@ -75,6 +75,7 @@ module.exports = class GraphView extends View
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
 	setSVG: (attr) =>
+		@publishEvent 'rendered:' + attr, null
 		chart_class = 'chart-' + attr[0..2]
 		parent = '#' + @id + '.view .' + chart_class
 		text = ' ' + @id + ' ' + attr + ' '

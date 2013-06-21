@@ -31,6 +31,7 @@ module.exports = class RepView extends View
 		console.log 'User name is ' + @name
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
+		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
@@ -60,20 +61,9 @@ module.exports = class RepView extends View
 
 	render: =>
 		super
-		@svg()
-		_.defer @removeActive
 		console.log 'rendering rep view for ' + @id
 		@renderDatepicker '#review-datepicker'
 		@renderDatepicker '#network-datepicker'
-
-	svg: =>
-		console.log 'checking svg'
-		chart_class = 'chart-' + @attrs[1][0..2]
-		parent = '#' + @id + '.view .' + chart_class
-		html = @$(parent).html()
-		bad = 'opacity: 0.000001;'
-		# console.log html
-		html and html.indexOf(bad) < 0 and html.length > 40
 
 	removeActive: =>
 		# Hack to get the chart to render in the inactive tab
