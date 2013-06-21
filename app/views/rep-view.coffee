@@ -85,7 +85,7 @@ module.exports = class RepView extends View
 	renderDatepicker: (selection) =>
 		momentous = new Momentous @.$ selection
 		momentous.init()
-		console.log momentous
+		# console.log momentous
 
 	objectify: (form) ->
 		data = @.$(form).serializeArray()

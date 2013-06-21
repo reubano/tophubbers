@@ -21,7 +21,8 @@ module.exports = class GraphView extends View
 		for attr in @attrs
 			change = 'change:' + attr + config.chart_suffix
 			@listenTo @model, change, @render
-			@listenTo @model, change, @modelChangeAlert
+			@listenTo @model, change, ->
+				console.log 'graph-view heard modelChange'
 			# @subscribeEvent 'dispatcher:dispatch', ->
 			#	console.log 'graph-view caught dispatcher event'
 
@@ -30,9 +31,6 @@ module.exports = class GraphView extends View
 		console.log 'rendering graph view for ' + @id
 		@attach()
 		_.defer @getChartScript, @ignore_svg
-
-	modelChangeAlert: ->
-		console.log 'graph-view heard modelChange'
 
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
