@@ -110,6 +110,10 @@ module.exports = class RepView extends View
 		if model.get('id')
 			console.log 'successfully posted form for ' + model.get('id') + '!'
 			@$('#success-modal').modal()
+		else
+			console.log 'successfully fetched forms'
+			@render()
+			console.log @forms
 
 	failWhale: (model, jqXHR, options) =>
 		if model.get('id')
