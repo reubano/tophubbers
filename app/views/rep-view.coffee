@@ -113,7 +113,6 @@ module.exports = class RepView extends View
 		else
 			console.log 'successfully fetched forms'
 			@render()
-			console.log @forms
 
 		console.log model
 		console.log resp
