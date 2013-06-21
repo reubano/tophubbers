@@ -49,4 +49,4 @@ module.exports = class Rep extends Model
 			{key: 'End', values: endValues},
 			{key: 'Duration', values: durValues}]
 
-		JSON.stringify(data)
+		JSON.stringify data

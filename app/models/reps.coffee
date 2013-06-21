@@ -3,7 +3,7 @@ Model = require 'models/rep'
 
 module.exports = class Reps extends Collection
 	model: Model
-	localStorage: new Store 'reps-collection'
+	localStorage: new Store 'reps'
 
 	allAreCalled: ->
 		@getCalled().length is @length
