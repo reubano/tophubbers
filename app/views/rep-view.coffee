@@ -115,6 +115,10 @@ module.exports = class RepView extends View
 			@render()
 			console.log @forms
 
+		console.log model
+		console.log resp
+		console.log options
+
 	failWhale: (model, xhr, options) =>
 		if model.get('id')
 			console.log 'failed to post form for ' + model.get('id')
