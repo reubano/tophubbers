@@ -5,6 +5,6 @@ module.exports = class Users extends Collection
 	model: Model
 	localStorage: new Store 'user'
 
-	initialize: ->
+	initialize: =>
 		super
 		console.log 'initialize users collection'
