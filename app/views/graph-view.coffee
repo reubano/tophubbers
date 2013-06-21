@@ -60,6 +60,7 @@ module.exports = class GraphView extends View
 				# console.log svg.length
 				# console.log svg.indexOf('opacity: 0.000001;') < 0
 				@$(parent).html svg
+				@pubRender attr
 			else if chart_json and name
 				# console.log text + 'is rendered: ' + rendered
 				console.log text + 'has svg: ' + svg?
@@ -70,12 +71,16 @@ module.exports = class GraphView extends View
 				chart_data = JSON.parse chart_json
 				nvd3 = new nvd3util chart_data, selection, draw
 				nvd3.init()
-				_.defer(@setSVG, attr) if not svg and not changed
+				_.defer(@setSVG, attr) if not svg or changed
+				_.defer @pubRender, attr
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
-	setSVG: (attr) =>
+	pubRender: (attr) =>
 		@publishEvent 'rendered:' + attr, null
+		console.log 'published rendered:' + attr
+
+	setSVG: (attr) =>
 		chart_class = 'chart-' + attr[0..2]
 		parent = '#' + @id + '.view .' + chart_class
 		text = ' ' + @id + ' ' + attr + ' '
