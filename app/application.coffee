@@ -36,7 +36,7 @@ module.exports = class Application extends Chaplin.Application
     # the root per default. You might change that in the options
     # if necessary:
     # @initRouter routes, pushState: false, root: '/subdir/'
-    @initRouter routes, pushState: false
+    @initRouter routes
 
     # Actually start routing.
     @startRouting()
