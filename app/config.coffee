@@ -1,15 +1,18 @@
 switch window.location.hostname
 	when 'localhost'
 		console.log 'development envrionment set'
-		url = 'http://localhost:5000/'
+		api_url = 'http://localhost:5000/'
+		forms_url = 'http://localhost:5001/forms'
 		age = 72	 # in hours
 	else
 		console.log 'production envrionment set'
-		url = 'http://ongeza-api.herokuapp.com/'
+		api_url = 'http://ongeza-api.herokuapp.com/'
+		forms_url = 'http://ongeza-forms.herokuapp.com/forms'
 		age = 24	 # in hours
 
 config =
-	api: url
+	api: api_url
+	forms: forms_url
 	max_age: age
 	to_chart: 'work_data'
 	data_attrs: ['cur_work_data', 'prev_work_data']
