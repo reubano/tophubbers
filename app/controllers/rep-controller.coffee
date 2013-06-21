@@ -35,6 +35,11 @@ module.exports = class Controller extends Controller
 		else
 			@redirectToRoute 'home#show'
 
+	refresh: (params) =>
+		console.log 'refreshing data...'
+		@fetchData(@res, params.id)
+		@redirectToRoute 'rep#show', id: params.id
+
 	showView: (model) =>
 		console.log 'rendering showView'
 		console.log 'ignore_svg is ' + @ignore_svg
@@ -42,9 +47,3 @@ module.exports = class Controller extends Controller
 			model: model
 			attrs: config.data_attrs
 			ignore_svg: @ignore_svg
-
-	refresh: (params) =>
-		console.log 'refreshing data...'
-		@fetchData(@res, params.id)
-		@redirectToRoute 'rep#show', id: params.id
-
