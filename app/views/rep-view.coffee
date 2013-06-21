@@ -115,7 +115,7 @@ module.exports = class RepView extends View
 			@render()
 			console.log @forms
 
-	failWhale: (model, jqXHR, options) =>
+	failWhale: (model, xhr, options) =>
 		if model.get('id')
 			console.log 'failed to post form for ' + model.get('id')
 			@$('#fail-modal').modal()
@@ -123,6 +123,6 @@ module.exports = class RepView extends View
 			console.log 'failed to fetch forms'
 
 		console.log model
-		console.log jqXHR
+		console.log xhr
 		console.log options
 
