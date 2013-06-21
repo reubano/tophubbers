@@ -5,15 +5,12 @@ module.exports = class Reps extends Collection
 	model: Model
 	localStorage: new Store 'reps'
 
-	allAreCalled: ->
-		@getCalled().length is @length
+	initialize: (options) =>
+		super
+		console.log 'initialize reps collection'
 
 	getCalled: ->
 		@where called: yes
 
 	getActive: ->
 		@where called: no
-
-	initialize: (options) ->
-		super
-		console.log 'initialize reps collection'
