@@ -52,6 +52,7 @@ module.exports = class RepView extends View
 			console.log 'rep-view caught sync event'
 		@listenTo @forms, 'sync', @success
 		@listenTo @forms, 'error', @failWhale
+		@listenTo @forms, 'invalid', @failWhale
 
 	setUserName: (user) =>
 		@name = user.get 'name'
