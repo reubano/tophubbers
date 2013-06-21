@@ -3,7 +3,7 @@ Model = require 'models/user'
 
 module.exports = class Users extends Collection
 	model: Model
-	localStorage: new Store 'user'
+	localStorage: new Store 'users'
 
 	initialize: =>
 		super
