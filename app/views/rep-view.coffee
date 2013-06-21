@@ -1,7 +1,6 @@
 Momentous = require 'lib/momentous'
 Chaplin = require 'chaplin'
 View = require 'views/graph-view'
-Forms = require 'models/forms'
 template = require 'views/templates/rep'
 
 module.exports = class RepView extends View
@@ -12,16 +11,15 @@ module.exports = class RepView extends View
 	className: 'span12'
 	template: template
 	user: mediator.users.get(1)
-	forms: new Forms()
+	forms: mediator.forms
 
 	initialize: (options) ->
 		super
 		@attrs = options.attrs
-		@forms.fetch()
 		@id = @model.get 'id'
 		mediator.rep_id = @id
 		console.log 'initialize rep-view for ' + @id
-		console.log 'options:'
+		console.log @forms
 		console.log options
 
 		if @user

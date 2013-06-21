@@ -9,6 +9,7 @@ module.exports = class Controller extends Controller
 	adjustTitle: 'Ongeza Rep View'
 	res: ['rep_info', 'work_data', 'feedback_data', 'progress_data']
 	collection: mediator.reps
+	forms: mediator.forms
 
 	initialize: =>
 		console.log 'initialize rep-controller'

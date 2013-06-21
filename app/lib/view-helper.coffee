@@ -14,7 +14,6 @@ prevEnd = moment(prevStart).endOf('month')
 isBetween = (date, start, ended) ->
   (date.isBefore(ended) && date.isAfter(start)) || date.isSame(start) || date.isSame(ended)
 
-# prevStart.isBefore(currEnd) && prevStart.isAfter(currStart)
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers
 # --------------------------------
@@ -85,12 +84,12 @@ Handlebars.registerHelper 'if_guest', (options) ->
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_month', (date, options) ->
-  momented = moment date, 'MM-DD-YYYY'
+  momented = moment date, 'YYYY-MM-DD'
   between = isBetween(momented, currStart, currEnd)
   if between then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_prev_month', (date, options) ->
-  momented = moment date, 'MM-DD-YYYY'
+  momented = moment date, 'YYYY-MM-DD'
   between = isBetween(momented, prevStart, prevEnd)
   if between then options.fn(this) else options.inverse(this)
 
