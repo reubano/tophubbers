@@ -368,7 +368,8 @@ as that.
           return onlineSync('create', model, options);
         } else {
           options.success = function(resp, status, xhr) {
-            return success(localsync(method, model, options));
+            success(resp);
+            return localsync(method, model, options);
           };
           options.error = function(resp) {
             options.dirty = true;
