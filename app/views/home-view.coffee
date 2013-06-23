@@ -47,8 +47,12 @@ module.exports = class HomePageView extends View
 		mediator.download.form_href = "data:text/csv;charset=utf-8," + escape csv
 
 	setRepData: =>
-		keys1 = ['first_name', 'last_name', 'id', 'score', 'airtel', 'called', 'created', 'ward']
-		keys2 = ['cur_feedback_data', 'cur_progress', 'prev_feedback_data', 'prev_progress',]
+		keys1 = [
+			'first_name', 'last_name', 'id', 'score', 'airtel', 'called',
+			'created', 'ward']
+		keys2 = [
+			'cur_feedback_data', 'cur_progress', 'prev_feedback_data',
+			'prev_progress',]
 
 		collection = []
 		for model in @reps.toJSON()
