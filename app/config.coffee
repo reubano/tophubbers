@@ -7,7 +7,7 @@ switch window.location.hostname
 	else
 		console.log 'production envrionment set'
 		api_url = 'http://ongeza-api.herokuapp.com/'
-		forms_url = 'http://ongeza-forms.herokuapp.com/forms'
+		forms_url = 'http://ongeza-forms.herokuapp.com/api/forms'
 		age = 12	 # in hours
 
 config =
