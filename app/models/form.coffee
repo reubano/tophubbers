@@ -7,4 +7,4 @@ module.exports = class Form extends Model
 
 	initialize: ->
 		super
-		console.log 'initialize form model'
+		# console.log 'initialize form model'
