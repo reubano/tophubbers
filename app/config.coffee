@@ -14,12 +14,11 @@ config =
 	api: api_url
 	forms: forms_url
 	max_age: age
+	poll_intrv: 24	 # in hours
 	to_chart: 'work_data'
 	data_attrs: ['cur_work_data', 'prev_work_data']
+	res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data']
 	chart_suffix: '_c'
 	svg_suffix: '_svg'
-#	attrs: ['cur_work', 'prev_work']
-#	data_suffix: '_data'
-#	chart_suffix: '_chart_data'
 
 module.exports = config

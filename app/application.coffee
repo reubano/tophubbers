@@ -51,12 +51,13 @@ module.exports = class Application extends Chaplin.Application
   initMediator: ->
     # Add additional application-specific properties and methods
     Chaplin.mediator.user = null
+    Chaplin.mediator.download = {}
     Chaplin.mediator.rep_id = null
     Chaplin.mediator.users = new Users()
     Chaplin.mediator.forms = new Forms()
     Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
     Chaplin.mediator.users.fetch()
-    Chaplin.mediator.forms.fetch()
+    Chaplin.mediator.forms.fetch {remote: false}
     Chaplin.mediator.reps.fetch()
     Chaplin.mediator.seal()

@@ -4,12 +4,9 @@ Chaplin = require 'chaplin'
 View = require 'views/rep-view'
 
 module.exports = class Controller extends Controller
-	mediator = Chaplin.mediator
-
 	adjustTitle: 'Ongeza Rep View'
 	res: ['rep_info', 'work_data', 'feedback_data', 'progress_data']
-	collection: mediator.reps
-	forms: mediator.forms
+	collection: Chaplin.mediator.reps
 
 	initialize: =>
 		console.log 'initialize rep-controller'

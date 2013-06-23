@@ -4,7 +4,6 @@ Model = require 'models/form'
 
 module.exports = class Forms extends Collection
 	model: Model
-	# localStorage: new Store 'forms'
 	url: config.forms
 
 	initialize: =>
@@ -12,8 +11,8 @@ module.exports = class Forms extends Collection
 		console.log 'initialize forms collection'
 		console.log 'forms collection url is ' + @url
 
-	parse: (response) ->
-		console.log 'parsing response'
+	parseBeforeLocalSave: (response) ->
+		console.log 'parsing response for localStorage'
 		response.objects
 
 	comparator: (model) ->

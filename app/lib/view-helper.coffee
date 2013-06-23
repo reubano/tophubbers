@@ -54,6 +54,11 @@ Handlebars.registerHelper 'with_forms', (options) ->
   context = mediator.forms or {}
   Handlebars.helpers.with.call(this, context, options)
 
+# Evaluate block with context being download
+Handlebars.registerHelper 'with_download', (options) ->
+  context = mediator.download or {}
+  Handlebars.helpers.with.call(this, context, options)
+
 # Conditional evaluation
 # ----------------------
 
@@ -84,12 +89,14 @@ Handlebars.registerHelper 'if_guest', (options) ->
   if allowed then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_month', (date, options) ->
-  momented = moment date, 'YYYY-MM-DD'
+  fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
+  momented = moment date, fmt
   between = isBetween(momented, currStart, currEnd)
   if between then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_prev_month', (date, options) ->
-  momented = moment date, 'YYYY-MM-DD'
+  fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
+  momented = moment date, fmt
   between = isBetween(momented, prevStart, prevEnd)
   if between then options.fn(this) else options.inverse(this)
 

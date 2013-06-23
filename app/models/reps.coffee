@@ -3,7 +3,8 @@ Model = require 'models/rep'
 
 module.exports = class Reps extends Collection
 	model: Model
-	localStorage: new Store 'reps'
+	url: 'reps'
+	local: true
 
 	initialize: (options) =>
 		super

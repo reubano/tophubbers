@@ -35,4 +35,3 @@ module.exports = class Controller extends Controller
 		console.log 'refreshing data...'
 		@fetchData(@res, false, @data_attrs)
 		@redirectToRoute 'graphs#index'
-

@@ -1,4 +1,23 @@
 {{#if_logged_in}}
+	<div class="control-group">
+		<div class="controls">
+		{{#if_manager}}
+			<a class="btn" href="/refresh/all">
+				<i class="icon-refresh"></i> Refresh All Data
+			</a>
+		{{/if_manager}}
+
+		{{#if_admin}}{{#with_download}}
+			<a id="download-reps" class="btn" href="{{rep_href}}" download="rep_data.csv">
+				<i class="icon-download-alt"></i> Download Rep Data
+			</a>
+			<a id="download-forms" class="btn" href="{{form_href}}" download="form_data.csv">
+				<i class="icon-download-alt"></i> Download Form Data
+			</a>
+		{{/with_download}}{{/if_admin}}
+		</div>
+	</div>
+
 	<h1 class="text-info">Chose an activity below.</h1>
 
 	{{#each items}}
