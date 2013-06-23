@@ -27,7 +27,7 @@ module.exports = class HomeController extends Controller
 		@forms.syncDirtyAndDestroyed()
 		@forms.fetch
 			data:
-				"results_per_page=100&q=" + JSON.stringify
+				'results_per_page=' + config.rpp + '&q=' + JSON.stringify
 					"order_by": [{"field": "date", "direction": "desc"}]
 
 		_.delay @fetchData, config.poll_intrv * 1000 * 60 * 60

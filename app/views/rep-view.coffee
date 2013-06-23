@@ -94,10 +94,8 @@ module.exports = class RepView extends View
 			console.log 'fetching form changes from server'
 			@forms.fetch
 				data:
-					"results_per_page=30&q=" + JSON.stringify
-						"filters": [{"name": "rep", "val": @id, "op": "eq"}]
+					'results_per_page=' + config.rpp + '&q=' + JSON.stringify
 						"order_by": [{"field": "date", "direction": "desc"}]
-
 		else
 			console.log 'forms already synced'
 

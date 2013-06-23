@@ -12,6 +12,7 @@ switch window.location.hostname
 
 config =
 	api: api_url
+	rpp: 100   # form results per page
 	forms: forms_url
 	max_age: age
 	poll_intrv: 24	 # in hours
