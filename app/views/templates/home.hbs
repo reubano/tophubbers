@@ -1,4 +1,14 @@
 {{#if_logged_in}}
+	{{#if_manager}}
+	<div class="control-group">
+		<div class="controls">
+			<a class="btn" href="/refresh/all">
+				<i class="icon-refresh"></i> Refresh All Data
+			</a>
+		</div>
+	</div>
+	{{/if_manager}}
+
 	<h1 class="text-info">Chose an activity below.</h1>
 
 	{{#each items}}

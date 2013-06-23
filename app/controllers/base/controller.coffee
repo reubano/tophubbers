@@ -30,16 +30,18 @@ module.exports = class Controller extends Chaplin.Controller
 			dataType: 'json'
 			beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
 
-	fetchData: (list, id=false, data_attrs=false) =>
+	fetchData: (list=false, id=false, data_attrs=false) =>
 		@id = id
 		@data_attrs = data_attrs
+		list = if list then list else config.res
 
 		for r in @getResList(list)
 			@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
 
-	fetchExpiredData: (list, id=false, data_attrs=false) =>
+	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
 		@id = id
 		@data_attrs = data_attrs
+		list = if list then list else config.res
 
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
