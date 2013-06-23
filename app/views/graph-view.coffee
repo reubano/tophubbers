@@ -78,7 +78,7 @@ module.exports = class GraphView extends View
 
 	pubRender: (attr) =>
 		@publishEvent 'rendered:' + attr, null
-		console.log 'published rendered:' + attr
+		# console.log 'published rendered:' + attr
 
 	setSVG: (attr) =>
 		chart_class = 'chart-' + attr[0..2]
