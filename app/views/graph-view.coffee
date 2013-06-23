@@ -16,14 +16,13 @@ module.exports = class GraphView extends View
 		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
 		console.log 'initialize graph-view for ' + @id
-		console.log 'options:'
 		console.log options
-		console.log 'ignore_svg: ' + @ignore_svg
 
 		for attr in @attrs
 			change = 'change:' + attr + config.chart_suffix
 			@listenTo @model, change, @render
-			@listenTo @model, change, @modelChangeAlert
+			@listenTo @model, change, ->
+				console.log 'graph-view heard modelChange'
 			# @subscribeEvent 'dispatcher:dispatch', ->
 			#	console.log 'graph-view caught dispatcher event'
 
@@ -32,9 +31,6 @@ module.exports = class GraphView extends View
 		console.log 'rendering graph view for ' + @id
 		@attach()
 		_.defer @getChartScript, @ignore_svg
-
-	modelChangeAlert: ->
-		console.log 'graph-view heard modelChange'
 
 	visibilityChangeAlert: ->
 		console.log 'graph-view heard visibilityChange'
@@ -54,28 +50,35 @@ module.exports = class GraphView extends View
 			chart_attr = attr + config.chart_suffix
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
-			svg = if @model.get svg_attr then @model.get svg_attr else false
+			svg = if @model.get svg_attr then @model.get svg_attr else null
 			# rendered = if @$(selection).html() then true else false
 			changed = @model.hasChanged attr
 			text = @id + ' ' + attr + ' '
 
-			# console.log text + 'is rendered: ' + rendered
-			# console.log text + 'has changed: ' + changed
-			# console.log text + 'has cached svg: ' + if svg then 'true' else 'false'
-
 			if (svg and not changed and not ignore_svg)
 				console.log 'drawing ' + text + 'chart from cache'
-				@$(parent).html svg
+				# console.log svg.length
 				# console.log svg.indexOf('opacity: 0.000001;') < 0
+				@$(parent).html svg
+				@pubRender attr
 			else if chart_json and name
+				# console.log text + 'is rendered: ' + rendered
+				console.log text + 'has svg: ' + svg?
+				console.log text + 'ignore svg: ' + ignore_svg
+				console.log text + 'has changed: ' + changed
 				console.log 'getting ' + text + 'script'
 				draw = @$ '#draw-' + chart_class
 				chart_data = JSON.parse chart_json
 				nvd3 = new nvd3util chart_data, selection, draw
 				nvd3.init()
-				_.defer @setSVG, attr
+				_.defer(@setSVG, attr) if not svg or changed
+				_.defer @pubRender, attr
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
+
+	pubRender: (attr) =>
+		@publishEvent 'rendered:' + attr, null
+		console.log 'published rendered:' + attr
 
 	setSVG: (attr) =>
 		chart_class = 'chart-' + attr[0..2]
@@ -84,7 +87,7 @@ module.exports = class GraphView extends View
 		html = @$(parent).html()
 		bad = 'opacity: 0.000001;'
 
-		if html and html.indexOf(bad) < 0 and html.length > 25
+		if html and html.indexOf(bad) < 0 and html.length > 40
 			svg_attr = attr + config.svg_suffix
 			console.log 'setting' + text + 'svg'
 			svg = html.replace(/\"/g, '\'')

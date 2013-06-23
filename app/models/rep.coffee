@@ -7,7 +7,7 @@ module.exports = class Rep extends Model
 	initialize: ->
 		super
 		@set created: new Date().toString() if @isNew() or not @get 'created'
-		@set score_sort: @get 'score' if not @get 'score_sort'
+		@set score_sort: @get 'score' if not @get 'score_sort' and @get 'score'
 
 	toggle: ->
 		@set called: not @get 'called'
@@ -49,4 +49,4 @@ module.exports = class Rep extends Model
 			{key: 'End', values: endValues},
 			{key: 'Duration', values: durValues}]
 
-		JSON.stringify(data)
+		JSON.stringify data

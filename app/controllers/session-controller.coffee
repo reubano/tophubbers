@@ -1,6 +1,5 @@
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
-User = require 'models/user'
 View = require 'views/login-view'
 Provider = require 'lib/services/google'
 

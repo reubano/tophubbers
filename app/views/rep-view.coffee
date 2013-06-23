@@ -4,9 +4,6 @@ View = require 'views/graph-view'
 template = require 'views/templates/rep'
 
 module.exports = class RepView extends View
-#	response = 'draftResponse=%5B%5D%0D%0A'
-#	history = '&pageHistory=0'
-#	base = 'https://docs.google.com/forms/d/'
 	mediator = Chaplin.mediator
 
 	autoRender: true
@@ -22,7 +19,7 @@ module.exports = class RepView extends View
 		@id = @model.get 'id'
 		mediator.rep_id = @id
 		console.log 'initialize rep-view for ' + @id
-		console.log 'options:'
+		console.log @forms
 		console.log options
 
 		if @user
@@ -34,6 +31,7 @@ module.exports = class RepView extends View
 		console.log 'User name is ' + @name
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
+		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
@@ -44,13 +42,25 @@ module.exports = class RepView extends View
 			@listenTo @model, prefix + 'feedback_data', @render
 			@listenTo @model, prefix + 'progress', @render
 
+		@listenTo @forms, 'add', ->
+			console.log 'rep-view caught add event'
+		@listenTo @forms, 'request', (model, xhr, options) ->
+			console.log 'rep-view caught request event'
+			console.log model
+			console.log xhr
+			console.log options
+		@listenTo @forms, 'sync', ->
+			console.log 'rep-view caught sync event'
+		@listenTo @forms, 'sync', @success
+		@listenTo @forms, 'error', @failWhale
+		@listenTo @forms, 'invalid', @failWhale
+
 	setUserName: (user) =>
 		@name = user.get 'name'
 		console.log 'User name is ' + @name
 
 	render: =>
 		super
-		_.defer @removeActive
 		console.log 'rendering rep view for ' + @id
 		@renderDatepicker '#review-datepicker'
 		@renderDatepicker '#network-datepicker'
@@ -65,81 +75,47 @@ module.exports = class RepView extends View
 	renderDatepicker: (selection) =>
 		momentous = new Momentous @.$ selection
 		momentous.init()
-		console.log momentous
+		# console.log momentous
 
 	objectify: (form) ->
 		data = @.$(form).serializeArray()
 		keys = ((y for x,y of z)[0] for z in data)
 		values = ((y for x,y of z)[1] for z in data)
 		obj = _.object(keys, values)
-		_.extend(obj, {rep: @id, manager: @name, form: form})
+		_.extend obj, {rep: @id, manager: @name, form: form}
 
 	networkFormSubmit: =>
 		json = @objectify('#network-form')
-#		date = data[0].value
-#		month = date[0..1]
-#		day = date[3...5]
-#		year = date[6..]
-#		key = '1dq25yvpMKDxpXB8EKf0R-Ss9awgJQ3s4ZTrxUhVSRk4/formResponse?'
-#
-#		day = '&entry.550366252_day=' + day
-#		month = '&entry.550366252_month=' + month
-#		year = '&entry.550366252_year=' + year
-#		reason = '&entry.1863214152=' + encodeURIComponent data[1].value
-#		user = '&entry.1079468731=' + encodeURIComponent @name
-#		rep = '&entry.1854922402=' + @id
-#
-#		fields = day + month + year + reason + user + rep
-#		url = base + key + response + fields + history
 		console.log 'saving form data...'
 		console.log json
 		@forms.create json
-		@render()
-		console.log @forms
-		@success()
-#		console.log url
-#		$.post(url).always(@getGithub)
 
 	reviewFormSubmit: =>
 		json = @objectify('#review-form')
-#		date = data[0].value
-# 		month = date[0..1]
-#		day = date[3...5]
-#		year = date[6..]
-#		key = '1NUy1KZTgjFqMXp6HPe1G5nr2AaiFe_FfRltT9sMsAek/formResponse?'
-#
-#		day = '&entry.1240672778_day=' + day
-#		month = '&entry.1240672778_month=' + month
-#		year = '&entry.1240672778_year=' + year
-#		type = '&entry.1863214152=' + encodeURIComponent data[1].value
-#		observations = '&entry.2056428099=' + encodeURIComponent data[2].value
-#		notes = '&entry.1079468731=' + encodeURIComponent data[3].value
-#		user = '&entry.804551073=' + encodeURIComponent @name
-#		rep = '&entry.1854922402=' + @id
-#
-#		fields = day + month + year + type + observations + notes + user + rep
-#		url = base + key + response + fields + history
 		console.log 'saving form data...'
 		console.log json
 		@forms.create json
-		console.log @forms
-		@success()
-#		console.log url
-#		$.post(url).always(@getGithub)
 
-	getGithub: =>
-		# posting to google will always return a failure status b.c.
-		# of the same-origin-policy. github is cors enabled and doesn't suffer
-		# from this drawback so we use this as a proxy for determining if the
-		# form posted http://stackoverflow.com/questions/3076414
-		$.get('https://api.github.com').done(@success).fail(@failWhale)
+	success: (model, resp, options) =>
+		if model.get('id')
+			console.log 'successfully posted form for ' + model.get('id') + '!'
+			@$('#success-modal').modal()
+		else
+			console.log 'successfully fetched forms'
+			@render()
 
-	success: (data, textStatus, jqXHR) =>
-		console.log 'successfully posted form!'
-		@$('#success-modal').modal()
+		console.log model
+		console.log resp
+		console.log options
 
-	failWhale: (jqXHR, textStatus, errorThrown) =>
-		console.log 'failed to post form'
-		console.log textStatus + ': ' + jqXHR.status
-		console.log 'error: ' + errorThrown if errorThrown
-		@$('#fail-modal').modal()
+	failWhale: (model, xhr, options) =>
+		if model.get('id')
+			console.log 'failed to post form for ' + model.get('id')
+			@$('#fail-modal').modal()
+		else
+			console.log 'failed to fetch forms'
+
+		console.log model
+		console.log xhr
+		console.log options
+
