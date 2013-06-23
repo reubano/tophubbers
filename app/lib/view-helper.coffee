@@ -54,6 +54,11 @@ Handlebars.registerHelper 'with_forms', (options) ->
   context = mediator.forms or {}
   Handlebars.helpers.with.call(this, context, options)
 
+# Evaluate block with context being download
+Handlebars.registerHelper 'with_download', (options) ->
+  context = mediator.download or {}
+  Handlebars.helpers.with.call(this, context, options)
+
 # Conditional evaluation
 # ----------------------
 
