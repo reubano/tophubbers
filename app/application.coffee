@@ -56,7 +56,7 @@ module.exports = class Application extends Chaplin.Application
     Chaplin.mediator.forms = new Forms()
     Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
-    Chaplin.mediator.users.fetch {local: true}
-    Chaplin.mediator.forms.fetch {local: true}
-    Chaplin.mediator.reps.fetch {local: true}
+    Chaplin.mediator.users.fetch()
+    Chaplin.mediator.forms.fetch {remote: false}
+    Chaplin.mediator.reps.fetch()
     Chaplin.mediator.seal()

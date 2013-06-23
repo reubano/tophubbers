@@ -1,3 +1,4 @@
+config = require 'config'
 Momentous = require 'lib/momentous'
 Chaplin = require 'chaplin'
 View = require 'views/graph-view'
@@ -12,8 +13,9 @@ module.exports = class RepView extends View
 	template: template
 	user: mediator.users.get(1)
 	forms: mediator.forms
+	synced: false
 
-	initialize: (options) ->
+	initialize: (options) =>
 		super
 		@attrs = options.attrs
 		@id = @model.get 'id'
@@ -29,6 +31,7 @@ module.exports = class RepView extends View
 			@subscribeEvent 'userUpdated', @setUserName
 
 		console.log 'User name is ' + @name
+		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
 		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
@@ -44,13 +47,8 @@ module.exports = class RepView extends View
 
 		@listenTo @forms, 'add', ->
 			console.log 'rep-view caught add event'
-		@listenTo @forms, 'request', (model, xhr, options) ->
-			console.log 'rep-view caught request event'
-			console.log model
-			console.log xhr
-			console.log options
-		@listenTo @forms, 'sync', ->
-			console.log 'rep-view caught sync event'
+		@listenTo @forms, 'request', @viewRequest
+		@listenTo @forms, 'change', @render
 		@listenTo @forms, 'sync', @success
 		@listenTo @forms, 'error', @failWhale
 		@listenTo @forms, 'invalid', @failWhale
@@ -84,6 +82,25 @@ module.exports = class RepView extends View
 		obj = _.object(keys, values)
 		_.extend obj, {rep: @id, manager: @name, form: form}
 
+	checkOnline: ->
+		$.ajax config.forms
+
+	sendForms: =>
+		console.log 'sending form changes to server'
+		@forms.syncDirtyAndDestroyed()
+
+	fetchForms: =>
+		if not @synced
+			console.log 'fetching form changes from server'
+			@forms.fetch
+				data:
+					"results_per_page=30&q=" + JSON.stringify
+						"filters": [{"name": "rep", "val": @id, "op": "eq"}]
+						"order_by": [{"field": "date", "direction": "desc"}]
+
+		else
+			console.log 'forms already synced'
+
 	networkFormSubmit: =>
 		json = @objectify('#network-form')
 		console.log 'saving form data...'
@@ -96,13 +113,21 @@ module.exports = class RepView extends View
 		console.log json
 		@forms.create json
 
+	viewRequest: (model, resp, options) ->
+		console.log 'rep-view caught request event'
+		console.log model
+		console.log resp
+		console.log options
+
 	success: (model, resp, options) =>
+		console.log 'rep-view caught sync event'
 		if model.get('id')
-			console.log 'successfully posted form for ' + model.get('id') + '!'
+			console.log 'successfully posted form #' + model.get('id') + '!'
+			@render()
 			@$('#success-modal').modal()
 		else
-			console.log 'successfully fetched forms'
-			@render()
+			console.log 'successfully synced forms'
+			@synced = true
 
 		console.log model
 		console.log resp
@@ -118,4 +143,3 @@ module.exports = class RepView extends View
 		console.log model
 		console.log xhr
 		console.log options
-
