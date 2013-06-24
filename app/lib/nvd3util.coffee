@@ -1,9 +1,10 @@
 module.exports = class nvd3util
-	constructor: (data, selection, draw, resize=false) ->
+	constructor: (data, selection, draw, changed=false, resize=false) ->
 		@data = data
 		@selection = selection
 		@draw = draw
 		@resize = resize
+		@changed = changed
 
 	nvlog: (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab: (data) -> data.label
@@ -26,6 +27,7 @@ module.exports = class nvd3util
 		maxTime = 18.5
 		chartRange = [minTime * 60, maxTime * 60]
 		tickInterval = []
+		color = if @changed then '#FFD658' else 'steelblue'
 
 		while i < maxTime - 1
 			tickInterval[i] = (minTime + i + 1) * 60
@@ -41,7 +43,7 @@ module.exports = class nvd3util
 			#.tooltips(false)
 			.stacked(true)
 			.showLegend(false)
-			.barColor([d3.rgb('steelblue')])
+			.barColor([d3.rgb(color)])
 			.showControls(false)
 
 		chart.yAxis

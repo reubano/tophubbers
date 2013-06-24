@@ -7,14 +7,14 @@ switch window.location.hostname
 	else
 		console.log 'production envrionment set'
 		api_url = 'http://ongeza-api.herokuapp.com/'
-		forms_url = 'http://ongeza-forms.herokuapp.com/forms'
-		age = 24	 # in hours
+		forms_url = 'http://ongeza-forms.herokuapp.com/api/forms'
+		age = 12	 # in hours
 
 config =
 	api: api_url
+	rpp: 100   # form results per page
 	forms: forms_url
 	max_age: age
-	poll_intrv: 24	 # in hours
 	to_chart: 'work_data'
 	data_attrs: ['cur_work_data', 'prev_work_data']
 	res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data']

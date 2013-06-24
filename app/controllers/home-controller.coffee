@@ -11,27 +11,25 @@ module.exports = class HomeController extends Controller
 
 	initialize: =>
 		console.log 'initialize home-controller'
+		@subscribeEvent 'fetchData', ->
+			_.delay @fetchAndPub, config.max_age * 1000 * 60 * 60
 
 	show: (params) =>
 		console.log 'show home'
 		@view = new View {@model}
 
-	fetchData: =>
-		if @collection.length is 0
-			console.log 'no collection so fetching all data...'
-			@fetchData()
-		else
-			console.log 'fetching expired data...'
-			@fetchExpiredData()
+	fetchAndPub: =>
+		@fetchData()
+		@publishEvent 'fetchData', -> null
 
+	fetchData: =>
+		console.log 'fetching all form data...'
+		@fetchData()
 		@forms.syncDirtyAndDestroyed()
 		@forms.fetch
 			data:
-				"results_per_page=100&q=" + JSON.stringify
+				'results_per_page=' + config.rpp + '&q=' + JSON.stringify
 					"order_by": [{"field": "date", "direction": "desc"}]
-
-		_.delay @fetchData, config.poll_intrv * 1000 * 60 * 60
-		# _.delay @fetchData, 5000
 
 	refresh: =>
 		@redirectToRoute 'home#show'
