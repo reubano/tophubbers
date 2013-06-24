@@ -3,15 +3,15 @@ View = require 'views/base/view'
 template = require 'views/templates/navbar'
 
 module.exports = class NavbarView extends View
-  mediator = Chaplin.mediator
+	mediator = Chaplin.mediator
 
-  autoRender: true
-  className: 'navbar-inner'
-  region: 'navbar'
-  template: template
+	autoRender: true
+	className: 'navbar-inner'
+	region: 'navbar'
+	template: template
 
-  initialize: (options) ->
-    super
-    # console.log 'navbar-view init'
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'dispatcher:dispatch', @render
+	initialize: (options) ->
+		super
+		# console.log 'navbar-view init'
+		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'dispatcher:dispatch', @render

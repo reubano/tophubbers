@@ -21,7 +21,8 @@ module.exports = class Momentous
 
 	dropdownTemplate =	"""
 		<div class='input-append'>
-			<input class='momentous-input' type='text' name='date' id='momentous' value='' readonly>
+			<input class='momentous-input' type='text' name='date'
+				id='momentous' value='' readonly>
 			<button class='btn momentous-cal-button' type='button'>
 				<i class='icon-calendar'></i>
 			</button>
@@ -123,7 +124,9 @@ module.exports = class Momentous
 				weekClasses = 'week'
 
 			[0..6].map (dow) =>
-				curDay = moment weekStart.day(@weekStart + dow).format(@dateFormat), @dateFormat
+				combo = @weekStart + dow
+				df = @dateFormat
+				curDay = moment weekStart.day(combo).format(df), df
 				curDayDate = curDay.format @dateFormat
 				classes = 'day'
 				if curDay.month() < month then classes += ' lastMonth'
@@ -132,7 +135,8 @@ module.exports = class Momentous
 					classes += ' active'
 					weekClasses += ' active'
 
-				daysHTML += "<td class='#{classes}' data-date='#{curDayDate}'>#{curDay.date()}</td>"
+				daysHTML += "<td class='#{classes}' data-date='#{curDayDate}'>" +
+					"#{curDay.date()}</td>"
 
 			weekHTML = "<tr class='#{weekClasses}'>#{daysHTML}</tr>"
 			calHTML += weekHTML
@@ -157,10 +161,13 @@ module.exports = class Momentous
 		for month in [0..11]
 			monthName = curMonth.format 'MMM'
 			monthNum = curMonth.format 'M'
-			if curMonth.month() == @curDate.month() and curMonth.year() == @curDate.year()
-				monthsHTML += "<li class='month-button active' data-date='#{monthNum}'>#{monthName}</li>"
+			if curMonth.month() is @curDate.month() and
+			curMonth.year() is @curDate.year()
+				monthsHTML += "<li class='month-button active' data-date=" +
+					"'#{monthNum}'>#{monthName}</li>"
 			else
-				monthsHTML += "<li class='month-button' data-date='#{monthNum}'>#{monthName}</li>"
+				monthsHTML += "<li class='month-button' data-date=" +
+					"'#{monthNum}'>#{monthName}</li>"
 
 			curMonth.add 'months', 1
 
