@@ -80,7 +80,7 @@ module.exports = class RepView extends View
 		keys = ((y for x,y of z)[0] for z in data)
 		values = ((y for x,y of z)[1] for z in data)
 		obj = _.object(keys, values)
-		_.extend obj, {rep: @id, manager: @name, form: form}
+		_.extend obj, {rep: @id, manager: @name, form: form[1..]}
 
 	checkOnline: ->
 		$.ajax config.forms
@@ -96,6 +96,8 @@ module.exports = class RepView extends View
 				data:
 					'results_per_page=' + config.rpp + '&q=' + JSON.stringify
 						"order_by": [{"field": "date", "direction": "desc"}]
+						"filters": [
+							{"name": 'form', "op": 'eq', "val": "network-form"}]
 		else
 			console.log 'forms already synced'
 
