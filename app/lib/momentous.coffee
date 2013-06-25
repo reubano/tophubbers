@@ -19,37 +19,37 @@ module.exports = class Momentous
 		@dropdown.find('.dir-button').bind 'click', @directionClickHandler
 		@viewButton.bind 'click', @viewClickHandler
 
-	dropdownTemplate =	"""
-		<div class='input-append'>
-			<input class='momentous-input' type='text' name='date'
-				id='momentous' value='' readonly>
-			<button class='btn momentous-cal-button' type='button'>
-				<i class='icon-calendar'></i>
-			</button>
-		</div>
-		<div class='momentous-dropdown popover bottom'>
-			<div class='arrow'></div>
-			<div class='momentous-nav'>
-				<span class='dir-button prev'>
-					<i class='icon-chevron-left'></i>
-				</span>
-				<span class='view-button'></span>
-				<span class='dir-button next'>
-					<i class='icon-chevron-right'></i>
-				</span>
-			</div>
-			<div class='days-view' style='display: none;'>
-				<table class='table-condensed'>
-					<thead>
-						<tr class='dow-row'></tr>
-					</thead>
-					<tbody></tbody>
-				</table>
-			</div>
-			<div class='months-view' style='display: none;'>
-				<ul></ul>
-			</div>
-		</div>
+	dropdownTemplate = """
+/t/t<div class='input-append'>
+/t/t/t<input class='momentous-input' type='text' name='date'
+/t/t/t/tid='momentous' value='' readonly>
+/t/t/t<button class='btn momentous-cal-button' type='button'>
+/t/t/t/t<i class='icon-calendar'></i>
+/t/t/t</button>
+/t/t</div>
+/t/t<div class='momentous-dropdown popover bottom'>
+/t/t/t<div class='arrow'></div>
+/t/t/t<div class='momentous-nav'>
+/t/t/t/t<span class='dir-button prev'>
+/t/t/t/t/t<i class='icon-chevron-left'></i>
+/t/t/t/t</span>
+/t/t/t/t<span class='view-button'></span>
+/t/t/t/t<span class='dir-button next'>
+/t/t/t/t/t<i class='icon-chevron-right'></i>
+/t/t/t/t</span>
+/t/t/t</div>
+/t/t/t<div class='days-view' style='display: none;'>
+/t/t/t/t<table class='table-condensed'>
+/t/t/t/t/t<thead>
+/t/t/t/t/t/t<tr class='dow-row'></tr>
+/t/t/t/t/t</thead>
+/t/t/t/t/t<tbody></tbody>
+/t/t/t/t</table>
+/t/t/t</div>
+/t/t/t<div class='months-view' style='display: none;'>
+/t/t/t/t<ul></ul>
+/t/t/t</div>
+/t/t</div>
 	"""
 
 	init: =>
