@@ -6,6 +6,16 @@ exports.config =
   # conventions:
   #   vendor: /^vendor.nvd3/
 
+  plugins:
+    coffeelint:
+      pattern: /^app\/.*\.coffee$/
+      options:
+        no_tabs:
+          level: "ignore"
+        indentation:
+          value: 1
+          level: "error"
+
   files:
     javascripts:
       joinTo:

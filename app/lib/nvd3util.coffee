@@ -1,4 +1,4 @@
-module.exports = class nvd3util
+module.exports = class Nvd3util
 	constructor: (data, selection, draw, changed=false, resize=false) ->
 		@data = data
 		@selection = selection
