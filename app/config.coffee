@@ -2,7 +2,7 @@ switch window.location.hostname
 	when 'localhost'
 		console.log 'development envrionment set'
 		api_url = 'http://localhost:5000/'
-		forms_url = 'http://localhost:5001/forms'
+		forms_url = 'http://localhost:5001/api/forms'
 		age = 72	 # in hours
 	else
 		console.log 'production envrionment set'
