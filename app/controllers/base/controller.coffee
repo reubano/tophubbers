@@ -36,7 +36,7 @@ module.exports = class Controller extends Chaplin.Controller
 		list = if list then list else config.res
 
 		for r in @getResList(list)
-			@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+			@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
 	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
 		@id = id
@@ -46,7 +46,7 @@ module.exports = class Controller extends Chaplin.Controller
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
 				console.log r.item + ' cache not found or expired'
-				@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+				@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 			else
 				console.log 'using cached ' + r.item + ' data'
 				@setCharts 'HTTP 200', 'success', url: r.url
