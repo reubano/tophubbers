@@ -15,14 +15,16 @@ module.exports = class GraphView extends View
 		@attrs = options.attrs
 		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
+		@changed = false
 		console.log 'initialize graph-view for ' + @id
 		console.log options
 
 		for attr in @attrs
 			change = 'change:' + attr + config.chart_suffix
-			@listenTo @model, change, @render
 			@listenTo @model, change, ->
 				console.log 'graph-view heard modelChange'
+				@changed = true
+				@render()
 			# @subscribeEvent 'dispatcher:dispatch', ->
 			#	console.log 'graph-view caught dispatcher event'
 
@@ -52,10 +54,9 @@ module.exports = class GraphView extends View
 			name = @model.get 'first_name'
 			svg = if @model.get svg_attr then @model.get svg_attr else null
 			# rendered = if @$(selection).html() then true else false
-			changed = @model.hasChanged attr
 			text = @id + ' ' + attr + ' '
 
-			if (svg and not changed and not ignore_svg)
+			if (svg and not @changed and not ignore_svg)
 				console.log 'drawing ' + text + 'chart from cache'
 				# console.log svg.length
 				# console.log svg.indexOf('opacity: 0.000001;') < 0
@@ -65,13 +66,13 @@ module.exports = class GraphView extends View
 				# console.log text + 'is rendered: ' + rendered
 				console.log text + 'has svg: ' + svg?
 				console.log text + 'ignore svg: ' + ignore_svg
-				console.log text + 'has changed: ' + changed
+				console.log text + 'has changed: ' + @changed
 				console.log 'getting ' + text + 'script'
 				draw = @$ '#draw-' + chart_class
 				chart_data = JSON.parse chart_json
-				nvd3 = new nvd3util chart_data, selection, draw, changed
+				nvd3 = new nvd3util chart_data, selection, draw, @changed
 				nvd3.init()
-				_.defer(@setSVG, attr) if not svg or changed
+				_.defer(@setSVG, attr)
 				_.defer @pubRender, attr
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
