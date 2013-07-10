@@ -55,6 +55,7 @@ module.exports = class Controller extends Chaplin.Controller
 		@parser.href = jqXHR.url
 		console.log 'failed to fetch ' + jqXHR.url
 		console.log 'error: ' + errorThrown if errorThrown
+		$.get config.api + 'reset'
 
 	saveCollection: =>
 		console.log 'saving collection'
