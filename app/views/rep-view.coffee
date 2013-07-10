@@ -38,7 +38,7 @@ module.exports = class RepView extends View
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
-		# @subscribeEvent 'dispatcher:dispatch', @render
+			# @render()
 
 		for prefix in ['change:cur_', 'change:prev_']
 			@listenTo @model, prefix + 'work_data_c', @render

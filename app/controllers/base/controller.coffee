@@ -36,7 +36,7 @@ module.exports = class Controller extends Chaplin.Controller
 		list = if list then list else config.res
 
 		for r in @getResList(list)
-			@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+			@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
 	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
 		@id = id
@@ -46,7 +46,7 @@ module.exports = class Controller extends Chaplin.Controller
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
 				console.log r.item + ' cache not found or expired'
-				@getData(r.url).done(@setReps).done(@setCharts).fail(@failWhale)
+				@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 			else
 				console.log 'using cached ' + r.item + ' data'
 				@setCharts 'HTTP 200', 'success', url: r.url
@@ -97,16 +97,17 @@ module.exports = class Controller extends Chaplin.Controller
 					chart_attr = attr + config.chart_suffix
 					id = model.get 'id'
 
-					if (not model.get(chart_attr) or model.hasChanged(attr))
-					# if model.get(attr)
+					# if (not model.get(chart_attr) or model.hasChanged(attr))
+					if model.get(attr)
 						console.log id + ': fetching missing chart data'
 						data = model.getChartData attr
 						console.log JSON.parse data
 						model.set chart_attr, data
 						model.save {patch: true}
 					else
-						text = id + ': ' + chart_attr + ' present and '
-						console.log text + attr + ' unchanged'
+						console.log attr + 'not present'
+						# text = id + ': ' + chart_attr + ' present and '
+						# console.log text + attr + ' unchanged'
 		else
 			console.log source + ' not chartable'
 
@@ -120,7 +121,7 @@ module.exports = class Controller extends Chaplin.Controller
 		if tstamp
 			string = 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ'
 			mstamp = moment(tstamp, string)
-			age = mstamp.diff(moment(), 'hours')
+			age = Math.abs mstamp.diff(moment(), 'hours')
 			console.log attr + ' age: ' + mstamp.fromNow(true)
 			age >= config.max_age
 		else
