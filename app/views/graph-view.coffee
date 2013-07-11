@@ -93,7 +93,8 @@ module.exports = class GraphView extends View
 			console.log 'setting' + text + 'svg'
 			svg = html.replace(/\"/g, '\'')
 			@model.set svg_attr, svg
-			@model.save()
 		else
 			console.log 'html blank or malformed for ' + parent
-			# setTimeout @setSVG, attr
+			@model.unset svg_attr
+
+		@model.save()
