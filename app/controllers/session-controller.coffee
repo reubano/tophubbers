@@ -26,10 +26,10 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent 'logout', @logout
 		@subscribeEvent 'clearView', @disposeLoginView
 		@subscribeEvent 'userData', @updateUser
+		@subscribeEvent 'loggingIn', @setLoggingIn
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
-		@subscribeEvent 'loggingIn', @setLoggingIn
 
 		console.log 'initialize SessionController'
 
