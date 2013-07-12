@@ -31,5 +31,7 @@
 	</div>
 	{{/each}}
 {{else}}
+	{{#if_not_logging_in}}
 	<h1 class="text-info">Welcome to the Ongeza Sales App. Please login above.</h1>
+	{{/if_not_logging_in}}
 {{/if_logged_in}}

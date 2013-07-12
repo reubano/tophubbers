@@ -28,6 +28,7 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
+		@subscribeEvent 'loggingIn', @setLoggingIn
 
 		console.log 'initialize SessionController'
 
@@ -63,6 +64,7 @@ module.exports = class SessionController extends Controller
 	showLoginView: ->
 		console.log 'session-controller showLoginView'
 		return if @loginView
+		@publishEvent 'loggingIn', true
 		@loadServiceProviders()
 		@loginView = new View()
 
@@ -104,6 +106,10 @@ module.exports = class SessionController extends Controller
 		@loginStatusDetermined = true
 		@publishEvent 'login', @user
 		@publishEvent 'loginStatus', true
+		@publishEvent 'loggingIn', false
+
+	setLoggingIn: (value) =>
+		mediator.loggingIn = value
 
 	# Logout
 	# ------
