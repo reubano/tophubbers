@@ -48,6 +48,7 @@ module.exports = class SessionController extends Controller
 
 	# Load the libraries of all service providers
 	loadServiceProviders: ->
+		console.log 'session-controller loadServiceProviders'
 		for name, serviceProvider of SessionController.serviceProviders
 			serviceProvider.load()
 
