@@ -61,7 +61,7 @@ module.exports = class Google extends ServiceProvider
 		@authorize @loginHandler, true
 
 	isLoaded: ->
-		console.log 'google isLoaded'
+		console.log 'google check isLoaded'
 		Boolean window.gapi and gapi.auth and gapi.auth.authorize
 
 	triggerLogin: =>
