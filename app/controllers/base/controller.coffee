@@ -10,6 +10,7 @@ module.exports = class Controller extends Chaplin.Controller
 	beforeAction: (params, route) =>
 		@compose 'site', SiteView
 		console.log 'beforeAction'
+		@publishEvent 'clearView'
 		@compose 'auth', ->
 			SessionController = require 'controllers/session-controller'
 			@controller = new SessionController params

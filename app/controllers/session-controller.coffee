@@ -24,11 +24,14 @@ module.exports = class SessionController extends Controller
 	initialize: (params) ->
 		@subscribeEvent 'serviceProviderSession', @serviceProviderSession
 		@subscribeEvent 'logout', @logout
+		@subscribeEvent 'clearView', @disposeLoginView
 		@subscribeEvent 'userData', @updateUser
+		@subscribeEvent 'loggingIn', @setLoggingIn
+		@subscribeEvent 'loginFail', @processFail
+		@subscribeEvent 'serviceProviderMissing', @processFail
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
-		@subscribeEvent 'loggingIn', @setLoggingIn
 
 		console.log 'initialize SessionController'
 
@@ -77,6 +80,7 @@ module.exports = class SessionController extends Controller
 
 		# Publish an event in case the provider library could not be loaded
 		unless serviceProvider.isLoaded()
+			console.log 'serviceProviderMissing'
 			@publishEvent 'serviceProviderMissing', serviceProviderName
 			return
 
@@ -111,6 +115,12 @@ module.exports = class SessionController extends Controller
 
 	setLoggingIn: (value) =>
 		mediator.loggingIn = value
+
+	processFail: (params) =>
+		name = if params.provider then params.provider.name else 'provider'
+		console.log name + ' login failed'
+		mediator.loginFailed = true
+		@publishEvent 'loggingIn', false
 
 	# Logout
 	# ------

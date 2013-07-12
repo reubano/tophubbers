@@ -1,3 +1,9 @@
+{{#if_login_failed}}
+<h1 class="text-error">Login failed. Please check your connection.</h1>
+{{else}}
 <h1 class="text-info">
 	<img src="images/spinner.gif" style="padding-right:10px;"/>Logging in...
 </h1>
+{{/if_login_failed}}
+
+

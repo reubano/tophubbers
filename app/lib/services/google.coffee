@@ -33,6 +33,7 @@ module.exports = class Google extends ServiceProvider
 		console.log 'google load'
 		console.log 'state: ' + @state()
 		console.log 'loading: ' + @loading
+		@publishEvent 'loginFail', {provider: this} if @state() is 'rejected'
 		return if @state() is 'resolved' or @loading
 		@loading = true
 
@@ -47,7 +48,7 @@ module.exports = class Google extends ServiceProvider
 
 	loadHandler: =>
 		console.log 'google loadHandler'
-		@publishEvent '!showLogin', false
+		@publishEvent '!showLogin'
 		gapi.client.setApiKey @apiKey
 		# Remove the global load handler
 		try
@@ -82,7 +83,6 @@ module.exports = class Google extends ServiceProvider
 			console.log "couldn't auto login... triggering popup"
 			@triggerLogin()
 		else
-			console.log 'google login failed'
 			@publishEvent 'loginFail', {provider: this, authResponse}
 
 	getUserData: (callback) ->
