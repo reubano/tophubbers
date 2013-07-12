@@ -27,6 +27,7 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent 'clearView', @disposeLoginView
 		@subscribeEvent 'userData', @updateUser
 		@subscribeEvent 'loggingIn', @setLoggingIn
+		@subscribeEvent 'loginFail', @processFail
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
@@ -112,6 +113,12 @@ module.exports = class SessionController extends Controller
 
 	setLoggingIn: (value) =>
 		mediator.loggingIn = value
+
+	processFail: (params) =>
+		name = if params.provider then params.provider.name else 'provider'
+		console.log name + ' login failed'
+		mediator.loginFailed = true
+		@publishEvent 'loggingIn', false
 
 	# Logout
 	# ------

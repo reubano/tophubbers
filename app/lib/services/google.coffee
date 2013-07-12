@@ -82,7 +82,6 @@ module.exports = class Google extends ServiceProvider
 			console.log "couldn't auto login... triggering popup"
 			@triggerLogin()
 		else
-			console.log 'google login failed'
 			@publishEvent 'loginFail', {provider: this, authResponse}
 
 	getUserData: (callback) ->
