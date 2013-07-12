@@ -5,6 +5,10 @@ View = require 'views/login-view'
 module.exports = class AuthController extends Controller
 	mediator = Chaplin.mediator
 
+	initialize: =>
+		console.log 'initialize auth-controller'
+		@subscribeEvent 'login', -> @redirectToRoute 'home#show'
+
 	logout: =>
 		console.log 'auth-controller logging out'
 		@redirectToRoute 'home#show', login: false
