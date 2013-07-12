@@ -118,7 +118,6 @@ module.exports = class SessionController extends Controller
 		@loginStatusDetermined = true
 		@disposeUser()
 		@serviceProviderName = null
-		@showLoginView()
 		@publishEvent 'loginStatus', false
 
 	saveUser: =>
