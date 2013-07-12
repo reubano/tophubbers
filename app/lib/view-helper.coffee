@@ -68,6 +68,10 @@ Handlebars.registerHelper 'with_download', (options) ->
 Handlebars.registerHelper 'if_logged_in', (options) ->
 	if mediator.user then options.fn(this) else options.inverse(this)
 
+Handlebars.registerHelper 'if_login_failed', (options) ->
+	if mediator.loginFailed then options.fn(this) else options.inverse(this)
+
+
 Handlebars.registerHelper 'if_not_logging_in', (options) ->
 	if mediator.loggingIn then options.inverse(this) else options.fn(this)
 

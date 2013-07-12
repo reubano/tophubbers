@@ -28,6 +28,7 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent 'userData', @updateUser
 		@subscribeEvent 'loggingIn', @setLoggingIn
 		@subscribeEvent 'loginFail', @processFail
+		@subscribeEvent 'serviceProviderMissing', @processFail
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
@@ -79,6 +80,7 @@ module.exports = class SessionController extends Controller
 
 		# Publish an event in case the provider library could not be loaded
 		unless serviceProvider.isLoaded()
+			console.log 'serviceProviderMissing'
 			@publishEvent 'serviceProviderMissing', serviceProviderName
 			return
 

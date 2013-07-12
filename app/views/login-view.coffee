@@ -10,3 +10,4 @@ module.exports = class LoginView extends View
 	initialize: (options) ->
 		super
 		@subscribeEvent 'dispatcher:dispatch', @render
+		@subscribeEvent 'loginFail', @render

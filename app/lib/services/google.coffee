@@ -33,6 +33,7 @@ module.exports = class Google extends ServiceProvider
 		console.log 'google load'
 		console.log 'state: ' + @state()
 		console.log 'loading: ' + @loading
+		@publishEvent 'loginFail', {provider: this} if @state() is 'rejected'
 		return if @state() is 'resolved' or @loading
 		@loading = true
 
