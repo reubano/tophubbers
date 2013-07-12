@@ -1,5 +1,6 @@
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
+View = require 'views/login-view'
 
 module.exports = class AuthController extends Controller
 	mediator = Chaplin.mediator
@@ -12,5 +13,4 @@ module.exports = class AuthController extends Controller
 	login: =>
 		console.log 'auth-controller logging in'
 		@publishEvent '!login', 'google'
-		@redirectToRoute 'home#show'
-		location.reload()
+		@view = new View()
