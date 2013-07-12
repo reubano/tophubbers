@@ -47,7 +47,7 @@ module.exports = class Google extends ServiceProvider
 
 	loadHandler: =>
 		console.log 'google loadHandler'
-		@publishEvent '!showLogin', false
+		@publishEvent '!showLogin'
 		gapi.client.setApiKey @apiKey
 		# Remove the global load handler
 		try

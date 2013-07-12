@@ -18,4 +18,4 @@ module.exports = class AuthController extends Controller
 	login: =>
 		console.log 'auth-controller logging in'
 		@publishEvent '!login', 'google'
-		@publishEvent '!showLogin', false
+		@publishEvent '!showLogin'
