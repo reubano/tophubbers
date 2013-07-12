@@ -66,8 +66,10 @@ Handlebars.registerHelper 'with_download', (options) ->
 
 # Choose block by user login status
 Handlebars.registerHelper 'if_logged_in', (options) ->
-	allowed = mediator.user
-	if allowed then options.fn(this) else options.inverse(this)
+	if mediator.user then options.fn(this) else options.inverse(this)
+
+Handlebars.registerHelper 'if_not_logging_in', (options) ->
+	if mediator.loggingIn then options.inverse(this) else options.fn(this)
 
 # Choose block by user role (returns true if role is at least that level
 Handlebars.registerHelper 'if_admin', (options) ->

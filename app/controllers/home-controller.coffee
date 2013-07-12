@@ -4,10 +4,12 @@ Controller = require 'controllers/base/controller'
 View = require 'views/home-view'
 
 module.exports = class HomeController extends Controller
+	mediator = Chaplin.mediator
+
 	adjustTitle: 'Ongeza Home'
-	collection: Chaplin.mediator.reps
-	model: Chaplin.mediator.navbar
-	forms: Chaplin.mediator.forms
+	collection: mediator.reps
+	model: mediator.navbar
+	forms: mediator.forms
 
 	initialize: =>
 		console.log 'initialize home-controller'

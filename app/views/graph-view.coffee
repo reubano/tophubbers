@@ -19,12 +19,13 @@ module.exports = class GraphView extends View
 		console.log 'initialize graph-view for ' + @id
 		console.log options
 
-		for attr in @attrs
+		for attr in config.data_attrs
 			change = 'change:' + attr + config.chart_suffix
 			@listenTo @model, change, ->
 				console.log 'graph-view heard modelChange'
 				@changed = true
-				@render()
+				@unsetSVG attr
+				@render() if attr in @attrs
 			# @subscribeEvent 'dispatcher:dispatch', ->
 			#	console.log 'graph-view caught dispatcher event'
 
@@ -81,6 +82,11 @@ module.exports = class GraphView extends View
 		@publishEvent 'rendered:' + attr, null
 		# console.log 'published rendered:' + attr
 
+	unsetSVG: (attr) =>
+		svg_attr = attr + config.svg_suffix
+		@model.unset svg_attr
+		@model.save()
+
 	setSVG: (attr) =>
 		chart_class = 'chart-' + attr[0..2]
 		parent = '#' + @id + '.view .' + chart_class
@@ -96,4 +102,3 @@ module.exports = class GraphView extends View
 			@model.save()
 		else
 			console.log 'html blank or malformed for ' + parent
-			# setTimeout @setSVG, attr

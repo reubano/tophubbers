@@ -1,16 +1,21 @@
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
+View = require 'views/home-view'
 
 module.exports = class AuthController extends Controller
-	mediator = Chaplin.mediator
+	model: Chaplin.mediator.navbar
+
+	initialize: =>
+		console.log 'initialize auth-controller'
+		@subscribeEvent 'login', -> @redirectToRoute 'home#show'
 
 	logout: =>
 		console.log 'auth-controller logging out'
-		@redirectToRoute 'home#show', login: false
+		console.log 'show home from auth-controller'
+		@view = new View {@model}
 		@publishEvent '!logout'
 
 	login: =>
-		console.log 'logging in'
+		console.log 'auth-controller logging in'
 		@publishEvent '!login', 'google'
-		@redirectToRoute 'home#show'
-		location.reload()
+		@publishEvent '!showLogin', false
