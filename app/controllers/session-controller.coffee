@@ -28,7 +28,6 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent 'userData', @updateUser
 		@subscribeEvent 'loggingIn', @setLoggingIn
 		@subscribeEvent 'loginFail', @processFail
-		@subscribeEvent 'serviceProviderMissing', @processFail
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
@@ -65,12 +64,18 @@ module.exports = class SessionController extends Controller
 			console.log 'done getting session'
 
 	# Handler for the global !showLogin event
-	showLoginView: ->
+	showLoginView: =>
 		console.log 'session-controller showLoginView'
 		return if @loginView
 		@publishEvent 'loggingIn', true
 		@loadServiceProviders()
 		@loginView = new View()
+		timeout = setTimeout(
+			=> @publishEvent('loginFail')
+			60000)
+		@subscribeEvent 'loginStatus', =>
+			clearTimeout timeout
+			@unsubscribeEvent 'loginStatus', -> null
 
 	# Handler for the global !login event
 	# Delegate the login to the selected service provider
@@ -81,7 +86,6 @@ module.exports = class SessionController extends Controller
 		# Publish an event in case the provider library could not be loaded
 		unless serviceProvider.isLoaded()
 			console.log 'serviceProviderMissing'
-			@publishEvent 'serviceProviderMissing', serviceProviderName
 			return
 
 		@publishEvent 'loginAttempt', serviceProviderName
@@ -117,9 +121,10 @@ module.exports = class SessionController extends Controller
 		mediator.loggingIn = value
 
 	processFail: (params) =>
-		name = if params.provider then params.provider.name else 'provider'
+		name = if params?.provider? then params.provider.name else 'provider'
 		console.log name + ' login failed'
 		mediator.loginFailed = true
+		@publishEvent 'loginStatus', false
 		@publishEvent 'loggingIn', false
 
 	# Logout
