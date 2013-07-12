@@ -24,6 +24,7 @@ module.exports = class SessionController extends Controller
 	initialize: (params) ->
 		@subscribeEvent 'serviceProviderSession', @serviceProviderSession
 		@subscribeEvent 'logout', @logout
+		@subscribeEvent 'clearView', @disposeLoginView
 		@subscribeEvent 'userData', @updateUser
 		@subscribeEvent '!showLogin', @showLoginView
 		@subscribeEvent '!login', @triggerLogin
