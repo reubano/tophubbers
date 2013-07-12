@@ -14,6 +14,7 @@ module.exports = class HomePageView extends View
 
 	initialize: ->
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', @render
 		@setFormData()
 		@setRepData()
