@@ -10,7 +10,7 @@ module.exports = class AuthController extends Controller
 		@publishEvent '!logout'
 
 	login: =>
-		console.log 'logging in'
+		console.log 'auth-controller logging in'
 		@publishEvent '!login', 'google'
 		@redirectToRoute 'home#show'
 		location.reload()
