@@ -125,7 +125,6 @@ module.exports = class SessionController extends Controller
 		console.log name + ' login failed'
 		mediator.loginFailed = true
 		@publishEvent 'loginStatus', false
-		@publishEvent 'loggingIn', false
 
 	# Logout
 	# ------
