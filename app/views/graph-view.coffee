@@ -78,7 +78,7 @@ module.exports = class GraphView extends View
 				draw = @$ '#draw-' + chart_class
 				chart_data = JSON.parse chart_json
 				nvd3 = new nvd3util chart_data, selection, draw, @changed
-				nvd3.init()
+				_.defer nvd3.init
 				_.defer @setSVG, attr
 				_.defer @pubRender, attr
 			else
