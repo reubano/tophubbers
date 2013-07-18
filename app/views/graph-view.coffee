@@ -80,10 +80,11 @@ module.exports = class GraphView extends View
 
 	pubRender: (attr) =>
 		@publishEvent 'rendered:' + attr, null
-		# console.log 'published rendered:' + attr
+		console.log 'published rendered:' + attr
 
 	unsetSVG: (attr) =>
 		svg_attr = attr + config.svg_suffix
+		console.log 'unsetting ' + svg_attr
 		@model.unset svg_attr
 		@model.save()
 
