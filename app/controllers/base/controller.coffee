@@ -107,7 +107,7 @@ module.exports = class Controller extends Chaplin.Controller
 						model.set chart_attr, data
 						model.save {patch: true}
 					else
-						console.log attr + 'not present'
+						console.log attr + ' not present'
 						# text = id + ': ' + chart_attr + ' present and '
 						# console.log text + attr + ' unchanged'
 		else
