@@ -13,6 +13,7 @@ module.exports = class GraphView extends View
 	initialize: (options) =>
 		super
 		@attrs = options.attrs
+		@chart_suffix = config.chart_suffix
 		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
 		@changed = false
@@ -50,7 +51,7 @@ module.exports = class GraphView extends View
 			selection = '#' + @id + '.view .' + chart_class + ' svg'
 			parent = '#' + @id + '.view .' + chart_class
 			svg_attr = attr + config.svg_suffix
-			chart_attr = attr + config.chart_suffix
+			chart_attr = attr + @chart_suffix
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.get svg_attr then @model.get svg_attr else null
@@ -79,7 +80,7 @@ module.exports = class GraphView extends View
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
 	pubRender: (attr) =>
-		@publishEvent 'rendered:' + attr, null
+		@publishEvent 'rendered:' + attr
 		console.log 'published rendered:' + attr
 
 	unsetSVG: (attr) =>
