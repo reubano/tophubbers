@@ -13,21 +13,27 @@ module.exports = class GraphView extends View
 	initialize: (options) =>
 		super
 		@attrs = options.attrs
+		@chart_suffix = config.chart_suffix
 		@ignore_svg = options.ignore_svg
 		@id = @model.get 'id'
 		@changed = false
 		console.log 'initialize graph-view for ' + @id
 		console.log options
 
-		for attr in config.data_attrs
-			change = 'change:' + attr + config.chart_suffix
-			@listenTo @model, change, ->
-				console.log 'graph-view heard modelChange'
-				@changed = true
-				@unsetSVG attr
-				@render() if attr in @attrs
-			# @subscribeEvent 'dispatcher:dispatch', ->
-			#	console.log 'graph-view caught dispatcher event'
+		data_attrs = config.data_attrs
+		changes = ('change:' + attr + @chart_suffix for attr in data_attrs)
+
+		@listenTo @model, changes[0], ->
+			console.log 'graph-view heard ' + changes[0]
+			@changed = true
+			@unsetSVG data_attrs[0]
+			@render() if data_attrs[0] in @attrs
+
+		@listenTo @model, changes[1], ->
+			console.log 'graph-view heard ' + changes[1]
+			@changed = true
+			@unsetSVG data_attrs[1]
+			@render() if data_attrs[1] in @attrs
 
 	render: =>
 		super
@@ -50,7 +56,7 @@ module.exports = class GraphView extends View
 			selection = '#' + @id + '.view .' + chart_class + ' svg'
 			parent = '#' + @id + '.view .' + chart_class
 			svg_attr = attr + config.svg_suffix
-			chart_attr = attr + config.chart_suffix
+			chart_attr = attr + @chart_suffix
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.get svg_attr then @model.get svg_attr else null
@@ -79,11 +85,12 @@ module.exports = class GraphView extends View
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
 	pubRender: (attr) =>
-		@publishEvent 'rendered:' + attr, null
-		# console.log 'published rendered:' + attr
+		@publishEvent 'rendered:' + attr
+		console.log 'published rendered:' + attr
 
 	unsetSVG: (attr) =>
 		svg_attr = attr + config.svg_suffix
+		console.log 'unsetting ' + svg_attr
 		@model.unset svg_attr
 		@model.save()
 
