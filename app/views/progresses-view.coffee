@@ -13,6 +13,7 @@ module.exports = class ProgressesView extends CollectionView
 		super
 		@subscribeEvent 'resort', @sort
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'progresses-view caught dispatcher event'
 		# @subscribeEvent 'dispatcher:dispatch', @render

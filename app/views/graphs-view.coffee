@@ -34,13 +34,14 @@ module.exports = class GraphsView extends CollectionView
 			console.log 'graphs-view caught loginStatus event'
 			@render()
 
+		@subscribeEvent 'userUpdated', @render
 		@listenTo @collection, 'reset', ->
 			console.log 'graphs-view heard collection reset'
 			@render()
 
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'graphs-view caught dispatcher event'
-			# @render()
+			@render()
 
 	initItemView: (model) ->
 		new @itemView
