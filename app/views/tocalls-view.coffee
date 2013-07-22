@@ -16,7 +16,7 @@ module.exports = class TocallsView extends CollectionView
 		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'tocalls-view caught dispatcher event'
-		# @subscribeEvent 'dispatcher:dispatch', @render
+			@render()
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>
