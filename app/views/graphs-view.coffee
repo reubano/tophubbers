@@ -35,12 +35,12 @@ module.exports = class GraphsView extends CollectionView
 			@render()
 
 		@subscribeEvent 'userUpdated', @render
-		@listenTo @collection, 'reset', ->
-			console.log 'graphs-view heard collection reset'
-			@render()
-
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'graphs-view caught dispatcher event'
+			@render()
+
+		@listenTo @collection, 'reset', ->
+			console.log 'graphs-view heard collection reset'
 			@render()
 
 	initItemView: (model) ->
