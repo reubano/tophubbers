@@ -36,6 +36,7 @@ module.exports = class RepView extends View
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
 		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'loggingIn', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'rep-view caught dispatcher event'
 			@render()

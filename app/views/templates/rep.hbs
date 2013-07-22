@@ -349,6 +349,6 @@
 {{else}}
 	<h2 class="text-error">You are not authorized to see this page.</h2>
 {{/if_sales}}
-{{else}}
+{{else}}{{#if_not_logging_in}}
 	<h2 class="text-error">You must log in to see this page.</h2>
-{{/if_logged_in}}
+{{/if_not_logging_in}}{{/if_logged_in}}

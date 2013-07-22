@@ -34,6 +34,7 @@ module.exports = class GraphsView extends CollectionView
 			console.log 'graphs-view caught loginStatus event'
 			@render()
 
+		@subscribeEvent 'loggingIn', @render
 		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			console.log 'graphs-view caught dispatcher event'
