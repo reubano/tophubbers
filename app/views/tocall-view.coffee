@@ -8,10 +8,6 @@ module.exports = class TocallView extends View
 	initialize: ->
 		super
 		@listenTo @model, 'change', @render
-		@subscribeEvent 'loginStatus', @render
-# 		@subscribeEvent 'dispatcher:dispatch', ->
-# 			console.log 'tocall-view caught dispatcher event'
-# 		@subscribeEvent 'dispatcher:dispatch', @render
 		@delegate 'click', '.toggle', @toggle
 
 	render: =>

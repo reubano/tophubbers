@@ -8,10 +8,6 @@ module.exports = class ProgresView extends View
 	initialize: ->
 		super
 		@listenTo @model, 'change', @render
-		@subscribeEvent 'loginStatus', @render
-# 		@subscribeEvent 'dispatcher:dispatch', ->
-# 			console.log 'progress-view caught dispatcher event'
-# 		@subscribeEvent 'dispatcher:dispatch', @render
 
 	render: =>
 		super
