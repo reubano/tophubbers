@@ -1,8 +1,7 @@
 module.exports = class Nvd3util
-	constructor: (data, selection, draw, changed=false, resize=false) ->
+	constructor: (data, selection, changed=false, resize=false) ->
 		@data = data
 		@selection = selection
-		@draw = draw
 		@resize = resize
 		@changed = changed
 
@@ -54,6 +53,4 @@ module.exports = class Nvd3util
 
 		nv.utils.windowResize(chart.update) if @resize
 		chart.dispatch.on 'stateChange', @nvlog
-		# nv.addGraph chart
-		@draw.html chart
-		# console.log 'nvd3util init done!'
+		nv.addGraph chart

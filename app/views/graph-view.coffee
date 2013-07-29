@@ -75,9 +75,8 @@ module.exports = class GraphView extends View
 				console.log text + 'ignore svg: ' + ignore_svg
 				console.log text + 'has changed: ' + @changed
 				console.log 'getting ' + text + 'script'
-				draw = @$ '#draw-' + chart_class
 				chart_data = JSON.parse chart_json
-				nvd3 = new nvd3util chart_data, selection, draw, @changed
+				nvd3 = new nvd3util chart_data, selection, @changed
 				_.defer nvd3.init
 				_.defer @setSVG, attr
 				_.defer @pubRender, attr
