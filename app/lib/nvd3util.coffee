@@ -53,4 +53,4 @@ module.exports = class Nvd3util
 
 		nv.utils.windowResize(chart.update) if @resize
 		chart.dispatch.on 'stateChange', @nvlog
-		nv.addGraph chart
+		_.defer nv.addGraph chart
