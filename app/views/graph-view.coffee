@@ -75,10 +75,10 @@ module.exports = class GraphView extends View
 				console.log text + 'has changed: ' + @changed
 				console.log 'getting ' + text + 'script'
 				chart_data = JSON.parse chart_json
-				nvd3 = new nvd3util chart_data, selection, @changed
-				_.defer nvd3.init
-				_.defer @setSVG, attr
-				_.defer @pubRender, attr
+# 				nvd3 = new nvd3util chart_data, selection, @changed
+# 				_.defer nvd3.init
+# 				_.defer @setSVG, attr
+# 				_.defer @pubRender, attr
 			else
 				console.log @id + ' has no ' + chart_attr + ' or no name'
 
