@@ -60,7 +60,6 @@ module.exports = class GraphView extends View
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.get svg_attr then @model.get svg_attr else null
-			# rendered = if @$(selection).html() then true else false
 			text = @id + ' ' + attr + ' '
 
 			if (svg and not @changed and not ignore_svg)
