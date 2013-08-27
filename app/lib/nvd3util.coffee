@@ -1,3 +1,5 @@
+utils = require 'lib/utils'
+
 module.exports = class Nvd3util
 	constructor: (data, selection, changed=false, resize=false) ->
 		@data = data
@@ -14,7 +16,7 @@ module.exports = class Nvd3util
 		if time.substr(0,1) == '0' then time.substr(1) else time
 
 	init: =>
-		console.log 'making ' + @selection
+		utils.log 'making ' + @selection
 
 # 		i = 0
 # 		minTime = 7.5

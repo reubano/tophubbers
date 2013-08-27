@@ -2,6 +2,7 @@ config = require 'config'
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/rep-view'
+utils = require 'lib/utils'
 
 module.exports = class RepController extends Controller
 	adjustTitle: 'Ongeza Rep View'
@@ -9,37 +10,37 @@ module.exports = class RepController extends Controller
 	collection: Chaplin.mediator.reps
 
 	initialize: =>
-		console.log 'initialize rep-controller'
-		console.log @collection
+		utils.log 'initialize rep-controller'
+		utils.log @collection
 
 	show: (params) =>
 		@id = params.id
 		if @collection.get(@id)
 			@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
-			console.log 'show route id is ' + @id
-			console.log 'ignore_svg is ' + @ignore_svg
+			utils.log 'show route id is ' + @id
+			utils.log 'ignore_svg is ' + @ignore_svg
 
 		if @collection.length is 0 and @collection.get(@id)
-			console.log 'no collection so fetching all data...'
+			utils.log 'no collection so fetching all data...'
 			@fetchData(@res, @id)
 			@subscribeEvent 'repsSet', ->
 				@showView @collection.get @id
 				@unsubscribeEvent 'repsSet', -> null
 		else if @collection.get(@id)
-			console.log 'fetching expired data...'
+			utils.log 'fetching expired data...'
 			@fetchExpiredData(@res, @id)
 			@showView @collection.get @id
 		else
 			@redirectToRoute 'home#show'
 
 	refresh: (params) =>
-		console.log 'refreshing data...'
+		utils.log 'refreshing data...'
 		@fetchData(@res, params.id)
 		@redirectToRoute 'rep#show', id: params.id
 
 	showView: (model) =>
-		console.log 'rendering showView'
-		console.log 'ignore_svg is ' + @ignore_svg
+		utils.log 'rendering showView'
+		utils.log 'ignore_svg is ' + @ignore_svg
 		@view = new View
 			model: model
 			attrs: config.data_attrs

@@ -12,6 +12,6 @@ module.exports = class NavbarView extends View
 
 	initialize: (options) ->
 		super
-		# console.log 'navbar-view init'
+		# utils.log 'navbar-view init'
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'dispatcher:dispatch', @render

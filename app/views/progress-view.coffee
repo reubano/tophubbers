@@ -11,4 +11,4 @@ module.exports = class ProgresView extends View
 
 	render: =>
 		super
-		# console.log 'rendering progress view'
+		# utils.log 'rendering progress view'

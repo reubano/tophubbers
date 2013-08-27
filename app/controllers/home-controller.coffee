@@ -2,6 +2,7 @@ config = require 'config'
 Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
 View = require 'views/home-view'
+utils = require 'lib/utils'
 
 module.exports = class HomeController extends Controller
 	mediator = Chaplin.mediator
@@ -12,12 +13,12 @@ module.exports = class HomeController extends Controller
 	forms: mediator.forms
 
 	initialize: =>
-		console.log 'initialize home-controller'
+		utils.log 'initialize home-controller'
 		@subscribeEvent 'fetchData', ->
 			_.delay @fetchAndPub, config.max_age * 1000 * 60 * 60
 
 	show: (params) =>
-		console.log 'show home'
+		utils.log 'show home'
 		@view = new View {@model}
 
 	fetchAndPub: =>
@@ -25,7 +26,7 @@ module.exports = class HomeController extends Controller
 		@publishEvent 'fetchData', -> null
 
 	fetchData: =>
-		console.log 'fetching all form data...'
+		utils.log 'fetching all form data...'
 		@fetchData()
 		@forms.syncDirtyAndDestroyed()
 		@forms.fetch

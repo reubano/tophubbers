@@ -1,6 +1,7 @@
 View = require 'views/base/view'
 template = require 'views/templates/home'
 Chaplin = require 'chaplin'
+utils = require 'lib/utils'
 
 module.exports = class HomePageView extends View
 	mediator = Chaplin.mediator

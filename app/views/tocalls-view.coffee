@@ -17,15 +17,15 @@ module.exports = class TocallsView extends CollectionView
 		@subscribeEvent 'loggingIn', @render
 		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'tocalls-view caught dispatcher event'
+			utils.log 'tocalls-view caught dispatcher event'
 			@render()
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>
-		console.log 'resorting tocalls view'
+		utils.log 'resorting tocalls view'
 		@collection.sort()
 
 	render: =>
 		super
-		console.log 'rendering tocalls view'
+		utils.log 'rendering tocalls view'
 		@collection.sort()

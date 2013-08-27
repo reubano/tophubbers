@@ -13,7 +13,7 @@ module.exports = class TocallView extends View
 
 	render: =>
 		super
-		# console.log 'rendering tocall view'
+		# utils.log 'rendering tocall view'
 		@$el.removeClass 'text-error text-success muted'
 
 		if @model.get 'called'
@@ -27,5 +27,5 @@ module.exports = class TocallView extends View
 
 	toggle: =>
 		@model.toggle().save()
-		console.log 'model score sort: ' + @model.get 'score_sort'
+		utils.log 'model score sort: ' + @model.get 'score_sort'
 		@publishEvent 'resort'

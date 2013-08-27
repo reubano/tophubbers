@@ -27,12 +27,12 @@ module.exports = class Google extends ServiceProvider
 
 	constructor: ->
 		super
-		console.log 'google constructor'
+		utils.log 'google constructor'
 
 	load: =>
-		console.log 'google load'
-		console.log 'state: ' + @state()
-		console.log 'loading: ' + @loading
+		utils.log 'google load'
+		utils.log 'state: ' + @state()
+		utils.log 'loading: ' + @loading
 		@publishEvent 'loginFail', {provider: this} if @state() is 'rejected'
 		return if @state() is 'resolved' or @loading
 		@loading = true
@@ -47,7 +47,7 @@ module.exports = class Google extends ServiceProvider
 			@reject)
 
 	loadHandler: =>
-		console.log 'google loadHandler'
+		utils.log 'google loadHandler'
 		@publishEvent '!showLogin'
 		gapi.client.setApiKey @apiKey
 		# Remove the global load handler
@@ -61,32 +61,32 @@ module.exports = class Google extends ServiceProvider
 		@authorize @loginHandler, true
 
 	isLoaded: ->
-		console.log 'google check isLoaded'
+		utils.log 'google check isLoaded'
 		Boolean window.gapi and gapi.auth and gapi.auth.authorize
 
 	triggerLogin: =>
-		console.log 'google triggerLogin'
+		utils.log 'google triggerLogin'
 		@authorize @loginHandler, false
 
 	loginHandler: (authResponse) =>
-		console.log 'google loginHandler'
-		console.log 'authResponse below'
-		console.log authResponse
+		utils.log 'google loginHandler'
+		utils.log 'authResponse below'
+		utils.log authResponse
 
 		if authResponse and not authResponse.error
-			console.log 'google login successful!'
+			utils.log 'google login successful!'
 			@publishEvent 'loginSuccessful', {provider: this, authResponse}
 			@publishSession authResponse, authResponse.access_token
 			@getUserData @processUserData
 		else if not @failed
 			@failed = true
-			console.log "couldn't auto login... triggering popup"
+			utils.log "couldn't auto login... triggering popup"
 			@triggerLogin()
 		else
 			@publishEvent 'loginFail', {provider: this, authResponse}
 
 	getUserData: (callback) ->
-		console.log 'fetching google user data'
+		utils.log 'fetching google user data'
 		# returns name and id (among other things) if they have google+ and
 		# scope includes 'https://www.googleapis.com/auth/plus.me'
 #			gapi.client.load 'plus', 'v1', ->
@@ -103,8 +103,8 @@ module.exports = class Google extends ServiceProvider
 			request.execute callback
 
 	processUserData: (data) =>
-		console.log 'google processUserData'
-		console.log data
+		utils.log 'google processUserData'
+		utils.log data
 		userData = {}
 
 		hash = [
@@ -119,7 +119,7 @@ module.exports = class Google extends ServiceProvider
 		@publishEvent 'userData', userData
 
 	authorize: (callback, immediate) ->
-		console.log 'google authorize'
+		utils.log 'google authorize'
 		gapi.auth.authorize
 			client_id: clientId, scope: scopes, immediate: immediate
 			callback

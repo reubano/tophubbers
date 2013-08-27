@@ -1,6 +1,7 @@
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/progresses-view'
+utils = require 'lib/utils'
 
 module.exports = class ProgressesController extends Controller
 	adjustTitle: 'Ongeza Rep Progress'
@@ -8,13 +9,13 @@ module.exports = class ProgressesController extends Controller
 	collection: Chaplin.mediator.reps
 
 	initialize: =>
-		console.log 'initialize progresses-controller'
+		utils.log 'initialize progresses-controller'
 
 		if @collection.length is 0
-			console.log 'no collection so fetching all data...'
+			utils.log 'no collection so fetching all data...'
 			@fetchData(@res)
 		else
-			console.log 'fetching expired data...'
+			utils.log 'fetching expired data...'
 			@fetchExpiredData(@res)
 
 	comparator: (model) ->
@@ -25,7 +26,7 @@ module.exports = class ProgressesController extends Controller
 		@view = new View {@collection}
 
 	refresh: =>
-		console.log 'refreshing data...'
+		utils.log 'refreshing data...'
 		@redirectToRoute 'progresses#index'
 		@fetchData(@res)
 

@@ -1,4 +1,5 @@
 Model = require 'models/base/model'
+utils = require 'lib/utils'
 
 module.exports = class User extends Model
 	admins = ['reubano@gmail.com', 'patrick.fischer@ongeza.com',
@@ -12,12 +13,12 @@ module.exports = class User extends Model
 
 	initialize: ->
 		super
-		console.log 'initialize user model'
+		utils.log 'initialize user model'
 
 	setAccess: =>
 		email = @get 'email'
 		return unless email?
-		console.log 'setting user access'
+		utils.log 'setting user access'
 
 		if email in admins
 			@set role: 'admin'  # No restrictions
@@ -29,4 +30,4 @@ module.exports = class User extends Model
 			@set role: 'support'  # Access to rep-view only (no forms)
 		else @set role: 'guest'  # Access to home-view only
 
-		console.log 'user role: ' + @get 'role'
+		utils.log 'user role: ' + @get 'role'

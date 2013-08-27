@@ -8,7 +8,7 @@ module.exports = class ServiceProvider
 	loading: false
 
 	constructor: ->
-		console.log 'ServiceProvider constructor'
+		utils.log 'ServiceProvider constructor'
 		# Mixin a Deferred
 		_(this).extend $.Deferred()
 

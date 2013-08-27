@@ -2,6 +2,7 @@ config = require 'config'
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/graphs-view'
+utils = require 'lib/utils'
 
 module.exports = class GraphsController extends Controller
 	adjustTitle: 'Ongeza Work Graph'
@@ -10,13 +11,13 @@ module.exports = class GraphsController extends Controller
 	collection: Chaplin.mediator.reps
 
 	initialize: =>
-		console.log 'initialize graphs-controller'
+		utils.log 'initialize graphs-controller'
 
 		if @collection.length is 0
-			console.log 'no collection so fetching all data...'
+			utils.log 'no collection so fetching all data...'
 			@fetchData(@res, false, @data_attrs)
 		else
-			console.log 'fetching expired data...'
+			utils.log 'fetching expired data...'
 			@fetchExpiredData(@res, false, @data_attrs)
 
 	comparator: (model) ->
@@ -32,6 +33,6 @@ module.exports = class GraphsController extends Controller
 			ignore_svg: @ignore_svg
 
 	refresh: =>
-		console.log 'refreshing data...'
+		utils.log 'refreshing data...'
 		@fetchData(@res, false, @data_attrs)
 		@redirectToRoute 'graphs#index'
