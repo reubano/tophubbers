@@ -405,14 +405,15 @@ not found"
 
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
 
-	log: (message) ->
-		key = "eb3d5c6a-acfd-48de-9dc0-7dec2f049277"
-		host = "//logs.loggly.com"
-		castor = new loggly.castor {url: host + '/inputs/' + key, level: 'log'}
+	key = "d61b46cb-de6a-49df-94f6-6a25472bd747"
+	host = "//logs.loggly.com"
+	castor = new loggly.castor {url: host + '/inputs/' + key, level: 'log'}
+	user_agent = navigator.userAgent
 
+	log: (message) ->
 		castor.log
 			message: message
-			user_agent: navigator.userAgent
+			user_agent: user_agent
 			datetime: Date()
 			location: window.location.href
 
