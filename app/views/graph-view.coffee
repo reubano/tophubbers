@@ -19,7 +19,7 @@ module.exports = class GraphView extends View
 		@id = @model.get 'id'
 		@changed = false
 		utils.log 'initialize graph-view for ' + @id
-		utils.log options
+		utils.log options, false
 
 		data_attrs = config.data_attrs
 		changes = ('change:' + attr + @chart_suffix for attr in data_attrs)

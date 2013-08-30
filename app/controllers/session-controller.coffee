@@ -39,7 +39,7 @@ module.exports = class SessionController extends Controller
 			utils.log 'user found in SessionController'
 			name = @user.get 'name'
 			utils.log 'welcome back ' + name + '!'
-			utils.log @user
+			utils.log @user, false
 			@user.setAccess()
 			@publishLogin()
 		else

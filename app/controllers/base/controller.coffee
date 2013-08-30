@@ -64,8 +64,8 @@ module.exports = class Controller extends Chaplin.Controller
 		(model.save {patch: true} for model in @collection.models)
 
 	displayCollection: =>
-		utils.log @collection
-		utils.log @collection.at(1).getAttributes()
+		utils.log @collection, false
+		utils.log @collection.at(1).getAttributes(), false
 
 	saveTstamp: (tstamp) =>
 		utils.log 'saving ' + tstamp
@@ -77,7 +77,7 @@ module.exports = class Controller extends Chaplin.Controller
 		attr = (@parser.pathname.replace /\//g, '')
 		tstamp = attr + '_tstamp'
 		utils.log 'setting collection with ' + attr
-		utils.log response.data
+		utils.log response.data, false
 		@collection.set response.data, remove: false
 		@saveTstamp(tstamp)
 		@saveCollection()
@@ -104,7 +104,7 @@ module.exports = class Controller extends Chaplin.Controller
 					if model.get(attr)
 						utils.log id + ': fetching missing chart data'
 						data = model.getChartData attr
-						utils.log JSON.parse data
+						utils.log JSON.parse(data), false
 						model.set chart_attr, data
 						model.save {patch: true}
 					else
