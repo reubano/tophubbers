@@ -423,6 +423,7 @@ not found"
 				user_agent: user_agent
 				# castor_agent: castor_agent
 				datetime: Date()
+				time: (new Date()).getTime()
 				location: window.location.href
 
 module.exports = utils
