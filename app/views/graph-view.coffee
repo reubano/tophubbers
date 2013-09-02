@@ -40,7 +40,7 @@ module.exports = class GraphView extends View
 		super
 		utils.log 'rendering graph view for ' + @id
 		@attach()
-		_.defer @getChartScript, @ignore_svg
+		# _.defer @getChartScript, @ignore_svg
 
 	visibilityChangeAlert: ->
 		utils.log 'graph-view heard visibilityChange'
