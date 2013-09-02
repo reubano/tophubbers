@@ -405,25 +405,23 @@ not found"
 
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
 
-	key = "71970c98-af4b-4671-b212-124f24688571"
-	host = "//logs.loggly.com"
-	castor = new loggly.castor {url: host + '/inputs/' + key, level: 'log'}
-	user_agent = navigator.userAgent
-	castor_agent = castor.user_agent
-
 	log: (message, remote=true) ->
 		console.log message
 
 		if remote
+			site = 'https://logs.loggly.com/inputs/'
+			key = '71970c98-af4b-4671-b212-124f24688571'
+			castor = new loggly.castor {url: site + key, level: 'log'}
+
 			text = JSON.stringify(message)
+			date = new Date()
 			message = if text.length > 256 then "size exceeded" else message
 
 			castor.log
 				message: message
-				user_agent: user_agent
-				# castor_agent: castor_agent
-				datetime: Date()
-				time: (new Date()).getTime()
+				user_agent: navigator.userAgent
+				datetime: date.toString()
+				time: date.getTime()
 				location: window.location.href
 
 module.exports = utils
