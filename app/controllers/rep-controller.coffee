@@ -3,7 +3,7 @@ Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/rep-view'
 
-module.exports = class Controller extends Controller
+module.exports = class RepController extends Controller
 	adjustTitle: 'Ongeza Rep View'
 	res: ['rep_info', 'work_data', 'feedback_data', 'progress_data']
 	collection: Chaplin.mediator.reps

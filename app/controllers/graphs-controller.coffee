@@ -3,7 +3,7 @@ Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/graphs-view'
 
-module.exports = class Controller extends Controller
+module.exports = class GraphsController extends Controller
 	adjustTitle: 'Ongeza Work Graph'
 	res: ['rep_info', 'work_data']
 	data_attrs: [config.data_attrs[0]]

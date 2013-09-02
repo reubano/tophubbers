@@ -2,7 +2,7 @@ Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/progresses-view'
 
-module.exports = class Controller extends Controller
+module.exports = class ProgressesController extends Controller
 	adjustTitle: 'Ongeza Rep Progress'
 	res: ['rep_info', 'score', 'progress_data']
 	collection: Chaplin.mediator.reps

@@ -2,7 +2,7 @@ Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/tocalls-view'
 
-module.exports = class Controller extends Controller
+module.exports = class TocallsController extends Controller
 	adjustTitle: 'Ongeza Call List'
 	res: ['rep_info', 'score']
 	collection: Chaplin.mediator.reps
