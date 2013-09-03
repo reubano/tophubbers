@@ -6,6 +6,14 @@ mediator = Chaplin.mediator
 
 # Delegate to Chaplin’s utils module
 utils = Chaplin.utils.beget Chaplin.utils
+site = 'https://logs-01.loggly.com/inputs/'
+key = 'c20e8443-a736-4440-9b62-55831aef3a32/'
+
+Minilog
+	.enable()
+	.pipe new Minilog.backends.jQuery {url: site + key, interval: 5000}
+
+minilog = Minilog 'app'
 
 _(utils).extend
 	# String helpers
@@ -406,19 +414,20 @@ not found"
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
 
 	log: (message, remote=true) ->
-		console.log message
+		if remote
+			text = JSON.stringify message
+			date = new Date()
+			message = if text.length > 256 then "size exceeded" else message
 
-# 		if remote
-# 			text = JSON.stringify(message)
-# 			date = new Date()
-# 			message = if text.length > 256 then "size exceeded" else message
-#
-# 			data =
-# 				user_agent: navigator.userAgent
-# 				datetime: date.toString()
-# 				time: date.getTime()
-# 				location: window.location.href
-#
-# 			winston.log 'debug', message, data
+			data =
+				message: message
+				user_agent: navigator.userAgent
+				datetime: date.toString()
+				time: date.getTime()
+				location: window.location.href
+
+			minilog.debug data
+		else
+			console.log message
 
 module.exports = utils
