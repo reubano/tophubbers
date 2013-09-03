@@ -27,6 +27,7 @@
     "clean-css-brunch": ">= 1.0 < 1.7",
     "express": "3.x",
     "winston": "0.7.x",
+    "minilog": "2.x",
     "brunch": "1.6"
   },
   "devDependencies": {
