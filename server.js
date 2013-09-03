@@ -3,7 +3,7 @@ var express = require('express'),
 	log = require('minilog')('app'),
 	app = express(),
 	oneDay = 86400000,
-	port = process.env.PORT || 3000;
+	port = process.env.PORT || 3333;
 
 require('minilog').enable();
 
@@ -14,4 +14,4 @@ app.use(function(req, res) {
 	return res.redirect(newUrl);
 });
 
-app.listen(port, function() {console.log("listening on " + port); });
+app.listen(port, function() {console.log("listening on " + port);});
