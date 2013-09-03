@@ -408,20 +408,17 @@ not found"
 	log: (message, remote=true) ->
 		console.log message
 
-		if remote
-			site = 'https://logs.loggly.com/inputs/'
-			key = '71970c98-af4b-4671-b212-124f24688571'
-			castor = new loggly.castor {url: site + key, level: 'log'}
-
-			text = JSON.stringify(message)
-			date = new Date()
-			message = if text.length > 256 then "size exceeded" else message
-
-			castor.log
-				message: message
-				user_agent: navigator.userAgent
-				datetime: date.toString()
-				time: date.getTime()
-				location: window.location.href
+# 		if remote
+# 			text = JSON.stringify(message)
+# 			date = new Date()
+# 			message = if text.length > 256 then "size exceeded" else message
+#
+# 			data =
+# 				user_agent: navigator.userAgent
+# 				datetime: date.toString()
+# 				time: date.getTime()
+# 				location: window.location.href
+#
+# 			winston.log 'debug', message, data
 
 module.exports = utils
