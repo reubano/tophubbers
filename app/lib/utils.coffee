@@ -4,14 +4,12 @@ mediator = Chaplin.mediator
 # Application-specific utilities
 # ------------------------------
 
-# Delegate to Chaplin’s utils module
-utils = Chaplin.utils.beget Chaplin.utils
-site = 'https://logs.loggly.com/inputs/'
-key = 'eb3d5c6a-acfd-48de-9dc0-7dec2f049277/'
+utils = Chaplin.utils.beget Chaplin.utils # Delegate to Chaplin’s utils module
+url = 'http://localhost:8888/log'
 
 Minilog
 	.enable()
-	.pipe new Minilog.backends.jQuery {url: site + key, interval: 5000}
+	.pipe new Minilog.backends.jQuery {url: url, interval: 5000}
 
 minilog = Minilog 'app'
 
