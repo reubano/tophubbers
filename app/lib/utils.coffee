@@ -6,8 +6,8 @@ mediator = Chaplin.mediator
 
 # Delegate to Chaplin’s utils module
 utils = Chaplin.utils.beget Chaplin.utils
-site = 'https://logs-01.loggly.com/inputs/'
-key = 'c20e8443-a736-4440-9b62-55831aef3a32/'
+site = 'https://logs.loggly.com/inputs/'
+key = 'eb3d5c6a-acfd-48de-9dc0-7dec2f049277/'
 
 Minilog
 	.enable()
