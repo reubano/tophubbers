@@ -39,7 +39,7 @@ module.exports = class GraphView extends View
 	render: =>
 		super
 		utils.log 'rendering graph view for ' + @id
-		@attach()
+		# @attach()
 		# _.defer @getChartScript, @ignore_svg
 
 	visibilityChangeAlert: ->
