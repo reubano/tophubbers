@@ -117,9 +117,9 @@ module.exports = class RepView extends View
 
 	viewRequest: (model, resp, options) ->
 		utils.log 'rep-view caught request event'
-		utils.log model
-		utils.log resp
-		utils.log options
+		utils.log model, false
+		utils.log resp, false
+		utils.log options, false
 
 	success: (model, resp, options) =>
 		utils.log 'rep-view caught sync event'
@@ -131,9 +131,9 @@ module.exports = class RepView extends View
 			utils.log 'successfully synced forms'
 			@synced = true
 
-		utils.log model
-		utils.log resp
-		utils.log options
+		utils.log model, false
+		utils.log resp, false
+		utils.log options, false
 
 	failWhale: (model, xhr, options) =>
 		if model.get('id')
@@ -142,6 +142,6 @@ module.exports = class RepView extends View
 		else
 			utils.log 'failed to fetch forms'
 
-		utils.log model
-		utils.log xhr
-		utils.log options
+		utils.log model, false
+		utils.log xhr, false
+		utils.log options, false
