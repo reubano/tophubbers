@@ -26,6 +26,6 @@ module.exports = class TocallView extends View
 		@$el.addClass className
 
 	toggle: =>
-		@model.toggle().save()
-		utils.log 'model score sort: ' + @model.get 'score_sort'
+		@model.toggle()
+		@model.save()
 		@publishEvent 'resort'
