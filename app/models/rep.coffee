@@ -1,4 +1,5 @@
 Model = require 'models/base/model'
+utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
 	defaults:
@@ -11,8 +12,8 @@ module.exports = class Rep extends Model
 
 	toggle: ->
 		@set called: not @get 'called'
-		console.log 'called: ' + @get 'called'
-		console.log 'score: ' + if @get('called') then 0 else @get 'score'
+		utils.log 'called: ' + @get 'called'
+		utils.log 'score: ' + if @get('called') then 0 else @get 'score'
 		score_sort = if @get('called') then 0 else @get 'score'
 		@set score_sort: JSON.stringify score_sort
 
@@ -20,10 +21,10 @@ module.exports = class Rep extends Model
 		d = @get attr
 
 		if not d
-			console.log 'no ' + attr + ' found for ' + @get('id')
+			utils.log 'no ' + attr + ' found for ' + @get('id')
 			return
 
-		console.log @get('id') + ': generating ' + attr + ' chart data...'
+		utils.log @get('id') + ': generating ' + attr + ' chart data...'
 
 		if d.rows
 			endRows = (label: obj.date, value: obj.start for obj in d.rows)

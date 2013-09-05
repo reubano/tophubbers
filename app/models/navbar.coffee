@@ -1,4 +1,5 @@
 Model = require 'models/base/model'
+utils = require 'lib/utils'
 
 module.exports = class Navbar extends Model
 	defaults:

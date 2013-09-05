@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/tocalls'
 View = require 'views/tocall-view'
+utils = require 'lib/utils'
 
 module.exports = class TocallsView extends CollectionView
 	itemView: View
@@ -13,16 +14,18 @@ module.exports = class TocallsView extends CollectionView
 		super
 		@subscribeEvent 'resort', @sort
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'loggingIn', @render
+		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'tocalls-view caught dispatcher event'
-		# @subscribeEvent 'dispatcher:dispatch', @render
+			utils.log 'tocalls-view caught dispatcher event'
+			@render()
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>
-		console.log 'resorting tocalls view'
+		utils.log 'resorting tocalls view'
 		@collection.sort()
 
 	render: =>
 		super
-		console.log 'rendering tocalls view'
+		utils.log 'rendering tocalls view'
 		@collection.sort()

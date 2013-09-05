@@ -1,11 +1,17 @@
+config = require 'config'
 Chaplin = require 'chaplin'
 mediator = Chaplin.mediator
 
 # Application-specific utilities
 # ------------------------------
 
-# Delegate to Chaplin’s utils module
-utils = Chaplin.utils.beget Chaplin.utils
+utils = Chaplin.utils.beget Chaplin.utils # Delegate to Chaplin’s utils module
+
+Minilog
+	.enable()
+	.pipe new Minilog.backends.jQuery {url: config.logs, interval: 1000}
+
+minilog = Minilog 'ongeza'
 
 _(utils).extend
 	# String helpers
@@ -392,7 +398,6 @@ not found"
 				null, obj, func, loginContext, eventType
 			)
 
-
 	# Facebook image helper
 	# ---------------------
 	facebookImageURL: (fbId, type = 'square') ->
@@ -405,5 +410,19 @@ not found"
 			params.access_token = accessToken if accessToken
 
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
+
+	log: (message, remote=true) ->
+		if remote
+			text = JSON.stringify message
+			message = if text.length > 512 then "size exceeded" else message
+
+			data =
+				message: message
+				time: (new Date()).getTime()
+				user: if mediator.user? then mediator.user.get 'email' else null
+
+			minilog.debug data
+		else
+			console.log message
 
 module.exports = utils

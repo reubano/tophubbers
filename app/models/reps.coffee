@@ -1,5 +1,6 @@
 Collection = require 'models/base/collection'
 Model = require 'models/rep'
+utils = require 'lib/utils'
 
 module.exports = class Reps extends Collection
 	model: Model
@@ -8,7 +9,7 @@ module.exports = class Reps extends Collection
 
 	initialize: (options) =>
 		super
-		console.log 'initialize reps collection'
+		utils.log 'initialize reps collection'
 
 	getCalled: ->
 		@where called: yes

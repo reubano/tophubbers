@@ -3,6 +3,7 @@ Momentous = require 'lib/momentous'
 Chaplin = require 'chaplin'
 View = require 'views/graph-view'
 template = require 'views/templates/rep'
+utils = require 'lib/utils'
 
 module.exports = class RepView extends View
 	mediator = Chaplin.mediator
@@ -20,9 +21,9 @@ module.exports = class RepView extends View
 		@attrs = options.attrs
 		@id = @model.get 'id'
 		mediator.rep_id = @id
-		console.log 'initialize rep-view for ' + @id
-		console.log @forms
-		console.log options
+		utils.log 'initialize rep-view for ' + @id
+		utils.log @forms
+		utils.log options
 
 		if @user
 			@name = @user.get 'name'
@@ -30,15 +31,16 @@ module.exports = class RepView extends View
 			@name = 'N/A'
 			@subscribeEvent 'userUpdated', @setUserName
 
-		console.log 'User name is ' + @name
+		utils.log 'User name is ' + @name
 		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
 		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'loggingIn', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'rep-view caught dispatcher event'
-			# @render()
+			utils.log 'rep-view caught dispatcher event'
+			@render()
 
 		for prefix in ['change:cur_', 'change:prev_']
 			@listenTo @model, prefix + 'work_data_c', @render
@@ -46,7 +48,7 @@ module.exports = class RepView extends View
 			@listenTo @model, prefix + 'progress', @render
 
 		@listenTo @forms, 'add', ->
-			console.log 'rep-view caught add event'
+			utils.log 'rep-view caught add event'
 		@listenTo @forms, 'request', @viewRequest
 		@listenTo @forms, 'change', @render
 		@listenTo @forms, 'sync', @success
@@ -55,11 +57,11 @@ module.exports = class RepView extends View
 
 	setUserName: (user) =>
 		@name = user.get 'name'
-		console.log 'User name is ' + @name
+		utils.log 'User name is ' + @name
 
 	render: =>
 		super
-		console.log 'rendering rep view for ' + @id
+		utils.log 'rendering rep view for ' + @id
 		@renderDatepicker '#review-datepicker'
 		@renderDatepicker '#network-datepicker'
 
@@ -73,7 +75,7 @@ module.exports = class RepView extends View
 	renderDatepicker: (selection) =>
 		momentous = new Momentous @.$ selection
 		momentous.init()
-		# console.log momentous
+		# utils.log momentous
 
 	objectify: (form) ->
 		data = @.$(form).serializeArray()
@@ -86,12 +88,12 @@ module.exports = class RepView extends View
 		$.ajax config.forms
 
 	sendForms: =>
-		console.log 'sending form changes to server'
+		utils.log 'sending form changes to server'
 		@forms.syncDirtyAndDestroyed()
 
 	fetchForms: =>
 		if not @synced
-			console.log 'fetching form changes from server'
+			utils.log 'fetching form changes from server'
 			@forms.fetch
 				data:
 					'results_per_page=' + config.rpp + '&q=' + JSON.stringify
@@ -99,47 +101,47 @@ module.exports = class RepView extends View
 						"filters": [
 							{"name": 'form', "op": 'eq', "val": "network-form"}]
 		else
-			console.log 'forms already synced'
+			utils.log 'forms already synced'
 
 	networkFormSubmit: =>
 		json = @objectify('#network-form')
-		console.log 'saving form data...'
-		console.log json
+		utils.log 'saving form data...'
+		utils.log json
 		@forms.create json
 
 	reviewFormSubmit: =>
 		json = @objectify('#review-form')
-		console.log 'saving form data...'
-		console.log json
+		utils.log 'saving form data...'
+		utils.log json
 		@forms.create json
 
 	viewRequest: (model, resp, options) ->
-		console.log 'rep-view caught request event'
-		console.log model
-		console.log resp
-		console.log options
+		utils.log 'rep-view caught request event'
+		utils.log model, false
+		utils.log resp, false
+		utils.log options, false
 
 	success: (model, resp, options) =>
-		console.log 'rep-view caught sync event'
+		utils.log 'rep-view caught sync event'
 		if model.get('id')
-			console.log 'successfully posted form #' + model.get('id') + '!'
+			utils.log 'successfully posted form #' + model.get('id') + '!'
 			@render()
 			@$('#success-modal').modal()
 		else
-			console.log 'successfully synced forms'
+			utils.log 'successfully synced forms'
 			@synced = true
 
-		console.log model
-		console.log resp
-		console.log options
+		utils.log model, false
+		utils.log resp, false
+		utils.log options, false
 
 	failWhale: (model, xhr, options) =>
 		if model.get('id')
-			console.log 'failed to post form for ' + model.get('id')
+			utils.log 'failed to post form for ' + model.get('id')
 			@$('#fail-modal').modal()
 		else
-			console.log 'failed to fetch forms'
+			utils.log 'failed to fetch forms'
 
-		console.log model
-		console.log xhr
-		console.log options
+		utils.log model, false
+		utils.log xhr, false
+		utils.log options, false

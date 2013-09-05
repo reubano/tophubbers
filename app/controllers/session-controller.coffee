@@ -2,6 +2,7 @@ Chaplin = require 'chaplin'
 Controller = require 'controllers/base/controller'
 View = require 'views/login-view'
 Provider = require 'lib/services/google'
+utils = require 'lib/utils'
 
 module.exports = class SessionController extends Controller
 	mediator = Chaplin.mediator
@@ -32,17 +33,17 @@ module.exports = class SessionController extends Controller
 		@subscribeEvent '!login', @triggerLogin
 		@subscribeEvent '!logout', @triggerLogout
 
-		console.log 'initialize SessionController'
+		utils.log 'initialize SessionController'
 
 		if @user and @user.get 'accessToken'
-			console.log 'user found in SessionController'
+			utils.log 'user found in SessionController'
 			name = @user.get 'name'
-			console.log 'welcome back ' + name + '!'
-			console.log @user
+			utils.log 'welcome back ' + name + '!'
+			utils.log @user, false
 			@user.setAccess()
 			@publishLogin()
 		else
-			console.log 'no user in SessionController'
+			utils.log 'no user in SessionController'
 
 			# login unless params.login is false
 			if not params?.login? or not params.login
@@ -50,22 +51,22 @@ module.exports = class SessionController extends Controller
 
 	# Load the libraries of all service providers
 	loadServiceProviders: ->
-		console.log 'session-controller loadServiceProviders'
+		utils.log 'session-controller loadServiceProviders'
 		for name, serviceProvider of SessionController.serviceProviders
 			serviceProvider.load()
 
 	# Try to get an existing session from one of the login providers
 	getSession: ->
-		console.log 'session-controller getSession'
+		utils.log 'session-controller getSession'
 		@loadServiceProviders()
 		for name, serviceProvider of SessionController.serviceProviders
-			console.log 'getting session'
+			utils.log 'getting session'
 			serviceProvider.done serviceProvider.getLoginStatus
-			console.log 'done getting session'
+			utils.log 'done getting session'
 
 	# Handler for the global !showLogin event
 	showLoginView: =>
-		console.log 'session-controller showLoginView'
+		utils.log 'session-controller showLoginView'
 		return if @loginView
 		@publishEvent 'loggingIn', true
 		@loadServiceProviders()
@@ -80,12 +81,12 @@ module.exports = class SessionController extends Controller
 	# Handler for the global !login event
 	# Delegate the login to the selected service provider
 	triggerLogin: (serviceProviderName) =>
-		console.log 'session-controller triggerLogin'
+		utils.log 'session-controller triggerLogin'
 		serviceProvider = SessionController.serviceProviders[serviceProviderName]
 
 		# Publish an event in case the provider library could not be loaded
 		unless serviceProvider.isLoaded()
-			console.log 'serviceProviderMissing'
+			utils.log 'serviceProviderMissing'
 			return
 
 		@publishEvent 'loginAttempt', serviceProviderName
@@ -95,7 +96,7 @@ module.exports = class SessionController extends Controller
 
 	# Handler for the global serviceProviderSession event
 	serviceProviderSession: (session) =>
-		console.log 'session-controller serviceProviderSession'
+		utils.log 'session-controller serviceProviderSession'
 		@serviceProviderName = session.provider.name
 		@disposeLoginView()
 
@@ -111,7 +112,7 @@ module.exports = class SessionController extends Controller
 
 	# Publish an event to notify all application components of the login
 	publishLogin: ->
-		console.log 'session-controller publishLogin'
+		utils.log 'session-controller publishLogin'
 		@loginStatusDetermined = true
 		@publishEvent 'login', @user
 		@publishEvent 'loginStatus', true
@@ -122,7 +123,7 @@ module.exports = class SessionController extends Controller
 
 	processFail: (params) =>
 		name = if params?.provider? then params.provider.name else 'provider'
-		console.log name + ' login failed'
+		utils.log name + ' login failed'
 		mediator.loginFailed = true
 		@publishEvent 'loginStatus', false
 
@@ -135,27 +136,27 @@ module.exports = class SessionController extends Controller
 
 	# Handler for the global logout event
 	logout: =>
-		console.log 'session-controller logging out'
+		utils.log 'session-controller logging out'
 		@loginStatusDetermined = true
 		@disposeUser()
 		@serviceProviderName = null
 		@publishEvent 'loginStatus', false
 
 	saveUser: =>
-		console.log 'saving collection'
+		utils.log 'saving collection'
 		@collection.get(1).save {patch: true}
 		@user = @collection.get(1)
 
 	# Update the user with the given data and handles the global userData event
 	updateUser: (userData) =>
-		console.log 'session-controller updateUser'
+		utils.log 'session-controller updateUser'
 		@collection.set userData
 		@saveUser()
 		mediator.user = @user
 		@user.setAccess()
 		@publishEvent 'userUpdated', @user
-		console.log @collection
-		console.log @user.getAttributes()
+		utils.log @collection
+		utils.log @user.getAttributes()
 
 	# Disposal
 	# --------

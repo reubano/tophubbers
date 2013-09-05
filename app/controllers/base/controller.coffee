@@ -2,6 +2,7 @@ config = require 'config'
 Chaplin = require 'chaplin'
 SiteView = require 'views/site-view'
 NavbarView = require 'views/navbar-view'
+utils = require 'lib/utils'
 
 module.exports = class Controller extends Chaplin.Controller
 	model: Chaplin.mediator.navbar
@@ -9,7 +10,7 @@ module.exports = class Controller extends Chaplin.Controller
 
 	beforeAction: (params, route) =>
 		@compose 'site', SiteView
-		console.log 'beforeAction'
+		utils.log 'beforeAction'
 		@publishEvent 'clearView'
 		@compose 'auth', ->
 			SessionController = require 'controllers/session-controller'
@@ -24,7 +25,7 @@ module.exports = class Controller extends Chaplin.Controller
 		(item: i, tstamp: i + '_tstamp', url: config.api + i for i in list)
 
 	getData: (url) ->
-		console.log 'fetching ' + url
+		utils.log 'fetching ' + url
 		$.ajax
 			url: url
 			type: 'get'
@@ -46,28 +47,28 @@ module.exports = class Controller extends Chaplin.Controller
 
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
-				console.log r.item + ' cache not found or expired'
+				utils.log r.item + ' cache not found or expired'
 				@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 			else
-				console.log 'using cached ' + r.item + ' data'
+				utils.log 'using cached ' + r.item + ' data'
 				@setCharts 'HTTP 200', 'success', url: r.url
 
 	failWhale: (jqXHR, textStatus, errorThrown) =>
 		@parser.href = jqXHR.url
-		console.log 'failed to fetch ' + jqXHR.url
-		console.log 'error: ' + errorThrown if errorThrown
+		utils.log 'failed to fetch ' + jqXHR.url
+		utils.log 'error: ' + errorThrown if errorThrown
 		$.get config.api + 'reset'
 
 	saveCollection: =>
-		console.log 'saving collection'
+		utils.log 'saving collection'
 		(model.save {patch: true} for model in @collection.models)
 
 	displayCollection: =>
-		console.log @collection
-		console.log @collection.at(1).getAttributes()
+		utils.log @collection, false
+		utils.log @collection.at(1).getAttributes(), false
 
 	saveTstamp: (tstamp) =>
-		console.log 'saving ' + tstamp
+		utils.log 'saving ' + tstamp
 		date = new Date().toString()
 		(model.set tstamp, date for model in @collection.models)
 
@@ -75,13 +76,13 @@ module.exports = class Controller extends Chaplin.Controller
 		@parser.href = jqXHR.url
 		attr = (@parser.pathname.replace /\//g, '')
 		tstamp = attr + '_tstamp'
-		console.log 'setting collection with ' + attr
-		console.log response.data
+		utils.log 'setting collection with ' + attr
+		utils.log response.data, false
 		@collection.set response.data, remove: false
 		@saveTstamp(tstamp)
 		@saveCollection()
 		@publishEvent 'repsSet'
-		console.log 'collection length: ' + @collection.length
+		utils.log 'collection length: ' + @collection.length
 		@displayCollection()
 
 	setCharts: (response, textStatus, jqXHR) =>
@@ -89,7 +90,7 @@ module.exports = class Controller extends Chaplin.Controller
 		source = (@parser.pathname.replace /\//g, '')
 
 		if source == config.to_chart
-			console.log 'setting chart data for ' + source
+			utils.log 'setting chart data for ' + source
 
 			models = if @id then [@collection.get(@id)] else @collection.models
 			data_attrs = if @data_attrs then @data_attrs else config.data_attrs
@@ -101,31 +102,31 @@ module.exports = class Controller extends Chaplin.Controller
 
 					# if (not model.get(chart_attr) or model.hasChanged(attr))
 					if model.get(attr)
-						console.log id + ': fetching missing chart data'
+						utils.log id + ': fetching missing chart data'
 						data = model.getChartData attr
-						console.log JSON.parse data
+						utils.log JSON.parse(data), false
 						model.set chart_attr, data
 						model.save {patch: true}
 					else
-						console.log attr + 'not present'
+						utils.log attr + ' not present'
 						# text = id + ': ' + chart_attr + ' present and '
-						# console.log text + attr + ' unchanged'
+						# utils.log text + attr + ' unchanged'
 		else
-			console.log source + ' not chartable'
+			utils.log source + ' not chartable'
 
 		@displayCollection()
 
 	cacheExpired: (attr) =>
 		# check if the cache has expired
-		console.log 'checking ' + attr
+		utils.log 'checking ' + attr
 		tstamp = @collection.at(1).get attr
 
 		if tstamp
 			string = 'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ'
 			mstamp = moment(tstamp, string)
 			age = Math.abs mstamp.diff(moment(), 'hours')
-			console.log attr + ' age: ' + mstamp.fromNow(true)
+			utils.log attr + ' age: ' + mstamp.fromNow(true)
 			age >= config.max_age
 		else
-			console.log 'no ' + attr + ' found'
+			utils.log 'no ' + attr + ' found'
 			true

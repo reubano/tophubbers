@@ -1,20 +1,21 @@
 Controller = require 'controllers/base/controller'
 Chaplin = require 'chaplin'
 View = require 'views/tocalls-view'
+utils = require 'lib/utils'
 
-module.exports = class Controller extends Controller
+module.exports = class TocallsController extends Controller
 	adjustTitle: 'Ongeza Call List'
 	res: ['rep_info', 'score']
 	collection: Chaplin.mediator.reps
 
 	initialize: =>
-		console.log 'initialize tocalls-controller'
+		utils.log 'initialize tocalls-controller'
 
 		if @collection.length is 0
-			console.log 'no collection so fetching all data...'
+			utils.log 'no collection so fetching all data...'
 			@fetchData(@res)
 		else
-			console.log 'fetching expired data...'
+			utils.log 'fetching expired data...'
 			@fetchExpiredData(@res)
 
 	comparator: (model) ->
@@ -25,7 +26,7 @@ module.exports = class Controller extends Controller
 		@view = new View {@collection}
 
 	refresh: =>
-		console.log 'refreshing data...'
+		utils.log 'refreshing data...'
 		@redirectToRoute 'tocalls#index'
 		@fetchData(@res)
 

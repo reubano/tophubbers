@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/graphs'
 View = require 'views/graph-view'
+utils = require 'lib/utils'
 
 module.exports = class GraphsView extends CollectionView
 	itemView: View
@@ -18,29 +19,31 @@ module.exports = class GraphsView extends CollectionView
 		# visibilityChange: 'visibilityChangeAlert'
 
 	addedToParentAlert: ->
-		console.log 'graphs-view heard addedToParent'
+		utils.log 'graphs-view heard addedToParent'
 
 	addedToDOMAlert: ->
-		console.log 'graphs-view heard addedToDOM'
+		utils.log 'graphs-view heard addedToDOM'
 
 	visibilityChangeAlert: ->
-		console.log 'graphs-view heard visibilityChange'
+		utils.log 'graphs-view heard visibilityChange'
 
 	initialize: (options) ->
 		super
-		console.log 'initialize graphs-view'
+		utils.log 'initialize graphs-view'
 		@options = options
 		@subscribeEvent 'loginStatus', ->
-			console.log 'graphs-view caught loginStatus event'
+			utils.log 'graphs-view caught loginStatus event'
+			@render()
+
+		@subscribeEvent 'loggingIn', @render
+		@subscribeEvent 'userUpdated', @render
+		@subscribeEvent 'dispatcher:dispatch', ->
+			utils.log 'graphs-view caught dispatcher event'
 			@render()
 
 		@listenTo @collection, 'reset', ->
-			console.log 'graphs-view heard collection reset'
+			utils.log 'graphs-view heard collection reset'
 			@render()
-
-		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'graphs-view caught dispatcher event'
-			# @render()
 
 	initItemView: (model) ->
 		new @itemView
@@ -52,7 +55,7 @@ module.exports = class GraphsView extends CollectionView
 
 	render: =>
 		super
-		console.log 'rendering graphs view'
+		utils.log 'rendering graphs view'
 		@collection.sort()
 
 	clear: ->

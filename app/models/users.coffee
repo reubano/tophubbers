@@ -1,5 +1,6 @@
 Collection = require 'models/base/collection'
 Model = require 'models/user'
+utils = require 'lib/utils'
 
 module.exports = class Users extends Collection
 	model: Model
@@ -8,4 +9,4 @@ module.exports = class Users extends Collection
 
 	initialize: =>
 		super
-		console.log 'initialize users collection'
+		utils.log 'initialize users collection'

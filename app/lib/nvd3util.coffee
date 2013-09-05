@@ -1,8 +1,9 @@
+utils = require 'lib/utils'
+
 module.exports = class Nvd3util
-	constructor: (data, selection, draw, changed=false, resize=false) ->
+	constructor: (data, selection, changed=false, resize=false) ->
 		@data = data
 		@selection = selection
-		@draw = draw
 		@resize = resize
 		@changed = changed
 
@@ -10,17 +11,12 @@ module.exports = class Nvd3util
 	retLab: (data) -> data.label
 	retVal: (data) -> data.value
 
-	init: =>
-		@draw.html @makeChart()
-		# console.log 'nvd3util init done!'
-		# nv.addGraph chart
-
 	formatMinutes: (d) ->
 		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
 		if time.substr(0,1) == '0' then time.substr(1) else time
 
-	makeChart: =>
-		console.log 'making ' + @selection
+	init: =>
+		utils.log 'making ' + @selection
 
 		i = 0
 		minTime = 7.5
@@ -59,4 +55,4 @@ module.exports = class Nvd3util
 
 		nv.utils.windowResize(chart.update) if @resize
 		chart.dispatch.on 'stateChange', @nvlog
-		chart
+		# _.defer nv.addGraph chart

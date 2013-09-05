@@ -1,5 +1,6 @@
 View = require 'views/base/view'
 template = require 'views/templates/tocall'
+utils = require 'lib/utils'
 
 module.exports = class TocallView extends View
 	template: template
@@ -8,15 +9,11 @@ module.exports = class TocallView extends View
 	initialize: ->
 		super
 		@listenTo @model, 'change', @render
-		@subscribeEvent 'loginStatus', @render
-# 		@subscribeEvent 'dispatcher:dispatch', ->
-# 			console.log 'tocall-view caught dispatcher event'
-# 		@subscribeEvent 'dispatcher:dispatch', @render
 		@delegate 'click', '.toggle', @toggle
 
 	render: =>
 		super
-		# console.log 'rendering tocall view'
+		# utils.log 'rendering tocall view'
 		@$el.removeClass 'text-error text-success muted'
 
 		if @model.get 'called'
@@ -30,5 +27,5 @@ module.exports = class TocallView extends View
 
 	toggle: =>
 		@model.toggle().save()
-		console.log 'model score sort: ' + @model.get 'score_sort'
+		utils.log 'model score sort: ' + @model.get 'score_sort'
 		@publishEvent 'resort'

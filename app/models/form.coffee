@@ -1,4 +1,5 @@
 Model = require 'models/base/model'
+utils = require 'lib/utils'
 
 module.exports = class Form extends Model
 	defaults:
@@ -7,4 +8,4 @@ module.exports = class Form extends Model
 
 	initialize: ->
 		super
-		# console.log 'initialize form model'
+		# utils.log 'initialize form model'

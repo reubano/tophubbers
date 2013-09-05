@@ -37,6 +37,7 @@ exports.config =
           # 'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/backbone.dualstorage.js',
           'vendor/scripts/bootstrap.js',
+          'vendor/scripts/minilog.js',
           'vendor/scripts/nvd3/d3.v3.js',
           'vendor/scripts/nvd3/nv.d3.js',
           'vendor/scripts/nvd3/stream_layers.js',

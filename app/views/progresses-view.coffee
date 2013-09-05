@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/progresses'
 View = require 'views/progress-view'
+utils = require 'lib/utils'
 
 module.exports = class ProgressesView extends CollectionView
 	itemView: View
@@ -13,16 +14,18 @@ module.exports = class ProgressesView extends CollectionView
 		super
 		@subscribeEvent 'resort', @sort
 		@subscribeEvent 'loginStatus', @render
+		@subscribeEvent 'loggingIn', @render
+		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
-			console.log 'progresses-view caught dispatcher event'
-		# @subscribeEvent 'dispatcher:dispatch', @render
+			utils.log 'progresses-view caught dispatcher event'
+			@render()
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>
-		console.log 'resorting progresses view'
+		utils.log 'resorting progresses view'
 		@collection.sort()
 
 	render: =>
 		super
-		console.log 'rendering progresses view'
+		utils.log 'rendering progresses view'
 		@collection.sort()
