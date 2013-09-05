@@ -5,13 +5,13 @@ mediator = Chaplin.mediator
 # ------------------------------
 
 utils = Chaplin.utils.beget Chaplin.utils # Delegate to Chaplin’s utils module
-url = 'http://localhost:8888/log'
+url = 'http://flogger.herokuapp.com/api/logs'
 
 Minilog
 	.enable()
-	.pipe new Minilog.backends.jQuery {url: url, interval: 5000}
+	.pipe new Minilog.backends.jQuery {url: url, interval: 1000}
 
-minilog = Minilog 'app'
+minilog = Minilog 'ongeza'
 
 _(utils).extend
 	# String helpers
@@ -415,7 +415,7 @@ not found"
 		if remote
 			text = JSON.stringify message
 			date = new Date()
-			message = if text.length > 256 then "size exceeded" else message
+			message = if text.length > 512 then "size exceeded" else message
 
 			data =
 				message: message
