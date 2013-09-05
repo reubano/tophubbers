@@ -1,11 +1,13 @@
+utils = require 'lib/utils'
+
 switch window.location.hostname
 	when 'localhost'
-		console.log 'development envrionment set'
+		utils.log 'development envrionment set'
 		api_url = 'http://localhost:5000/'
 		forms_url = 'http://localhost:5001/api/forms'
 		age = 72	 # in hours
 	else
-		console.log 'production envrionment set'
+		utils.log 'production envrionment set'
 		api_url = 'http://ongeza-api.herokuapp.com/'
 		forms_url = 'http://ongeza-forms.herokuapp.com/api/forms'
 		age = 12	 # in hours

@@ -34,6 +34,7 @@ exports.config =
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone-1.0.0.js',
           'vendor/scripts/moment.min.js',
+          'vendor/scripts/loggly-0.2.1.js',
           # 'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/backbone.dualstorage.js',
           'vendor/scripts/bootstrap.js',

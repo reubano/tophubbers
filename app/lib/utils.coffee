@@ -392,7 +392,6 @@ not found"
 				null, obj, func, loginContext, eventType
 			)
 
-
 	# Facebook image helper
 	# ---------------------
 	facebookImageURL: (fbId, type = 'square') ->
@@ -405,5 +404,16 @@ not found"
 			params.access_token = accessToken if accessToken
 
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
+
+	log: (message) ->
+		key = "eb3d5c6a-acfd-48de-9dc0-7dec2f049277"
+		host = "//logs.loggly.com"
+		castor = new loggly.castor {url: host + '/inputs/' + key, level: 'log'}
+
+		castor.log
+			message: message
+			user_agent: navigator.userAgent
+			datetime: Date()
+			location: window.location.href
 
 module.exports = utils
