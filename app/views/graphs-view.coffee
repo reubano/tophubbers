@@ -49,7 +49,7 @@ module.exports = class GraphsView extends CollectionView
 		new @itemView
 			model: model
 			autoRender: false
-			# autoAttach: false
+			autoAttach: false
 			attrs: @options.attrs
 			ignore_svg: @options.ignore_svg
 
