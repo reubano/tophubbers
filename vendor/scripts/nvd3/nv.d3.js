@@ -1738,8 +1738,14 @@ nv.models.bulletChart = function() {
     , tickFormat = null
     , tooltips = true
     , tooltip = function(key, x, y, e, graph) {
-        return '<h3>' + x + '</h3>' +
-               '<p>' + y + '</p>'
+        var value, is23, hours, minutes, time, value, converted;
+        is12 = y.substr(0,2) == 12;
+        hours = is12 ? 0 : y.substr(0,1);
+        minutes = is12 ? y.substr(3,3) : y.substr(2,2);
+        // converted = hours * 60 + minutes * 1 + ' minutes';
+        converted = hours + ':' + minutes;
+        value = e.series.key == 'End' ? y : converted;
+        return '<h5>' + key + ' - ' + x + '</h5>' + '<p>' + value +'</p>'
       }
     , noData = 'No Data Available.'
     , dispatch = d3.dispatch('tooltipShow', 'tooltipHide')
