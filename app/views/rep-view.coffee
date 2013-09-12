@@ -85,7 +85,7 @@ module.exports = class RepView extends View
 		_.extend obj, {rep: @id, manager: @name, form: form[1..]}
 
 	checkOnline: ->
-		$.ajax config.forms
+		$.ajax config.api_forms
 
 	sendForms: =>
 		utils.log 'sending form changes to server'

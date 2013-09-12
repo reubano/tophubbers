@@ -22,7 +22,7 @@ module.exports = class Controller extends Chaplin.Controller
 	parser: document.createElement('a')
 
 	getResList: (list) =>
-		(item: i, tstamp: i + '_tstamp', url: config.api + i for i in list)
+		(item: i, tstamp: i + '_tstamp', url: config.api_get + i for i in list)
 
 	getData: (url) ->
 		utils.log 'fetching ' + url
@@ -57,7 +57,7 @@ module.exports = class Controller extends Chaplin.Controller
 		@parser.href = jqXHR.url
 		utils.log 'failed to fetch ' + jqXHR.url
 		utils.log 'error: ' + errorThrown if errorThrown
-		$.get config.api + 'reset'
+		$.get config.api_get + 'reset'
 
 	saveCollection: =>
 		utils.log 'saving collection'
