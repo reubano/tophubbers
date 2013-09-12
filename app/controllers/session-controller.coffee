@@ -122,7 +122,7 @@ module.exports = class SessionController extends Controller
 		mediator.loggingIn = value
 
 	processFail: (params) =>
-		name = if params?.provider? then params.provider.name else 'provider'
+		name = params?.provider?.name or 'provider'
 		utils.log name + ' login failed'
 		mediator.loginFailed = true
 		@publishEvent 'loginStatus', false

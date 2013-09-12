@@ -16,7 +16,7 @@ module.exports = class RepController extends Controller
 	show: (params) =>
 		@id = params.id
 		if @collection.get(@id)
-			@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
+			@ignore_svg = params?.ignore_svg ? false
 			utils.log 'show route id is ' + @id
 			utils.log 'ignore_svg is ' + @ignore_svg
 

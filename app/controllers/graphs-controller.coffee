@@ -24,7 +24,7 @@ module.exports = class GraphsController extends Controller
 		model.get('id')
 
 	index: (params) =>
-		@ignore_svg = if params?.ignore_svg? then params.ignore_svg else false
+		@ignore_svg = params?.ignore_svg ? false
 
 		@collection.comparator = @comparator
 		@view = new View

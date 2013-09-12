@@ -35,7 +35,7 @@ module.exports = class Controller extends Chaplin.Controller
 	fetchData: (list=false, id=false, data_attrs=false) =>
 		@id = id
 		@data_attrs = data_attrs
-		list = if list then list else config.res
+		list = list or config.res
 
 		for r in @getResList(list)
 			@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
@@ -43,7 +43,7 @@ module.exports = class Controller extends Chaplin.Controller
 	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
 		@id = id
 		@data_attrs = data_attrs
-		list = if list then list else config.res
+		list = list or config.res
 
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
@@ -93,7 +93,7 @@ module.exports = class Controller extends Chaplin.Controller
 			utils.log 'setting chart data for ' + source
 
 			models = if @id then [@collection.get(@id)] else @collection.models
-			data_attrs = if @data_attrs then @data_attrs else config.data_attrs
+			data_attrs = @data_attrs or config.data_attrs
 
 			for model in models
 				for attr in data_attrs
