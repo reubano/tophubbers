@@ -8,12 +8,9 @@ module.exports = class Rep extends Model
 
 	initialize: ->
 		super
-		utils.log 'init score sort: ' + @get 'score_sort'
-		utils.log 'has score sort: ' + @has 'score_sort'
 		@set created: new Date().toString() if @isNew() or not @has 'created'
 		ss = if @has 'score_sort' then @get 'score_sort' else @get 'score'
 		@set score_sort: ss
-		utils.log 'next score sort: ' + @get 'score_sort'
 
 	toggle: ->
 		@set called: not @get 'called'
