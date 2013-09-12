@@ -1,12 +1,15 @@
-(function(){
+(function() {
 
-var nv = window.nv || {};
+var nv, _ref;
 
+nv = (_ref = typeof window !== "undefined" && window !== null ? window.nv : void 0) != null ? _ref : {};
 
 nv.version = '1.1.10b';
 nv.dev = true //set false when in production
 
-window.nv = nv;
+if (typeof window !== "undefined" && window !== null) {
+  window.nv = nv;
+}
 
 nv.tooltip = {}; // For the tooltip system
 nv.utils = {}; // Utility subsystem
@@ -48,7 +51,6 @@ nv.log = function() {
   }
   return arguments[arguments.length - 1];
 };
-
 
 nv.render = function render(step) {
   step = step || 1; // number of graphs to generate in each timeout loop
@@ -351,7 +353,11 @@ window.nv.tooltip.* also has various helper methods.
 */
 (function() {
   "use strict";
-  window.nv.tooltip = {};
+  if (typeof window !== "undefined" && window !== null) {
+    window.nv.tooltip = {};
+  } else {
+    nv.tooltip = {};
+  }
 
   /* Model which can be instantiated to handle tooltip rendering.
     Example usage:
@@ -360,7 +366,8 @@ window.nv.tooltip.* also has various helper methods.
 
         tip();    //just invoke the returned function to render tooltip.
   */
-  window.nv.models.tooltip = function() {
+
+  var func = function() {
         var content = null    //HTML contents of the tooltip.  If null, the content is generated via the data variable.
         ,   data = null     /* Tooltip data. If data is given in the proper format, a consistent tooltip is generated.
         Format of data:
@@ -611,6 +618,11 @@ window.nv.tooltip.* also has various helper methods.
         return nvtooltip;
   };
 
+  if (typeof window !== "undefined" && window !== null) {
+    window.nv.models.tooltip = func;
+  } else {
+    nv.models.tooltip = func;
+  }
 
   //Original tooltip.show function. Kept for backward compatibility.
   // pos = [left,top]
@@ -920,7 +932,7 @@ chart.options({
 });
 
 To enable in the chart:
-chart.options = nv.utils.optionsFunc.bind(chart);
+// chart.options = nv.utils.optionsFunc.bind(chart);
 */
 nv.utils.optionsFunc = function(args) {
     if (args) {
@@ -1250,7 +1262,7 @@ nv.utils.optionsFunc = function(args) {
   d3.rebind(chart, axis, 'orient', 'tickValues', 'tickSubdivide', 'tickSize', 'tickPadding', 'tickFormat');
   d3.rebind(chart, scale, 'domain', 'range', 'rangeBand', 'rangeBands'); //these are also accessible by chart.scale(), but added common ones directly for ease of use
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if(!arguments.length) return margin;
@@ -1637,7 +1649,7 @@ nv.models.bullet = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   // left, right, top, bottom
   chart.orient = function(_) {
@@ -1745,7 +1757,8 @@ nv.models.bulletChart = function() {
         // converted = hours * 60 + minutes * 1 + ' minutes';
         converted = hours + ':' + minutes;
         value = e.series.key == 'End' ? y : converted;
-        return '<h5>' + key + ' - ' + x + '</h5>' + '<p>' + value +'</p>'
+        // return '<h5>' + key + ' ~ ' + x + '</h5>' + '<p>' + value +'</p>'
+        return 'hi bob'
       }
     , noData = 'No Data Available.'
     , dispatch = d3.dispatch('tooltipShow', 'tooltipHide')
@@ -1980,7 +1993,7 @@ nv.models.bulletChart = function() {
 
   d3.rebind(chart, bullet, 'color');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   // left, right, top, bottom
   chart.orient = function(x) {
@@ -2676,7 +2689,7 @@ nv.models.cumulativeLineChart = function() {
 
   d3.rebind(chart, lines, 'defined', 'isArea', 'x', 'y', 'xScale','yScale', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi','useVoronoi',  'id');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -3073,7 +3086,7 @@ nv.models.discreteBar = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -3433,7 +3446,7 @@ nv.models.discreteBarChart = function() {
 
   d3.rebind(chart, discretebar, 'x', 'y', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'id', 'showValues', 'valueFormat');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -3614,7 +3627,7 @@ nv.models.distribution = function() {
   //============================================================
   // Expose Public Variables
   //------------------------------------------------------------
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -3878,7 +3891,7 @@ nv.models.historicalBar = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -4319,7 +4332,7 @@ nv.models.historicalBarChart = function() {
   d3.rebind(chart, bars, 'defined', 'isArea', 'x', 'y', 'size', 'xScale', 'yScale',
     'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id', 'interpolate','highlightPoint','clearHighlights', 'interactive');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -4663,7 +4676,7 @@ nv.models.indentedTree = function() {
   //============================================================
   // Expose Public Variables
   //------------------------------------------------------------
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -4957,7 +4970,7 @@ nv.models.indentedTree = function() {
   //------------------------------------------------------------
 
   chart.dispatch = dispatch;
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -5232,7 +5245,7 @@ nv.models.line = function() {
   d3.rebind(chart, scatter, 'id', 'interactive', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange',
     'sizeDomain', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'useVoronoi', 'clipRadius', 'padData','highlightPoint','clearHighlights');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -5655,7 +5668,7 @@ nv.models.lineChart = function() {
   d3.rebind(chart, lines, 'defined', 'isArea', 'x', 'y', 'size', 'xScale', 'yScale', 'xDomain', 'yDomain', 'xRange', 'yRange'
     , 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'useVoronoi','id', 'interpolate');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -6107,7 +6120,7 @@ nv.models.linePlusBarChart = function() {
   //TODO: consider rebinding x, y and some other stuff, and simply do soemthign lile bars.x(lines.x()), etc.
   //d3.rebind(chart, lines, 'x', 'y', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -6649,7 +6662,7 @@ nv.models.lineWithFocusChart = function() {
 
   d3.rebind(chart, lines, 'defined', 'isArea', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return lines.x;
@@ -7344,7 +7357,7 @@ nv.models.linePlusBarWithFocusChart = function() {
   //TODO: consider rebinding x, y and some other stuff, and simply do soemthign lile bars.x(lines.x()), etc.
   //d3.rebind(chart, lines, 'x', 'y', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -7746,7 +7759,7 @@ nv.models.multiBar = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -8280,7 +8293,7 @@ nv.models.multiBarChart = function() {
   d3.rebind(chart, multibar, 'x', 'y', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'clipEdge',
    'id', 'stacked', 'delay', 'barColor','groupSpacing');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -8696,7 +8709,7 @@ nv.models.multiBarHorizontal = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -8916,9 +8929,34 @@ nv.models.multiBarHorizontalChart = function() {
 
       chart.update = function() { container.transition().duration(transitionDuration).call(chart) };
       chart.container = this;
+      var d, noData, res;
+
+      if (data != null ? data.length : void 0) {
+        res = (function() {
+          var _i, _len, _ref, _results;
+
+          _results = [];
+          for (_i = 0, _len = data.length; _i < _len; _i++) {
+            d = data[_i];
+            _results.push(d != null ? (_ref = d.values) != null ? _ref.length : void 0 : void 0);
+          }
+          return _results;
+        })();
+        if (res.filter(function(v) {
+          return v !== void 0;
+        }).length) {
+          noData = false;
+        } else {
+          noData = true;
+        }
+      } else {
+        noData = true;
+      }
 
       //set state.disabled
-      state.disabled = data.map(function(d) { return !!d.disabled });
+      if (!noData) {
+        state.disabled = data.map(function(d) { return !!d.disabled });
+      }
 
       if (!defaultState) {
         var key;
@@ -8934,7 +8972,7 @@ nv.models.multiBarHorizontalChart = function() {
       //------------------------------------------------------------
       // Display No Data message if there's nothing to show.
 
-      if (!data || !data.length || !data.filter(function(d) { return d.values.length }).length) {
+      if (noData) {
         var noDataText = container.selectAll('.nv-noData').data([noData]);
 
         noDataText.enter().append('text')
@@ -9178,7 +9216,7 @@ nv.models.multiBarHorizontalChart = function() {
 
   d3.rebind(chart, multibar, 'x', 'y', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'clipEdge', 'id', 'delay', 'showValues', 'valueFormat', 'stacked', 'barColor');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -9642,7 +9680,7 @@ nv.models.multiChart = function() {
   chart.xAxis = xAxis;
   chart.yAxis1 = yAxis1;
   chart.yAxis2 = yAxis2;
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -9963,7 +10001,7 @@ nv.models.ohlcBar = function() {
 
   chart.dispatch = dispatch;
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -10368,7 +10406,7 @@ nv.models.pie = function() {
   //------------------------------------------------------------
 
   chart.dispatch = dispatch;
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -10717,7 +10755,7 @@ nv.models.pieChart = function() {
   chart.pie = pie;
 
   d3.rebind(chart, pie, 'valueFormat', 'values', 'x', 'y', 'description', 'id', 'showLabels', 'donutLabelsOutside', 'pieLabelsOutside', 'labelType', 'donut', 'donutRatio', 'labelThreshold');
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -11260,7 +11298,7 @@ nv.models.scatter = function() {
   //------------------------------------------------------------
 
   chart.dispatch = dispatch;
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -11946,7 +11984,7 @@ nv.models.scatterChart = function() {
   chart.distY = distY;
 
   d3.rebind(chart, scatter, 'id', 'interactive', 'pointActive', 'x', 'y', 'shape', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'sizeRange', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'clipRadius', 'useVoronoi');
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -12579,7 +12617,7 @@ nv.models.scatterPlusLineChart = function() {
 
   d3.rebind(chart, scatter, 'id', 'interactive', 'pointActive', 'x', 'y', 'shape', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'sizeRange', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'clipRadius', 'useVoronoi');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -12819,7 +12857,7 @@ nv.models.sparkline = function() {
   //============================================================
   // Expose Public Variables
   //------------------------------------------------------------
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -13138,7 +13176,7 @@ nv.models.sparklinePlus = function() {
 
   d3.rebind(chart, sparkline, 'x', 'y', 'xScale', 'yScale', 'color');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -13449,7 +13487,7 @@ nv.models.stackedArea = function() {
   d3.rebind(chart, scatter, 'interactive', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange',
     'sizeDomain', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'useVoronoi','clipRadius','highlightPoint','clearHighlights');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.x = function(_) {
     if (!arguments.length) return getX;
@@ -13998,7 +14036,7 @@ nv.models.stackedAreaChart = function() {
 
   d3.rebind(chart, stacked, 'x', 'y', 'size', 'xScale', 'yScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'interactive', 'useVoronoi', 'offset', 'order', 'style', 'clipEdge', 'forceX', 'forceY', 'forceSize', 'interpolate');
 
-  chart.options = nv.utils.optionsFunc.bind(chart);
+  // chart.options = nv.utils.optionsFunc.bind(chart);
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
