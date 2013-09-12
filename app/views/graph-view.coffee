@@ -1,6 +1,7 @@
-config = require 'config'
-nvd3util = require 'lib/nvd3util'
 View = require 'views/base/view'
+Common = require 'lib/common'
+makeChart = require 'lib/makechart'
+config = require 'config'
 template = require 'views/templates/graph'
 utils = require 'lib/utils'
 
@@ -53,9 +54,9 @@ module.exports = class GraphView extends View
 		# utils.log @model.get 'chart'
 
 		for attr in @attrs
-			chart_class = 'chart-' + attr[0..2]
-			selection = '#' + @id + '.view .' + chart_class + ' svg'
-			parent = '#' + @id + '.view .' + chart_class
+			options = {attr: attr, id: @id}
+			selection = Common.getSelection options
+			parent = Common.getParent options
 			svg_attr = attr + config.svg_suffix
 			chart_attr = attr + @chart_suffix
 			chart_json = @model.get chart_attr
@@ -76,8 +77,7 @@ module.exports = class GraphView extends View
 				utils.log text + 'has changed: ' + @changed
 				utils.log 'getting ' + text + 'script'
 				chart_data = JSON.parse chart_json
-				nvd3 = new nvd3util chart_data, selection, @changed
-				_.defer nvd3.init
+				_.defer makeChart, chart_data, selection, @changed
 				_.defer @setSVG, attr
 				_.defer @pubRender, attr
 			else
@@ -94,8 +94,7 @@ module.exports = class GraphView extends View
 		@model.save()
 
 	setSVG: (attr) =>
-		chart_class = 'chart-' + attr[0..2]
-		parent = '#' + @id + '.view .' + chart_class
+		parent = Common.getParent {attr: attr, id: @id}
 		text = ' ' + @id + ' ' + attr + ' '
 		html = @$(parent).html()
 		bad = 'opacity: 0.000001;'

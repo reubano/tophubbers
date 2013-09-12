@@ -18,6 +18,8 @@
     "postinstall": "brunch build --optimize"
   },
   "dependencies": {
+    "brunch": "1.6",
+    "auto-reload-brunch": "1.6",
     "javascript-brunch": ">= 1.0 < 1.7",
     "coffee-script-brunch": ">= 1.0 < 1.7",
     "css-brunch": ">= 1.0 < 1.7",
@@ -27,9 +29,12 @@
     "clean-css-brunch": ">= 1.0 < 1.7",
     "express": "3.x",
     "winston": "0.7.x",
-    "brunch": "1.6",
-    "auto-reload-brunch": "1.6"
-
+    "underscore": "1.5",
+    "coffee-script": "1.6",
+    "phantom": "0.5",
+    "d3": "3.x",
+    "restler": "2.x",
+    "blueimp-md5": "1.x"
   },
   "devDependencies": {
   }

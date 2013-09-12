@@ -1,5 +1,5 @@
-switch window.location.hostname
-	when 'localhost'
+switch window?.location?.hostname ? require('os').hostname()
+	when 'localhost', 'tokpro.local'
 		console.log 'development envrionment set'
 		api_url = 'http://localhost:5000/'
 		forms_url = 'http://localhost:5001/api/forms'

@@ -1,4 +1,5 @@
 Model = require 'models/base/model'
+Common = require 'lib/common'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
@@ -22,37 +23,6 @@ module.exports = class Rep extends Model
 		utils.log 'score: ' + @get 'score'
 		utils.log 'score sort: ' + score_sort
 
-	getChartData: (attr) =>
-		d = @get attr
+	getChartData: (attr) ->
+		Common.getChartData attr, @get(attr), @get 'id'
 
-		if not d
-			utils.log 'no ' + attr + ' found for ' + @get('id')
-			return
-
-		utils.log @get('id') + ': generating ' + attr + ' chart data...'
-
-		if d.rows
-			endRows = (label: obj.date, value: obj.start for obj in d.rows)
-			durRows = (label: obj.date, value: obj.duration for obj in d.rows)
-		else
-			endRows = []
-			durRows = []
-
-		if d.missing
-			endMiss = (label: obj, value: 0 for obj in d.missing)
-			durMiss = (label: obj, value: 0 for obj in d.missing)
-		else
-			endMiss = []
-			durMiss = []
-
-		endValues = endRows.concat endMiss
-		durValues = durRows.concat durMiss
-
-		endValues = _.sortBy endValues, 'label'
-		durValues = _.sortBy durValues, 'label'
-
-		data = [
-			{key: 'End', values: endValues},
-			{key: 'Duration', values: durValues}]
-
-		JSON.stringify data
