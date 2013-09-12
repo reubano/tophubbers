@@ -58,7 +58,7 @@ handleGet = (req, res) ->
       logger.info "Image #{id}.png exists! Serving to page."
       res.sendfile filename
     else
-      logger.warning "Image #{id}.png doesn't exist."
+      logger.error "Image #{id}.png doesn't exist."
       res.send 404, "Sorry! Image #{id}.png doesn't exist."
 
 # middleware
