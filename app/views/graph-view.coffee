@@ -50,42 +50,41 @@ module.exports = class GraphView extends View
 		utils.log 'graph-view heard addedToParent'
 
 	getChartScript: (ignore_svg) =>
-		# utils.log 'chart html'
+		utils.log 'getting chart script for ' + @id
 		# utils.log @model.get 'chart'
 
 		for attr in @attrs
-			options = {attr: attr, id: @id}
-			selection = Common.getSelection options
-			parent = Common.getParent options
+			@attr = attr
+			utils.log 'setting variables for ' + @attr
+			@options = {attr: attr, id: @id}
+			selection = Common.getSelection @options
+			@parent = Common.getParent @options
+			@text = "#{@id} #{@attr}"
 			svg_attr = attr + config.svg_suffix
 			chart_attr = attr + @chart_suffix
 			chart_json = @model.get chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.has svg_attr then @model.get svg_attr else null
-			text = @id + ' ' + attr + ' '
 
 			if (svg and not @changed and not ignore_svg)
-				utils.log 'drawing ' + text + 'chart from cache'
-				# utils.log svg.length
-				# utils.log svg.indexOf('opacity: 0.000001;') < 0
-				@$(parent).html svg
-				@pubRender attr
+				utils.log "drawing #{@text} chart from cache"
+				@$(@parent).html svg
+				@pubRender()
 			else if chart_json and name
-				# utils.log text + 'is rendered: ' + rendered
-				utils.log text + 'has svg: ' + svg?
-				utils.log text + 'ignore svg: ' + ignore_svg
-				utils.log text + 'has changed: ' + @changed
-				utils.log 'getting ' + text + 'script'
+				utils.log "#{@text} has svg: #{svg?}"
+				utils.log "#{@text} ignore svg: #{ignore_svg}"
+				utils.log "#{@text} has changed: #{@changed}"
+				utils.log "getting #{@text} script"
 				chart_data = JSON.parse chart_json
 				_.defer makeChart, chart_data, selection, @changed
-				_.defer @setSVG, attr
-				_.defer @pubRender, attr
+				_.defer @setSVG
+				_.defer @pubRender
 			else
-				utils.log @id + ' has no ' + chart_attr + ' or no name'
+				utils.log "#{@id} has no #{chart_attr} or no name"
 
-	pubRender: (attr) =>
-		@publishEvent 'rendered:' + attr
-		utils.log 'published rendered:' + attr
+	pubRender: =>
+		@publishEvent 'rendered:' + @attr
+		utils.log 'published rendered:' + @attr
 
 	unsetSVG: (attr) =>
 		svg_attr = attr + config.svg_suffix
@@ -93,17 +92,15 @@ module.exports = class GraphView extends View
 		@model.unset svg_attr
 		@model.save()
 
-	setSVG: (attr) =>
-		parent = Common.getParent {attr: attr, id: @id}
-		text = ' ' + @id + ' ' + attr + ' '
-		html = @$(parent).html()
+	setSVG: =>
+		html = @$(@parent).html()
 		bad = 'opacity: 0.000001;'
 
 		if html and html.indexOf(bad) < 0 and html.length > 40
 			svg_attr = attr + config.svg_suffix
-			utils.log 'setting' + text + 'svg'
+			utils.log "setting #{@text} svg"
 			svg = html.replace(/\"/g, '\'')
 			@model.set svg_attr, svg
 			@model.save()
 		else
-			utils.log 'html blank or malformed for ' + parent
+			utils.log 'html blank or malformed for ' + @parent
