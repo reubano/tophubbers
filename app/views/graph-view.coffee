@@ -66,7 +66,10 @@ module.exports = class GraphView extends View
 			name = @model.get 'first_name'
 			svg = if @model.has svg_attr then @model.get svg_attr else null
 
-			if (svg and not @changed and not ignore_svg)
+			if config.mobile
+				utils.log "getting #{@text} png from server"
+				$.post(config.api_upload, @options).done(@success).fail(@failWhale)
+			else if svg and not @changed and not ignore_svg
 				utils.log "drawing #{@text} chart from cache"
 				@$(@parent).html svg
 				@pubRender()
@@ -104,3 +107,16 @@ module.exports = class GraphView extends View
 			@model.save()
 		else
 			utils.log 'html blank or malformed for ' + @parent
+
+	success: (data, resp, options) =>
+		utils.log "successfully fetched png for #{@id}!"
+		url = "uploads/#{data.hash}.png"
+		utils.log "setting html for #{@parent} to #{url}"
+		@$(@parent).html "<img src=#{url}>"
+		@pubRender()
+
+	failWhale: (data, xhr, options) =>
+		utils.log "failed to fetch png for #{@id}."
+		console.log data
+		console.log xhr
+		console.log options
