@@ -51,7 +51,7 @@ module.exports = class GraphsView extends CollectionView
 			autoRender: false
 			autoAttach: false
 			attrs: @options.attrs
-			ignore_svg: @options.ignore_svg
+			ignore_cache: @options.ignore_cache
 
 	render: =>
 		super

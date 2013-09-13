@@ -15,10 +15,9 @@ module.exports = class RepController extends Controller
 
 	show: (params) =>
 		@id = params.id
-		if @collection.get(@id)
-			@ignore_svg = params?.ignore_svg ? false
-			utils.log 'show route id is ' + @id
-			utils.log 'ignore_svg is ' + @ignore_svg
+		@ignore_cache = params?.ignore_cache ? false
+		utils.log 'show route id is ' + @id
+		utils.log 'ignore_cache is ' + @ignore_cache
 
 		if @collection.length is 0 and @collection.get(@id)
 			utils.log 'no collection so fetching all data...'
@@ -40,8 +39,8 @@ module.exports = class RepController extends Controller
 
 	showView: (model) =>
 		utils.log 'rendering showView'
-		utils.log 'ignore_svg is ' + @ignore_svg
+		utils.log 'ignore_cache is ' + @ignore_cache
 		@view = new View
 			model: model
-			attrs: config.data_attrs
-			ignore_svg: @ignore_svg
+			attrs: if config.mobile then config.hash_attrs else config.data_attrs
+			ignore_cache: @ignore_cache

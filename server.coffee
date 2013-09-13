@@ -25,7 +25,6 @@ app = express()
 uploads = 'uploads'
 oneDay = 86400000
 selector = Common.getSelection()
-attrs = config.data_attrs
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
 logger = new winston.Logger
@@ -74,6 +73,9 @@ processPage = (page, ph) ->
   logger.info 'Processing phantom page'
 
   handleUpload = (req, res) ->
+    id = req.body?.id or 'E0008'
+    attr = req.body?.attr or 'cur_work_hash'
+
     sendHash = (result) ->
       data = JSON.stringify result.container.__data__
       # hash = murmur.murmur3 data, 5
@@ -84,15 +86,14 @@ processPage = (page, ph) ->
       fs.exists filename, (exists) ->
         if exists
           logger.info "File #{filename} exists. Sending image hash."
-          res.send 201, {hash: hash, type: 'cached'}
+          res.send 201, {hash: hash, type: 'cached', id: id, attr: attr}
         else
           # need to figure out how to delete old photos
           logger.info "File #{filename} doesn't exist. Creating new image."
           # page.renderBase64 'png', (str) -> res.send 201, {uri: str}
-          page.render filename, -> res.send 201, {hash: hash, type: 'new'}
+          page.render filename, -> res.send 201,
+            hash: hash, type: 'new', id: id, attr: attr
 
-    id = req.body?.id or 'E0008'
-    attr = req.body?.attr or 'cur_work_data'
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
     page.set 'viewportSize', {width: w, height: h}
 
@@ -107,18 +108,23 @@ processPage = (page, ph) ->
 
   handleFetch = (req, res) ->
     handleSuccess = (json, response) ->
-      list = []
+      data_list = []
+      hash_list = []
       for rep in json.data
-        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in attrs)
-        list.push _.object attrs, raw
+        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
+        hashes = (blueimp JSON.stringify r for r in raw)
+        data_list.push _.object config.hash_attrs, raw
+        hash_obj = _.object config.hash_attrs, hashes
+        hash_obj.id = rep.id
+        hash_list.push hash_obj
 
-      data = JSON.stringify _.object (rep.id for rep in json.data), list
+      data = JSON.stringify _.object (rep.id for rep in json.data), data_list
 
       fs.writeFile datafile, data, (err) ->
         if err
           res.send 500, {status: response.statusCode, error: err.message}
         else
-          res.send 201, {hash: blueimp data}
+          res.send 201, {data: hash_list}
 
     handleFailure = (data, response) ->
       res.send 417, {status: response.statusCode, response: data}
@@ -144,7 +150,7 @@ processPage = (page, ph) ->
     logger.info "Listening on #{port}"
     logger.info """
       Try curl --data 'url=http://localhost:5000/work_data' http://localhost:#{port}/api/fetch
-      Then curl --data 'id=E0018&attr=prev_work_data' http://localhost:#{port}/api/upload
+      Then curl --data 'id=E0018&attr=prev_work_hash' http://localhost:#{port}/api/upload
       Then go to http://localhost:#{port}/#{uploads}/<hash>"""
 
 phantom.create (ph) ->

@@ -43,17 +43,17 @@ module.exports = class Controller extends Chaplin.Controller
 				dataType: 'json'
 				beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
 
-	fetchData: (list=false, id=false, data_attrs=false) =>
+	fetchData: (list=false, id=false, attrs=false) =>
 		@id = id
-		@data_attrs = data_attrs
+		@attrs = attrs
 		list = list or config.res
 
 		for r in @getResList(list)
 			@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
-	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
+	fetchExpiredData: (list=false, id=false, attrs=false) =>
 		@id = id
-		@data_attrs = data_attrs
+		@attrs = attrs
 		list = list or config.res
 
 		for r in @getResList(list)
@@ -107,10 +107,10 @@ module.exports = class Controller extends Chaplin.Controller
 			utils.log 'setting chart data for ' + source
 
 			models = if @id then [@collection.get(@id)] else @collection.models
-			data_attrs = @data_attrs or config.data_attrs
+			attrs = @attrs or config.data_attrs
 
 			for model in models
-				for attr in data_attrs
+				for attr in attrs
 					chart_attr = attr + config.chart_suffix
 					id = model.get 'id'
 

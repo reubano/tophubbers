@@ -15,7 +15,7 @@ module.exports = (match) ->
 
 	# Cumulative working month graph sorted by employee num
 	match 'graphs', 'graphs#index'
-	match 'graphs/:ignore_svg', 'graphs#index'
+	match 'graphs/:ignore_cache', 'graphs#index'
 
 	# Data table of reps ordered by watch score
 	# Mint like progress bars summarizing points for each rep
@@ -26,4 +26,4 @@ module.exports = (match) ->
 	# Data table of progress
 	# Mint like progress bars
 	match 'rep/:id', 'rep#show'
-	match 'rep/:id/:ignore_svg', 'rep#show'
+	match 'rep/:id/:ignore_cache', 'rep#show'
