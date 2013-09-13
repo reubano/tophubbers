@@ -102,7 +102,6 @@ module.exports = class GraphView extends View
 		utils.log "unsetting #{attr} cache"
 		suffix = if @mobile then 'img_suffix' else 'svg_suffix'
 		@model.unset attr + config[suffix]
-
 		@model.save()
 
 	setImg: (options) =>
@@ -115,7 +114,7 @@ module.exports = class GraphView extends View
 			@model.set options.attr + config.img_suffix, img
 			@model.save()
 		else
-			utils.log 'html blank or malformed for ' + @parent
+			utils.log 'html blank or malformed for ' + parent
 
 	setSVG: (options) =>
 		parent = Common.getParent options
@@ -123,12 +122,12 @@ module.exports = class GraphView extends View
 		bad = 'opacity: 0.000001;'
 
 		if html and html.indexOf(bad) < 0 and html.length > 40
-			utils.log "setting #{@text} svg"
+			utils.log "setting #{options.id} #{options.attr} svg"
 			svg = html.replace(/\"/g, '\'')
 			@model.set options.attr + config.svg_suffix, svg
 			@model.save()
 		else
-			utils.log 'html blank or malformed for ' + @parent
+			utils.log 'html blank or malformed for ' + parent
 
 	gvSuccess: (data, resp, options) =>
 		parent = Common.getParent data
@@ -140,4 +139,4 @@ module.exports = class GraphView extends View
 		@pubRender data.attr
 
 	gvFailWhale: (data, xhr, options) =>
-		utils.log "failed to fetch png for #{@id}."
+		utils.log "failed to fetch png for #{data.id}."
