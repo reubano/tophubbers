@@ -28,17 +28,15 @@ module.exports = class GraphView extends View
 
 		@listenTo @model, changes[0], ->
 			utils.log 'graph-view heard ' + changes[0]
-			if listen_attrs[0] in @attrs
-				@changed = true
-				@unsetCache listen_attrs[0]
-				@render()
+			@changed = true
+			@unsetCache listen_attrs[0]
+			@render() if listen_attrs[0] in @attrs
 
 		@listenTo @model, changes[1], ->
 			utils.log 'graph-view heard ' + changes[1]
-			if listen_attrs[1] in @attrs
-				@changed = true
-				@unsetCache listen_attrs[1]
-				@render()
+			@changed = true
+			@unsetCache listen_attrs[1]
+			@render() if listen_attrs[1] in @attrs
 
 	render: =>
 		super
