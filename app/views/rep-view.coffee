@@ -7,6 +7,7 @@ utils = require 'lib/utils'
 
 module.exports = class RepView extends View
 	mediator = Chaplin.mediator
+	@synced = @synced ? false
 
 	autoRender: true
 	region: 'content'
@@ -14,7 +15,6 @@ module.exports = class RepView extends View
 	template: template
 	user: mediator.users.get(1)
 	forms: mediator.forms
-	synced: false
 
 	initialize: (options) =>
 		super
