@@ -23,7 +23,7 @@ module.exports = class RepView extends View
 		mediator.rep_id = @id
 		utils.log 'initialize rep-view for ' + @id
 		utils.log @forms
-		utils.log options
+		console.log options
 
 		if @user
 			@name = @user.get 'name'
@@ -47,8 +47,7 @@ module.exports = class RepView extends View
 			@listenTo @model, prefix + 'feedback_data', @render
 			@listenTo @model, prefix + 'progress', @render
 
-		@listenTo @forms, 'add', ->
-			utils.log 'rep-view caught add event'
+		@listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
 		@listenTo @forms, 'request', @viewRequest
 		@listenTo @forms, 'change', @render
 		@listenTo @forms, 'sync', @success
