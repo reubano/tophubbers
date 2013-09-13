@@ -89,7 +89,7 @@ module.exports = class GraphView extends View
 				utils.log "getting #{@text} script"
 				chart_data = JSON.parse chart_json
 				_.defer makeChart, chart_data, selection, @changed
-				_.defer @setSVG
+				_.defer @setSVG, @options
 				_.defer @pubRender, @attr
 			else
 				utils.log "#{@id} has no #{chart_attr} or no name"
@@ -117,14 +117,15 @@ module.exports = class GraphView extends View
 		else
 			utils.log 'html blank or malformed for ' + @parent
 
-	setSVG: =>
-		html = @$(@parent).html()
+	setSVG: (options) =>
+		parent = Common.getParent options
+		html = @$(parent).html()
 		bad = 'opacity: 0.000001;'
 
 		if html and html.indexOf(bad) < 0 and html.length > 40
 			utils.log "setting #{@text} svg"
 			svg = html.replace(/\"/g, '\'')
-			@model.set @svg_attr, svg
+			@model.set options.attr + config.svg_suffix, svg
 			@model.save()
 		else
 			utils.log 'html blank or malformed for ' + @parent
