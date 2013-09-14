@@ -19,21 +19,18 @@ module.exports = class RepView extends View
 		super
 		@attrs = options.attrs
 		@id = @model.get 'id'
+		@name = if @user then @user.get 'name' else 'N/A'
 		mediator.rep_id = @id
+
 		utils.log 'initialize rep-view for ' + @id
-		utils.log @forms
+		console.log @forms
 		console.log options
-
-		if @user
-			@name = @user.get 'name'
-		else
-			@name = 'N/A'
-			@subscribeEvent 'userUpdated', @setUserName
-
 		utils.log 'User name is ' + @name
+
 		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
+		@subscribeEvent 'userUpdated', @setUserName
 		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'loggingIn', @render
