@@ -87,6 +87,7 @@ module.exports = class GraphView extends View
 				utils.log "getting #{@text} script"
 				chart_data = JSON.parse chart_json
 				_.defer makeChart, chart_data, selection, @changed
+				_.defer @unsetCache, @attr
 				_.defer @setSVG, @options
 				_.defer @pubRender, @attr
 			else
