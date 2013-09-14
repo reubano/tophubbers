@@ -3,7 +3,7 @@ makeChart = (data, selection, changed=false, resize=false) ->
 	retLab = (data) -> data.label
 	retVal = (data) -> data.value
 	formatMinutes = (d) ->
-		time = d3.time.format("%I:%M %p")(new Date(2013, 0, 1, 0, d))
+		time = d3.time.format("%I:%M %p")(new Date 2013, 0, 1, 0, d)
 		if time.substr(0,1) is '0' then time.substr(1) else time
 
 	i = 0
