@@ -7,7 +7,6 @@ utils = require 'lib/utils'
 
 module.exports = class RepView extends View
 	mediator = Chaplin.mediator
-	@synced = @synced ? false
 
 	autoRender: true
 	region: 'content'
@@ -91,7 +90,7 @@ module.exports = class RepView extends View
 		@forms.syncDirtyAndDestroyed()
 
 	fetchForms: =>
-		if not @synced
+		if not mediator.synced
 			utils.log 'fetching form changes from server'
 			@forms.fetch
 				data:
@@ -128,7 +127,7 @@ module.exports = class RepView extends View
 			@$('#success-modal').modal()
 		else
 			utils.log 'successfully synced forms'
-			@synced = true
+			mediator.synced = true
 
 		utils.log model, false
 		utils.log resp, false

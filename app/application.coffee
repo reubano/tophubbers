@@ -53,6 +53,7 @@ module.exports = class Application extends Chaplin.Application
 		Chaplin.mediator.user = null
 		Chaplin.mediator.loggingIn = false
 		Chaplin.mediator.loginFailed = false
+		Chaplin.mediator.synced = false
 		Chaplin.mediator.download = {}
 		Chaplin.mediator.rep_id = null
 		Chaplin.mediator.users = new Users()
