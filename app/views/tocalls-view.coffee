@@ -5,6 +5,7 @@ utils = require 'lib/utils'
 
 module.exports = class TocallsView extends CollectionView
 	itemView: View
+	autoRender: true
 	listSelector: '#tocall-list'
 	region: 'content'
 	className: 'span12'
@@ -18,7 +19,6 @@ module.exports = class TocallsView extends CollectionView
 		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			utils.log 'tocalls-view caught dispatcher event'
-			@render
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>

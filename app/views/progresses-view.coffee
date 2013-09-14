@@ -5,6 +5,7 @@ utils = require 'lib/utils'
 
 module.exports = class ProgressesView extends CollectionView
 	itemView: View
+	autoRender: true
 	listSelector: '#progress-list'
 	region: 'content'
 	className: 'span12'
@@ -18,7 +19,6 @@ module.exports = class ProgressesView extends CollectionView
 		@subscribeEvent 'userUpdated', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			utils.log 'progresses-view caught dispatcher event'
-			@render
 		# @listenTo @model,'all', @renderCheckbox
 
 	sort: =>
