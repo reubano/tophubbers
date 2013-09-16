@@ -130,8 +130,8 @@ processPage = (page, ph) ->
       hash_list = []
       for rep in json.data
         raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
-        hashes = (blueimp JSON.stringify r for r in raw)
         data_list.push _.object config.hash_attrs, raw
+        hashes = (md5 JSON.stringify r for r in raw)
         hash_obj = _.object config.hash_attrs, hashes
         hash_obj.id = rep.id
         hash_list.push hash_obj
