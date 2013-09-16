@@ -94,22 +94,22 @@ processPage = (page, ph) ->
       # hash = md5.update(data).digest 'hex'
       # logger.info "hash #{hash}, data #{data}"
       filename = "#{hash}.png"
-      path = path.join 'public', uploads, filename
+      filepath = path.join 'public', uploads, filename
 
-      fs.exists path, (exists) ->
+      fs.exists filepath, (exists) ->
         if exists
           logger.info "File #{filename} exists. Sending image hash."
-          sendCacheRes
+          sendCacheRes()
         else
           logger.info "File #{filename} doesn't exist. Creating new image."
-          page.render path, sendNewRes
+          page.render filepath, sendNewRes
 
 #       if config.dev
 #       else
 #         s3Exists filename, (exists) ->
 #           if exists
 #             logger.info "File #{filename} exists. Sending image hash."
-#             sendCacheRes
+#             sendCacheRes()
 #           else
 #             logger.info "File #{filename} doesn't exist. Creating new image."
 #             page.render path, -> s3.putFile path, "/#{filename}", (err, s3Res) ->
@@ -117,7 +117,7 @@ processPage = (page, ph) ->
 #               res.resume
 
     readJSON = (err, raw) ->
-      if err return res.send 404, {error: err.message}
+      if err then return res.send 404, {error: err.message}
       try
         data = JSON.parse raw
         chart_data = data[id][attr]

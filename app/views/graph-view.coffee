@@ -138,4 +138,5 @@ module.exports = class GraphView extends View
 		@pubRender data.attr
 
 	gvFailWhale: (data, xhr, options) =>
-		utils.log "failed to fetch png for #{data}."
+		response = JSON.parse data.responseText
+		utils.log "failed to fetch png: #{response.error}."
