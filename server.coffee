@@ -4,6 +4,7 @@
 express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
+# knox = require 'knox'
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
@@ -23,6 +24,11 @@ config = require './app/config.coffee'
 # Set variables
 app = express()
 uploads = 'uploads'
+# s3 = knox.createClient
+#   key: process.env.AWS_ACCESS_KEY_ID
+#   secret: process.env.AWS_SECRET_ACCESS_KEY
+#   bucket: process.env.S3_BUCKET_NAME
+
 oneDay = 86400000
 selector = Common.getSelection()
 port = process.env.PORT or 3333
@@ -93,6 +99,18 @@ processPage = (page, ph) ->
           # page.renderBase64 'png', (str) -> res.send 201, {uri: str}
           page.render filename, -> res.send 201,
             hash: hash, type: 'new', id: id, attr: attr
+#       if config.dev
+#       else
+#         s3Exists filename, (exists) ->
+#           if exists
+#             logger.info "File #{filename} exists. Sending image hash."
+#             sendCacheRes
+#           else
+#             logger.info "File #{filename} doesn't exist. Creating new image."
+#             page.render path, -> s3.putFile path, "/#{filename}", (err, s3Res) ->
+#               if err then res.send 500, {error: err.message} else sendNewRes
+#               res.resume
+
 
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
     page.set 'viewportSize', {width: w, height: h}

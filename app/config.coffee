@@ -1,6 +1,7 @@
 switch window?.location?.hostname ? require('os').hostname()
 	when 'localhost', 'tokpro.local'
 		console.log 'development envrionment set'
+		mode = 'development'
 		api_get = 'http://localhost:5000/'
 		api_fetch = 'http://localhost:3333/api/fetch'
 		api_upload = 'http://localhost:3333/api/upload'
@@ -9,6 +10,7 @@ switch window?.location?.hostname ? require('os').hostname()
 		age = 72  # in hours
 	else
 		console.log 'production envrionment set'
+		mode = 'production'
 		api_get = 'http://ongeza-api.herokuapp.com/'
 		api_fetch = 'http://ongeza.herokuapp.com/api/fetch'
 		api_upload = 'http://ongeza.herokuapp.com/api/upload'
@@ -21,6 +23,9 @@ mobile = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
 console.log "mobile device: #{mobile}"
 
 config =
+	mode: mode
+	prod: mode is 'production'
+	dev: mode is 'development'
 	api_get: api_get
 	api_fetch: api_fetch
 	api_upload: api_upload
