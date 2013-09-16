@@ -51,7 +51,7 @@ module.exports = class GraphView extends View
 		utils.log 'graph-view heard addedToParent'
 
 	getChartScript: (ignore_cache) =>
-		utils.log 'getting chart script for ' + @id
+		utils.log 'getting chart for ' + @id
 
 		for attr in @attrs
 			@attr = attr
