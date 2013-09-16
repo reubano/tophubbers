@@ -27,3 +27,5 @@ tmp/
 
 # Brunch output folder.
 public/
+app/assets/uploads/*.png
+app/assets/uploads/*.json
