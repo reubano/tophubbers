@@ -6,8 +6,8 @@ phantom = require 'phantom'
 winston = require 'winston'
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
-# crypto = require('crypto').createHash('md5')
-blueimp = require('blueimp-md5').md5
+# md5 = require('crypto').createHash('md5')
+md5 = require('blueimp-md5').md5
 d3 = require 'd3'
 _ = require 'underscore'
 
@@ -79,8 +79,8 @@ processPage = (page, ph) ->
     sendHash = (result) ->
       data = JSON.stringify result.container.__data__
       # hash = murmur.murmur3 data, 5
-      hash = blueimp data
-      # hash = crypto.update(data).digest 'hex'
+      hash = md5 data
+      # hash = md5.update(data).digest 'hex'
       # logger.info "hash #{hash}, data #{data}"
       filename = path.join 'public', uploads, "#{hash}.png"
       fs.exists filename, (exists) ->
