@@ -5,6 +5,7 @@ express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
 # knox = require 'knox'
+Mongolian = require 'mongolian'
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
@@ -81,24 +82,28 @@ processPage = (page, ph) ->
   handleUpload = (req, res) ->
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
+    [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
+    page.set 'viewportSize', {width: w, height: h}
 
     sendHash = (result) ->
+      sendNewRes = -> res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
+      sendCacheRes = -> res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
       data = JSON.stringify result.container.__data__
       # hash = murmur.murmur3 data, 5
       hash = md5 data
       # hash = md5.update(data).digest 'hex'
       # logger.info "hash #{hash}, data #{data}"
-      filename = path.join 'public', uploads, "#{hash}.png"
-      fs.exists filename, (exists) ->
+      filename = "#{hash}.png"
+      path = path.join 'public', uploads, filename
+
+      fs.exists path, (exists) ->
         if exists
           logger.info "File #{filename} exists. Sending image hash."
-          res.send 201, {hash: hash, type: 'cached', id: id, attr: attr}
+          sendCacheRes
         else
-          # need to figure out how to delete old photos
           logger.info "File #{filename} doesn't exist. Creating new image."
-          # page.renderBase64 'png', (str) -> res.send 201, {uri: str}
-          page.render filename, -> res.send 201,
-            hash: hash, type: 'new', id: id, attr: attr
+          page.render path, sendNewRes
+
 #       if config.dev
 #       else
 #         s3Exists filename, (exists) ->
@@ -111,38 +116,53 @@ processPage = (page, ph) ->
 #               if err then res.send 500, {error: err.message} else sendNewRes
 #               res.resume
 
-
-    [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
-    page.set 'viewportSize', {width: w, height: h}
-
-    fs.readFile datafile, 'utf8', (err, raw) ->
-      if err
-        res.send 404, {error: err.message}
-      else
+    readJSON = (err, raw) ->
+      if err return res.send 404, {error: err.message}
+      try
         data = JSON.parse raw
-        page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
-          page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
-            page.evaluate makeChart, sendHash, data[id][attr], selector
+        chart_data = data[id][attr]
+      catch error
+        chart_data = data[attr]
+
+      page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
+        page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
+          page.evaluate makeChart, sendHash, chart_data, selector
+
+    if config.dev
+      fs.readFile datafile, 'utf8', readJSON
+    else
+      db = new Mongolian process.env.MONGOHQ_URL
+      reps = db.collection 'reps'
+      reps.findOne {id: id}, readJSON
 
   handleFetch = (req, res) ->
     handleSuccess = (json, response) ->
-      data_list = []
-      hash_list = []
-      for rep in json.data
-        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
-        data_list.push _.object config.hash_attrs, raw
-        hashes = (md5 JSON.stringify r for r in raw)
-        hash_obj = _.object config.hash_attrs, hashes
-        hash_obj.id = rep.id
-        hash_list.push hash_obj
-
-      data = JSON.stringify _.object (rep.id for rep in json.data), data_list
-
-      fs.writeFile datafile, data, (err) ->
+      postWrite = (err) ->
         if err
           res.send 500, {status: response.statusCode, error: err.message}
         else
           res.send 201, {data: hash_list}
+
+      data_list = []
+      hash_list = []
+
+      for rep in json.data
+        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
+        hashes = (md5 JSON.stringify r for r in raw)
+        data_obj = _.object config.hash_attrs, raw
+        hash_obj = _.object config.hash_attrs, hashes
+        data_obj.id = hash_obj.id = rep.id
+        data_list.push data_obj
+        hash_list.push hash_obj
+
+      data = JSON.stringify _.object (rep.id for rep in data_list), data_list
+
+      if config.dev
+        fs.writeFile datafile, data, postWrite
+      else
+        db = new Mongolian process.env.MONGOHQ_URL
+        reps = db.collection 'reps'
+        reps.insert data_list, postWrite
 
     handleFailure = (data, response) ->
       res.send 417, {status: response.statusCode, response: data}
