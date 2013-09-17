@@ -1750,15 +1750,8 @@ nv.models.bulletChart = function() {
     , tickFormat = null
     , tooltips = true
     , tooltip = function(key, x, y, e, graph) {
-        var value, is23, hours, minutes, time, value, converted;
-        is12 = y.substr(0,2) == 12;
-        hours = is12 ? 0 : y.substr(0,1);
-        minutes = is12 ? y.substr(3,3) : y.substr(2,2);
-        // converted = hours * 60 + minutes * 1 + ' minutes';
-        converted = hours + ':' + minutes;
-        value = e.series.key == 'End' ? y : converted;
-        // return '<h5>' + key + ' ~ ' + x + '</h5>' + '<p>' + value +'</p>'
-        return 'hi bob'
+        return '<h3>' + x + '</h3>' +
+               '<p>' + y + '</p>'
       }
     , noData = 'No Data Available.'
     , dispatch = d3.dispatch('tooltipShow', 'tooltipHide')
@@ -8868,8 +8861,13 @@ nv.models.multiBarHorizontalChart = function() {
     , stacked = false
     , tooltips = true
     , tooltip = function(key, x, y, e, graph) {
-        return '<h3>' + key + ' - ' + x + '</h3>' +
-               '<p>' +  y + '</p>'
+        var value, is12, hours, minutes, time, value, converted;
+        is12 = y.substr(0,2) == 12;
+        hours = is12 ? 0 : y.substr(0,1);
+        minutes = is12 ? y.substr(3,3) : y.substr(2,2);
+        converted = hours + ':' + minutes;
+        value = e.series.key == 'End' ? y : converted;
+        return '<h3>' + key + ' - ' + x + '</h3>' + '<p>' + value +'</p>'
       }
     , x //can be accessed via chart.xScale()
     , y //can be accessed via chart.yScale()
