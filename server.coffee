@@ -117,7 +117,8 @@ processPage = (page, ph) ->
 #               res.resume
 
     readJSON = (err, raw) ->
-      if err then return res.send 404, {error: err.message}
+      if err then return res.send 500, {error: err.message}
+      if not raw then return res.send 417, {error: 'raw data is blank'}
       logger.info 'parsing json'
 
       try
@@ -164,10 +165,11 @@ processPage = (page, ph) ->
         data_list.push data_obj
         hash_list.push hash_obj
 
-      data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
+      return res.send 500, {error: 'data_list is blank'} if not data_list
 
       if config.dev
         logger.info 'writing data to json file'
+        data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
         fs.writeFile datafile, data, postWrite
       else
         writeData = (err, db) ->
