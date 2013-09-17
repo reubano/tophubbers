@@ -56,11 +56,12 @@
   padding: 8px;
 }
 
-.nvtooltip h5 {
+.nvtooltip h3 {
   margin: 0;
   padding: 4px 14px;
   line-height: 18px;
   font-weight: normal;
+  font-size: 17px;
   background-color: #f7f7f7;
   text-align: center;
 
