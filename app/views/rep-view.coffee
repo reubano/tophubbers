@@ -14,41 +14,35 @@ module.exports = class RepView extends View
 	template: template
 	user: mediator.users.get(1)
 	forms: mediator.forms
-	synced: false
 
 	initialize: (options) =>
 		super
 		@attrs = options.attrs
 		@id = @model.get 'id'
+		@name = if @user then @user.get 'name' else 'N/A'
 		mediator.rep_id = @id
+
 		utils.log 'initialize rep-view for ' + @id
-		utils.log @forms
-		utils.log options
-
-		if @user
-			@name = @user.get 'name'
-		else
-			@name = 'N/A'
-			@subscribeEvent 'userUpdated', @setUserName
-
+		console.log @forms
+		console.log options
 		utils.log 'User name is ' + @name
+
 		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
 		@delegate 'click', '#review-form-submit', @reviewFormSubmit
+		@subscribeEvent 'userUpdated', @setUserName
 		@subscribeEvent 'rendered:' + @attrs[1], @removeActive
 		@subscribeEvent 'loginStatus', @render
 		@subscribeEvent 'loggingIn', @render
 		@subscribeEvent 'dispatcher:dispatch', ->
 			utils.log 'rep-view caught dispatcher event'
-			@render
 
 		for prefix in ['change:cur_', 'change:prev_']
 			@listenTo @model, prefix + 'work_data_c', @render
 			@listenTo @model, prefix + 'feedback_data', @render
 			@listenTo @model, prefix + 'progress', @render
 
-		@listenTo @forms, 'add', ->
-			utils.log 'rep-view caught add event'
+		@listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
 		@listenTo @forms, 'request', @viewRequest
 		@listenTo @forms, 'change', @render
 		@listenTo @forms, 'sync', @success
@@ -84,15 +78,14 @@ module.exports = class RepView extends View
 		obj = _.object(keys, values)
 		_.extend obj, {rep: @id, manager: @name, form: form[1..]}
 
-	checkOnline: ->
-		$.ajax config.forms
+	checkOnline: -> $.ajax config.api_forms
 
 	sendForms: =>
 		utils.log 'sending form changes to server'
 		@forms.syncDirtyAndDestroyed()
 
 	fetchForms: =>
-		if not @synced
+		if not mediator.synced
 			utils.log 'fetching form changes from server'
 			@forms.fetch
 				data:
@@ -129,7 +122,7 @@ module.exports = class RepView extends View
 			@$('#success-modal').modal()
 		else
 			utils.log 'successfully synced forms'
-			@synced = true
+			mediator.synced = true
 
 		utils.log model, false
 		utils.log resp, false

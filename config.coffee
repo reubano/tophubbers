@@ -20,9 +20,7 @@ exports.config =
     javascripts:
       joinTo:
         'javascripts/app.js': /^app/
-        # 'javascripts/vendor.js': /^vendor.(?!nvd3)/
         'javascripts/vendor.js': /^vendor/
-        # 'javascripts/nvd3.js' : /^vendor.nvd3/
         'test/javascripts/test.js': /^test[\\/](?!vendor)/
         'test/javascripts/test-vendor.js': /^test[\\/](?=vendor)/
       order:
@@ -34,7 +32,6 @@ exports.config =
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone-1.0.0.js',
           'vendor/scripts/moment.min.js',
-          # 'vendor/scripts/backbone-localStorage.js',
           'vendor/scripts/backbone.dualstorage.js',
           'vendor/scripts/bootstrap.js',
           'vendor/scripts/minilog.js',

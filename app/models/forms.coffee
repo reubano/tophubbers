@@ -5,7 +5,7 @@ utils = require 'lib/utils'
 
 module.exports = class Forms extends Collection
 	model: Model
-	url: config.forms
+	url: config.api_forms
 
 	initialize: =>
 		super

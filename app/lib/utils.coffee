@@ -9,7 +9,7 @@ utils = Chaplin.utils.beget Chaplin.utils # Delegate to Chaplin’s utils module
 
 Minilog
 	.enable()
-	.pipe new Minilog.backends.jQuery {url: config.logs, interval: 1000}
+	.pipe new Minilog.backends.jQuery {url: config.api_logs, interval: 3000}
 
 minilog = Minilog 'ongeza'
 

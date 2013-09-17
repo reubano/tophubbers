@@ -23,11 +23,11 @@ module.exports = class HomeController extends Controller
 
 	fetchAndPub: =>
 		@fetchData()
+		@fetchFormData()
 		@publishEvent 'fetchData', -> null
 
-	fetchData: =>
+	fetchFormData: =>
 		utils.log 'fetching all form data...'
-		@fetchData()
 		@forms.syncDirtyAndDestroyed()
 		@forms.fetch
 			data:
@@ -36,5 +36,5 @@ module.exports = class HomeController extends Controller
 
 	refresh: =>
 		@redirectToRoute 'home#show'
-		@fetchData()
+		@fetchAndPub()
 

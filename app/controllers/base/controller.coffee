@@ -22,28 +22,39 @@ module.exports = class Controller extends Chaplin.Controller
 	parser: document.createElement('a')
 
 	getResList: (list) =>
-		(item: i, tstamp: i + '_tstamp', url: config.api + i for i in list)
+		(item: i, tstamp: i + '_tstamp', url: config.api_get + i for i in list)
 
 	getData: (url) ->
-		utils.log 'fetching ' + url
-		$.ajax
-			url: url
-			type: 'get'
-			dataType: 'json'
-			beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+		# add logic to fetch png if on mobile and 'work_data' is in url
+		# post url to 'api/fetch' to fetch rep data serverside
+		if config.mobile and (/work_data/).test url
+			utils.log "sending #{url} to api"
+			$.ajax
+				url: config.api_fetch
+				data: {url: url}
+				type: 'post'
+				dataType: 'json'
+				beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+		else
+			utils.log 'fetching ' + url
+			$.ajax
+				url: url
+				type: 'get'
+				dataType: 'json'
+				beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
 
-	fetchData: (list=false, id=false, data_attrs=false) =>
+	fetchData: (list=false, id=false, attrs=false) =>
 		@id = id
-		@data_attrs = data_attrs
-		list = if list then list else config.res
+		@attrs = attrs
+		list = list or config.res
 
 		for r in @getResList(list)
 			@getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
-	fetchExpiredData: (list=false, id=false, data_attrs=false) =>
+	fetchExpiredData: (list=false, id=false, attrs=false) =>
 		@id = id
-		@data_attrs = data_attrs
-		list = if list then list else config.res
+		@attrs = attrs
+		list = list or config.res
 
 		for r in @getResList(list)
 			if (@cacheExpired r.tstamp)
@@ -57,7 +68,7 @@ module.exports = class Controller extends Chaplin.Controller
 		@parser.href = jqXHR.url
 		utils.log 'failed to fetch ' + jqXHR.url
 		utils.log 'error: ' + errorThrown if errorThrown
-		$.get config.api + 'reset'
+		$.get config.api_get + 'reset'
 
 	saveCollection: =>
 		utils.log 'saving collection'
@@ -73,30 +84,33 @@ module.exports = class Controller extends Chaplin.Controller
 		(model.set tstamp, date for model in @collection.models)
 
 	setReps: (response, textStatus, jqXHR) =>
-		@parser.href = jqXHR.url
-		attr = (@parser.pathname.replace /\//g, '')
-		tstamp = attr + '_tstamp'
-		utils.log 'setting collection with ' + attr
-		utils.log response.data, false
-		@collection.set response.data, remove: false
-		@saveTstamp(tstamp)
-		@saveCollection()
-		@publishEvent 'repsSet'
-		utils.log 'collection length: ' + @collection.length
-		@displayCollection()
+		if response?.data?
+			@parser.href = jqXHR.url
+			attr = (@parser.pathname.replace /\//g, '')
+			tstamp = attr + '_tstamp'
+			utils.log 'setting collection with ' + attr
+			utils.log response.data, false
+			@collection.set response.data, remove: false
+			@saveTstamp(tstamp)
+			@saveCollection()
+			@publishEvent 'repsSet'
+			utils.log 'collection length: ' + @collection.length
+			@displayCollection()
 
 	setCharts: (response, textStatus, jqXHR) =>
 		@parser.href = jqXHR.url
 		source = (@parser.pathname.replace /\//g, '')
+		chartable = source is config.to_chart
+		is_work_data = (/work_data/).test source
 
-		if source == config.to_chart
+		if chartable and not config.mobile and is_work_data
 			utils.log 'setting chart data for ' + source
 
 			models = if @id then [@collection.get(@id)] else @collection.models
-			data_attrs = if @data_attrs then @data_attrs else config.data_attrs
+			attrs = @attrs or config.data_attrs
 
 			for model in models
-				for attr in data_attrs
+				for attr in attrs
 					chart_attr = attr + config.chart_suffix
 					id = model.get 'id'
 
@@ -111,6 +125,8 @@ module.exports = class Controller extends Chaplin.Controller
 						utils.log attr + ' not present'
 						# text = id + ': ' + chart_attr + ' present and '
 						# utils.log text + attr + ' unchanged'
+		else if config.mobile and is_work_data
+			utils.log "#{source} svg rendering disabled on mobile"
 		else
 			utils.log source + ' not chartable'
 
