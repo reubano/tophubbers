@@ -136,8 +136,10 @@ processPage = (page, ph) ->
     else
       readData = (err, db) ->
         logger.info 'reading data from monogodb'
+        res.send 500, {error: err.messgae} if err
         reps = db.collection 'reps'
         reps.findOne {id: id}, readJSON
+        db.close()
 
       logger.info 'connecting to mongodb...'
       mongo.connect process.env.MONGOHQ_URL, readData
@@ -149,8 +151,6 @@ processPage = (page, ph) ->
           res.send 500, {status: response.statusCode, error: err.message}
         else
           res.send 201, {data: hash_list}
-
-        db.close if db?
 
       data_list = []
       hash_list = []
@@ -172,12 +172,14 @@ processPage = (page, ph) ->
         fs.writeFile datafile, data, postWrite
       else
         writeData = (err, db) ->
-          res.send 500, {error: err.messgae} if err
           logger.info 'writing data to mongodb'
+          res.send 500, {error: err.messgae} if err
           reps = db.collection 'reps'
           reps.remove {w:1}, (err, num_removed) ->
             res.send 500, {error: err.messgae} if err
             reps.insert data_list, {w:1}, postWrite
+
+          db.close()
 
         logger.info 'connecting to mongodb...'
         # mongo.connect 'mongodb://127.0.0.1:27017/ongeza', writeData
