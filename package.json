@@ -32,7 +32,7 @@
     "underscore": "1.5",
     "coffee-script": "1.6",
     "phantom": "0.5",
-    "mongolian": "0.1.x",
+    "mongodb": "1.x",
     "d3": "3.x",
     "restler": "2.x",
     "blueimp-md5": "1.x"

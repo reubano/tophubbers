@@ -5,7 +5,7 @@ express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
 # knox = require 'knox'
-Mongolian = require 'mongolian'
+mongo = require('mongodb').MongoClient
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
@@ -118,30 +118,39 @@ processPage = (page, ph) ->
 
     readJSON = (err, raw) ->
       if err then return res.send 404, {error: err.message}
+      logger.info 'parsing json'
+
       try
         data = JSON.parse raw
         chart_data = data[id][attr]
       catch error
-        chart_data = data[attr]
+        chart_data = raw[attr]
 
       page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
         page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
           page.evaluate makeChart, sendHash, chart_data, selector
 
     if config.dev
+      logger.info 'reading data from json file'
       fs.readFile datafile, 'utf8', readJSON
     else
-      db = new Mongolian process.env.MONGOHQ_URL
-      reps = db.collection 'reps'
-      reps.findOne {id: id}, readJSON
+      readData = (err, db) ->
+        logger.info 'reading data from monogodb'
+        reps = db.collection 'reps'
+        reps.findOne {id: id}, readJSON
+
+      logger.info 'connecting to mongodb...'
+      mongo.connect process.env.MONGOHQ_URL, readData
 
   handleFetch = (req, res) ->
     handleSuccess = (json, response) ->
-      postWrite = (err) ->
+      postWrite = (err, result=false) ->
         if err
           res.send 500, {status: response.statusCode, error: err.message}
         else
           res.send 201, {data: hash_list}
+
+        db.close if db?
 
       data_list = []
       hash_list = []
@@ -155,14 +164,24 @@ processPage = (page, ph) ->
         data_list.push data_obj
         hash_list.push hash_obj
 
-      data = JSON.stringify _.object (rep.id for rep in data_list), data_list
+      data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
 
       if config.dev
+        logger.info 'writing data to json file'
         fs.writeFile datafile, data, postWrite
       else
-        db = new Mongolian process.env.MONGOHQ_URL
-        reps = db.collection 'reps'
-        reps.insert data_list, postWrite
+        writeData = (err, db) ->
+          res.send 500, {error: err.messgae} if err
+          logger.info 'writing data to mongodb'
+          reps = db.collection 'reps'
+          reps.remove {w:1}, (err, num_removed) ->
+            res.send 500, {error: err.messgae} if err
+            reps.insert data_list, {w:1}, postWrite
+
+        logger.info 'connecting to mongodb...'
+        # mongo.connect 'mongodb://127.0.0.1:27017/ongeza', writeData
+        mongo.connect process.env.MONGOHQ_URL, writeData
+
 
     handleFailure = (data, response) ->
       res.send 417, {status: response.statusCode, response: data}
