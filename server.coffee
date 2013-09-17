@@ -122,8 +122,7 @@ processPage = (page, ph) ->
       logger.info 'parsing json'
 
       try
-        data = JSON.parse raw
-        chart_data = data[id][attr]
+        chart_data = JSON.parse(raw)[id][attr]
       catch error
         chart_data = raw[attr]
 
