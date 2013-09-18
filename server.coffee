@@ -25,12 +25,14 @@ config = require './app/config.coffee'
 # Set variables
 app = express()
 uploads = 'uploads'
+_db = false
 # s3 = knox.createClient
 #   key: process.env.AWS_ACCESS_KEY_ID
 #   secret: process.env.AWS_SECRET_ACCESS_KEY
 #   bucket: process.env.S3_BUCKET_NAME
 
-oneDay = 86400000
+days = 2
+maxCacheAge = days * 24 * 60 * 60 * 1000
 selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
@@ -73,7 +75,7 @@ winstonStream = {write: (message, encoding) -> logger.info message}
 app.use express.logger {stream:winstonStream}
 app.use express.bodyParser()
 app.use express.compress()
-app.use express.static __dirname + '/public', {maxAge: oneDay}
+app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
 processPage = (page, ph) ->
@@ -117,9 +119,15 @@ processPage = (page, ph) ->
 #               res.resume
 
     readJSON = (err, raw) ->
-      if err then return res.send 500, {error: err.message}
-      if not raw then return res.send 417, {error: 'raw data is blank'}
+      if err
+        logger.error err.message
+        return res.send 500, {error: err.message}
+      else if not raw
+        logger.error 'raw data is blank'
+        return res.send 417, {error: 'raw data is blank'}
+
       logger.info 'parsing json'
+      _db.close() if _db
 
       try
         chart_data = JSON.parse(raw)[id][attr]
@@ -135,11 +143,13 @@ processPage = (page, ph) ->
       fs.readFile datafile, 'utf8', readJSON
     else
       readData = (err, db) ->
-        logger.info 'reading data from monogodb'
-        res.send 500, {error: err.messgae} if err
-        reps = db.collection 'reps'
-        reps.findOne {id: id}, readJSON
-        db.close()
+        if err
+          logger.error err.message
+          res.send 500, {error: err.message}
+        else
+          logger.info 'reading data from monogodb'
+          _db = db
+          db.collection('reps').findOne {id: id}, readJSON
 
       logger.info 'connecting to mongodb...'
       mongo.connect process.env.MONGOHQ_URL, readData
@@ -148,9 +158,13 @@ processPage = (page, ph) ->
     handleSuccess = (json, response) ->
       postWrite = (err, result=false) ->
         if err
+          logger.error err.message
           res.send 500, {status: response.statusCode, error: err.message}
         else
+          logger.info 'Wrote data'
           res.send 201, {data: hash_list}
+
+        _db.close() if _db
 
       data_list = []
       hash_list = []
@@ -172,14 +186,20 @@ processPage = (page, ph) ->
         fs.writeFile datafile, data, postWrite
       else
         writeData = (err, db) ->
-          logger.info 'writing data to mongodb'
-          res.send 500, {error: err.messgae} if err
-          reps = db.collection 'reps'
-          reps.remove {w:1}, (err, num_removed) ->
-            res.send 500, {error: err.messgae} if err
-            reps.insert data_list, {w:1}, postWrite
-
-          db.close()
+          if err
+            logger.error err.message
+            res.send 500, {error: err.message}
+          else
+            logger.info 'writing data to mongodb'
+            reps = db.collection('reps')
+            reps.remove {w:1}, (err, num_removed) ->
+              if err
+                logger.error err.message
+                res.send 500, {error: err.message}
+                db.close()
+              else
+                _db = db
+                reps.insert data_list, {w:1}, postWrite
 
         logger.info 'connecting to mongodb...'
         # mongo.connect 'mongodb://127.0.0.1:27017/ongeza', writeData
