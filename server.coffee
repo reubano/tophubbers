@@ -25,7 +25,6 @@ config = require './app/config.coffee'
 # Set variables
 app = express()
 uploads = 'uploads'
-_db = false
 # s3 = knox.createClient
 #   key: process.env.AWS_ACCESS_KEY_ID
 #   secret: process.env.AWS_SECRET_ACCESS_KEY
@@ -127,7 +126,6 @@ processPage = (page, ph) ->
         return res.send 417, {error: 'raw data is blank'}
 
       logger.info 'parsing json'
-      _db.close() if _db
 
       try
         chart_data = JSON.parse(raw)[id][attr]
@@ -142,17 +140,10 @@ processPage = (page, ph) ->
       logger.info 'reading data from json file'
       fs.readFile datafile, 'utf8', readJSON
     else
-      readData = (err, db) ->
-        if err
-          logger.error err.message
-          res.send 500, {error: err.message}
-        else
-          logger.info 'reading data from monogodb'
-          _db = db
-          db.collection('reps').findOne {id: id}, readJSON
+      logger.info 'reading data from monogodb'
+      db.collection('reps').findOne {id: id}, readJSON
 
       logger.info 'connecting to mongodb...'
-      mongo.connect process.env.MONGOHQ_URL, readData
 
   handleFetch = (req, res) ->
     handleSuccess = (json, response) ->
@@ -163,8 +154,6 @@ processPage = (page, ph) ->
         else
           logger.info 'Wrote data'
           res.send 201, {data: hash_list}
-
-        _db.close() if _db
 
       data_list = []
       hash_list = []
@@ -185,26 +174,14 @@ processPage = (page, ph) ->
         data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
         fs.writeFile datafile, data, postWrite
       else
-        writeData = (err, db) ->
+        logger.info 'writing data to mongodb'
+        reps = db.collection('reps')
+        reps.remove {w:1}, (err, num_removed) ->
           if err
             logger.error err.message
             res.send 500, {error: err.message}
           else
-            logger.info 'writing data to mongodb'
-            reps = db.collection('reps')
-            reps.remove {w:1}, (err, num_removed) ->
-              if err
-                logger.error err.message
-                res.send 500, {error: err.message}
-                db.close()
-              else
-                _db = db
-                reps.insert data_list, {w:1}, postWrite
-
-        logger.info 'connecting to mongodb...'
-        # mongo.connect 'mongodb://127.0.0.1:27017/ongeza', writeData
-        mongo.connect process.env.MONGOHQ_URL, writeData
-
+            reps.insert data_list, {w:1}, postWrite
 
     handleFailure = (data, response) ->
       res.send 417, {status: response.statusCode, response: data}
@@ -281,4 +258,11 @@ phantom.create (ph) ->
           </div>
         </body>
       </html>"""
-    processPage page, ph
+
+    mongo.connect process.env.MONGOHQ_URL, (err, db) ->
+      if err
+        logger.error err.message
+      else
+        logger.info 'Connected to mongodb'
+        db = db
+        processPage page, ph
