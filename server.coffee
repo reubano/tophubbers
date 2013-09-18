@@ -77,7 +77,7 @@ app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
-processPage = (page, ph) ->
+processPage = (page, ph, db) ->
   logger.info 'Processing phantom page'
 
   handleUpload = (req, res) ->
@@ -142,8 +142,6 @@ processPage = (page, ph) ->
     else
       logger.info 'reading data from monogodb'
       db.collection('reps').findOne {id: id}, readJSON
-
-      logger.info 'connecting to mongodb...'
 
   handleFetch = (req, res) ->
     handleSuccess = (json, response) ->
@@ -264,5 +262,4 @@ phantom.create (ph) ->
         logger.error err.message
       else
         logger.info 'Connected to mongodb'
-        db = db
-        processPage page, ph
+        processPage page, ph, db

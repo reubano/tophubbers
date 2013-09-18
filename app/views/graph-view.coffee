@@ -75,6 +75,7 @@ module.exports = class GraphView extends View
 				@pubRender @attr
 			else if @mobile and name
 				utils.log "getting #{@text} png from server"
+				@unsetCache @attr
 				$.post(config.api_upload, @options).done(@gvSuccess).fail(@gvFailWhale)
 			else if svg and not @changed and not ignore_cache
 				utils.log "drawing #{@text} chart from cache"
@@ -107,7 +108,7 @@ module.exports = class GraphView extends View
 		parent = Common.getParent options
 		html = @$(parent).html()
 
-		if html and html.length is 57
+		if html and html.length is 53
 			utils.log "setting #{options.id} #{options.attr} img"
 			img = html.replace(/\"/g, '\'')
 			@model.set options.attr + config.img_suffix, img
@@ -131,12 +132,16 @@ module.exports = class GraphView extends View
 	gvSuccess: (data, resp, options) =>
 		parent = Common.getParent data
 		utils.log "successfully fetched png for #{data.id}!"
-		url = "/uploads/#{data.hash}.png"
+		url = "/uploads/#{data.hash}"
 		utils.log "setting html for #{parent} to #{url}"
 		@$(parent).html "<img src=#{url}>"
-		_.defer @setImg, data
-		@pubRender data.attr
+		@setImg data
+		_.defer @pubRender, data.attr
 
 	gvFailWhale: (data, xhr, options) =>
-		response = JSON.parse data.responseText
-		utils.log "failed to fetch png: #{response.error}."
+		try
+			response = JSON.parse(data.responseText).error
+		catch error
+			response = data
+
+		utils.log "failed to fetch png: #{response}."
