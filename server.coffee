@@ -58,6 +58,10 @@ configPush = (req, res, next) ->
 
 # serve images
 handleGet = (req, res) ->
+  if res.headerSent
+    return logger.warn 'handleGet headers already sent'
+
+  res.set 'Cache-Control', 'public, max-age=60'
   id = req.params.id
   filename = path.join 'public', uploads, "#{id}.png"
   fs.exists filename, (exists) ->
@@ -81,14 +85,19 @@ processPage = (page, ph, db) ->
   logger.info 'Processing phantom page'
 
   handleUpload = (req, res) ->
+    res.set 'Cache-Control', 'public, max-age=60'
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
     page.set 'viewportSize', {width: w, height: h}
 
     sendHash = (result) ->
-      sendNewRes = -> res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
-      sendCacheRes = -> res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
+      sendNewRes = ->
+        res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
+
+      sendCacheRes = ->
+        res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
+
       data = JSON.stringify result.container.__data__
       # hash = murmur.murmur3 data, 5
       hash = md5 data
@@ -118,7 +127,9 @@ processPage = (page, ph, db) ->
 #               res.resume
 
     readJSON = (err, raw) ->
-      if err
+      if res.headerSent
+        return logger.warn 'handleUpload headers already sent'
+      else if err
         logger.error err.message
         return res.send 500, {error: err.message}
       else if not raw
@@ -144,11 +155,17 @@ processPage = (page, ph, db) ->
       db.collection('reps').findOne {id: id}, readJSON
 
   handleFetch = (req, res) ->
+    res.set 'Cache-Control', 'public, max-age=60'
+
     handleSuccess = (json, response) ->
+      if res.headerSent
+        return logger.warn 'handleFetch headers already sent'
+
+      logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
         if err
-          logger.error err.message
-          res.send 500, {status: response.statusCode, error: err.message}
+          logger.error 'postWrite: ' + err.message
+          res.send 500, {error: err.message}
         else
           logger.info 'Wrote data'
           res.send 201, {data: hash_list}
@@ -165,9 +182,9 @@ processPage = (page, ph, db) ->
         data_list.push data_obj
         hash_list.push hash_obj
 
-      return res.send 500, {error: 'data_list is blank'} if not data_list
-
-      if config.dev
+      if not data_list
+        res.send 500, {error: 'data_list is blank'}
+      else if config.dev
         logger.info 'writing data to json file'
         data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
         fs.writeFile datafile, data, postWrite
@@ -176,16 +193,18 @@ processPage = (page, ph, db) ->
         reps = db.collection('reps')
         reps.remove {w:1}, (err, num_removed) ->
           if err
-            logger.error err.message
+            logger.error 'handleSuccess: ' + err.message
             res.send 500, {error: err.message}
           else
             reps.insert data_list, {w:1}, postWrite
 
     handleFailure = (data, response) ->
-      res.send 417, {status: response.statusCode, response: data}
+      logger.error 'handleFailure: ' + err.message
+      res.send 417, {response: data} if not res.headerSent
 
     handleError = (err, response) ->
-      res.send 500, {status: response.statusCode, error: err.message}
+      logger.error 'handleError: ' + err.message
+      res.send 500, {error: err.message} if not res.headerSent
 
     logger.info 'running restler'
     rest.get(req.body.url)
@@ -259,7 +278,7 @@ phantom.create (ph) ->
 
     mongo.connect process.env.MONGOHQ_URL, (err, db) ->
       if err
-        logger.error err.message
+        logger.error 'monogo: ' + err.message
       else
         logger.info 'Connected to mongodb'
         processPage page, ph, db
