@@ -23,8 +23,8 @@ module.exports = class GraphView extends View
 		utils.log 'initialize graph-view for ' + @id
 		utils.log options, false
 
-		@listen_attrs = if @mobile then config.data_attrs else config.hash_attrs
 		changes = ('change:' + attr + @chart_suffix for attr in @listen_attrs)
+		@listen_attrs = if @mobile then config.hash_attrs else config.data_attrs
 
 		@listenTo @model, changes[0], ->
 			utils.log 'graph-view heard ' + changes[0]
