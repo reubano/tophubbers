@@ -28,15 +28,15 @@ module.exports = class GraphView extends View
 
 		@listenTo @model, changes[0], ->
 			utils.log 'graph-view heard ' + changes[0]
-			@changed = true
-			@unsetCache @listen_attrs[0]
-			@render() if @listen_attrs[0] in @attrs
+			@changed = @listen_attrs[0]
+			@unsetCache @changed
+			@render() if @changed in @attrs
 
 		@listenTo @model, changes[1], ->
 			utils.log 'graph-view heard ' + changes[1]
-			@changed = true
-			@unsetCache @listen_attrs[1]
-			@render() if @listen_attrs[1] in @attrs
+			@changed = @listen_attrs[1]
+			@unsetCache @changed
+			@render() if @changed in @attrs
 
 	render: =>
 		super
@@ -54,39 +54,37 @@ module.exports = class GraphView extends View
 		utils.log 'getting chart for ' + @id
 		(@unsetCache attr for attr in @listen_attrs) if ignore_cache
 
-		for attr in @attrs
-			@attr = attr
+		for @attr in @attrs
 			utils.log 'setting variables for ' + @attr
-			@options = {attr: attr, id: @id}
-			selection = Common.getSelection @options
+			@options = {attr: @attr, id: @id}
 			@parent = Common.getParent @options
-			@text = "#{@id} #{@attr}"
-			@svg_attr = attr + config.svg_suffix
-			@img_attr = attr + config.img_suffix
-			chart_attr = attr + @chart_suffix
-			chart_json = @model.get chart_attr
+			@svg_attr = @attr + config.svg_suffix
+			@img_attr = @attr + config.img_suffix
+			@text = if @mobile then "#{@id} #{@img_attr}" else "#{@id} #{@svg_attr}"
+			chart_attr = @attr + @listen_suffix
+			chart_json = @model.has chart_attr
 			name = @model.get 'first_name'
 			svg = if @model.has @svg_attr then @model.get @svg_attr else null
 			img = if @model.has @img_attr then @model.get @img_attr else null
 
 			if @mobile and img and not @changed and not ignore_cache
-				utils.log "fetching #{@text} png from cache"
+				utils.log "fetching #{@text} from cache"
 				utils.log img
 				@$(@parent).html img
 				@pubRender @attr
 			else if @mobile and name
-				utils.log "getting #{@text} png from server"
+				utils.log "fetching #{@text} from server"
 				$.post(config.api_upload, @options).done(@gvSuccess).fail(@gvFailWhale)
 			else if svg and not @changed and not ignore_cache
-				utils.log "drawing #{@text} chart from cache"
+				utils.log "drawing #{@text} from cache"
 				@$(@parent).html svg
 				@pubRender @attr
 			else if chart_json and name
-				utils.log "#{@text} has svg: #{svg?}"
-				utils.log "#{@text} ignore svg: #{ignore_cache}"
-				utils.log "#{@text} has changed: #{@changed}"
-				utils.log "getting #{@text} script"
-				chart_data = JSON.parse chart_json
+				selection = Common.getSelection @options
+				utils.log "#{@id} #{@attr} has svg: #{svg?}"
+				utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
+				utils.log "fetching script for #{selection}"
+				chart_data = JSON.parse @model.get chart_attr
 				_.defer makeChart, chart_data, selection, @changed
 				_.defer @setSVG, @options
 				_.defer @pubRender, @attr
@@ -97,10 +95,11 @@ module.exports = class GraphView extends View
 		@publishEvent 'rendered:' + attr
 		utils.log 'published rendered:' + attr
 
-	unsetCache: (attr) =>
-		utils.log "unsetting #{attr} cache"
+	unsetCache: (prefix) =>
 		suffix = if @mobile then 'img_suffix' else 'svg_suffix'
-		@model.unset attr + config[suffix]
+		attr = prefix + config[suffix]
+		utils.log "unsetting #{@id} #{attr}"
+		@model.unset attr
 		@model.save()
 
 	setImg: (options) =>
@@ -108,9 +107,10 @@ module.exports = class GraphView extends View
 		html = @$(parent).html()
 
 		if html and html.length is 53
-			utils.log "setting #{options.id} #{options.attr} img"
 			img = html.replace(/\"/g, '\'')
-			@model.set options.attr + config.img_suffix, img
+			attr = options.attr + config.img_suffix
+			utils.log "setting #{options.id} #{attr}"
+			@model.set attr, img
 			@model.save()
 		else
 			utils.log 'html blank or malformed for ' + parent
@@ -121,9 +121,10 @@ module.exports = class GraphView extends View
 		bad = 'opacity: 0.000001;'
 
 		if html and html.indexOf(bad) < 0 and html.length > 40
-			utils.log "setting #{options.id} #{options.attr} svg"
 			svg = html.replace(/\"/g, '\'')
-			@model.set options.attr + config.svg_suffix, svg
+			attr = options.attr + config.svg_suffix
+			utils.log "setting #{options.id} #{attr}"
+			@model.set attr, svg
 			@model.save()
 		else
 			utils.log 'html blank or malformed for ' + parent
