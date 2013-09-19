@@ -25,7 +25,6 @@ module.exports = class RepView extends View
 		utils.log 'initialize rep-view for ' + @id
 		console.log @forms
 		console.log options
-		utils.log 'User name is ' + @name
 
 		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
