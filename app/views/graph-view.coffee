@@ -15,7 +15,7 @@ module.exports = class GraphView extends View
 	initialize: (options) =>
 		super
 		@attrs = options.attrs
-		@chart_suffix = config.chart_suffix
+		@listen_suffix = if @mobile then '' else config.parsed_suffix
 		@ignore_cache = options.ignore_cache
 		@id = @model.get 'id'
 		@changed = false
@@ -23,8 +23,8 @@ module.exports = class GraphView extends View
 		utils.log 'initialize graph-view for ' + @id
 		utils.log options, false
 
-		changes = ('change:' + attr + @chart_suffix for attr in @listen_attrs)
 		@listen_attrs = if @mobile then config.hash_attrs else config.data_attrs
+		changes = ('change:' + attr + @listen_suffix for attr in @listen_attrs)
 
 		@listenTo @model, changes[0], ->
 			utils.log 'graph-view heard ' + changes[0]
