@@ -23,20 +23,20 @@ module.exports = class GraphView extends View
 		utils.log 'initialize graph-view for ' + @id
 		utils.log options, false
 
-		listen_attrs = if @mobile then config.data_attrs else config.hash_attrs
-		changes = ('change:' + attr + @chart_suffix for attr in listen_attrs)
+		@listen_attrs = if @mobile then config.data_attrs else config.hash_attrs
+		changes = ('change:' + attr + @chart_suffix for attr in @listen_attrs)
 
 		@listenTo @model, changes[0], ->
 			utils.log 'graph-view heard ' + changes[0]
 			@changed = true
-			@unsetCache listen_attrs[0]
-			@render() if listen_attrs[0] in @attrs
+			@unsetCache @listen_attrs[0]
+			@render() if @listen_attrs[0] in @attrs
 
 		@listenTo @model, changes[1], ->
 			utils.log 'graph-view heard ' + changes[1]
 			@changed = true
-			@unsetCache listen_attrs[1]
-			@render() if listen_attrs[1] in @attrs
+			@unsetCache @listen_attrs[1]
+			@render() if @listen_attrs[1] in @attrs
 
 	render: =>
 		super
@@ -52,6 +52,7 @@ module.exports = class GraphView extends View
 
 	getChartScript: (ignore_cache) =>
 		utils.log 'getting chart for ' + @id
+		(@unsetCache attr for attr in @listen_attrs) if ignore_cache
 
 		for attr in @attrs
 			@attr = attr
@@ -75,7 +76,6 @@ module.exports = class GraphView extends View
 				@pubRender @attr
 			else if @mobile and name
 				utils.log "getting #{@text} png from server"
-				@unsetCache @attr
 				$.post(config.api_upload, @options).done(@gvSuccess).fail(@gvFailWhale)
 			else if svg and not @changed and not ignore_cache
 				utils.log "drawing #{@text} chart from cache"
@@ -88,7 +88,6 @@ module.exports = class GraphView extends View
 				utils.log "getting #{@text} script"
 				chart_data = JSON.parse chart_json
 				_.defer makeChart, chart_data, selection, @changed
-				_.defer @unsetCache, @attr
 				_.defer @setSVG, @options
 				_.defer @pubRender, @attr
 			else
