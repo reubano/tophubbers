@@ -9,7 +9,7 @@ utils = Chaplin.utils.beget Chaplin.utils # Delegate to Chaplin’s utils module
 
 Minilog
 	.enable()
-	.pipe new Minilog.backends.jQuery {url: config.api_logs, interval: 3000}
+	.pipe new Minilog.backends.jQuery {url: config.api_logs, interval: 5000}
 
 minilog = Minilog 'ongeza'
 
@@ -411,8 +411,8 @@ not found"
 
 		"https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
 
-	log: (message, remote=true) ->
-		if remote
+	log: (message, level='debug') ->
+		if level
 			text = JSON.stringify message
 			message = if text.length > 512 then "size exceeded" else message
 
@@ -421,7 +421,7 @@ not found"
 				time: (new Date()).getTime()
 				user: if mediator.user? then mediator.user.get 'email' else null
 
-			minilog.debug data
+			minilog[level] data
 		else
 			console.log message
 
