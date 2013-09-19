@@ -134,9 +134,10 @@ module.exports = class GraphView extends View
 		utils.log "successfully fetched png for #{data.id}!"
 		url = "/uploads/#{data.hash}"
 		utils.log "setting html for #{parent} to #{url}"
-		@$(parent).html "<img src=#{url}>"
-		@setImg data
-		_.defer @pubRender, data.attr
+		if @$(parent)
+			@$(parent).html "<img src=#{url}>"
+			@setImg data
+			_.defer @pubRender, data.attr
 
 	gvFailWhale: (data, xhr, options) =>
 		try
