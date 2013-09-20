@@ -65,9 +65,7 @@ configPush = (req, res, next) ->
 
 # serve images
 handleGet = (req, res) ->
-  if res.headerSent
-    return logger.warn 'handleGet headers already sent'
-
+  return logger.warn 'handleGet headers already sent' if res.headerSent
   res.set 'Cache-Control', 'public, max-age=60'
   id = req.params.id
   filename = "#{id}.png"
@@ -101,6 +99,7 @@ processPage = (page, ph, db) ->
 
   handleUpload = (req, res) ->
     res.set 'Cache-Control', 'public, max-age=60'
+    return logger.warn 'handleUpload headers already sent' if res.headerSent
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
@@ -144,9 +143,7 @@ processPage = (page, ph, db) ->
           if exists then sendCacheRes() else renderPage send2s3
 
     readJSON = (err, raw) ->
-      if res.headerSent
-        return logger.warn 'handleUpload headers already sent'
-      else if err
+      if err
         logger.error 'readJSON: ' + err.message
         return res.send 500, {error: err.message}
       else if not raw
@@ -178,11 +175,9 @@ processPage = (page, ph, db) ->
 
   handleFetch = (req, res) ->
     res.set 'Cache-Control', 'public, max-age=60'
+    return logger.warn 'handleFetch headers already sent' if res.headerSent
 
     handleSuccess = (json, response) ->
-      if res.headerSent
-        return logger.warn 'handleFetch headers already sent'
-
       logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
         if err
@@ -223,11 +218,10 @@ processPage = (page, ph, db) ->
 
     handleFailure = (data, response) ->
       logger.error 'handleFailure: ' + err.message
-      res.send 417, {response: data} if not res.headerSent
+      res.send 417, {response: data}
 
     handleError = (err, response) ->
       logger.error 'handleError: ' + err.message
-      res.send 500, {error: err.message} if not res.headerSent
 
     logger.info 'running restler'
     rest.get(req.body.url)
