@@ -86,7 +86,7 @@ handleGet = (req, res, next) ->
 
     if resp.statusCode isnt 200
       logger.error "Image #{id}.png doesn't exist at s3."
-      var err = new Error()
+      err = new Error()
       err.status = 404
       next err
 
