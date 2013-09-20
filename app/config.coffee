@@ -1,5 +1,5 @@
 switch window?.location?.hostname ? require('os').hostname()
-	when 'localhost', 'tokpro.local'
+	when 'localhost', 'tokpro.local', 'tokpro'
 		console.log 'development envrionment set'
 		mode = 'development'
 		api_get = 'http://localhost:5000/'
