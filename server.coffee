@@ -4,7 +4,7 @@
 express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
-# knox = require 'knox'
+knox = require 'knox'
 mongo = require('mongodb').MongoClient
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
@@ -25,16 +25,17 @@ config = require './app/config.coffee'
 # Set variables
 app = express()
 uploads = 'uploads'
-# s3 = knox.createClient
-#   key: process.env.AWS_ACCESS_KEY_ID
-#   secret: process.env.AWS_SECRET_ACCESS_KEY
-#   bucket: process.env.S3_BUCKET_NAME
+s3 = knox.createClient
+  key: process.env.AWS_ACCESS_KEY_ID
+  secret: process.env.AWS_SECRET_ACCESS_KEY
+  bucket: process.env.S3_BUCKET_NAME or 'ongeza'
 
 days = 2
 maxCacheAge = days * 24 * 60 * 60 * 1000
 selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
+s3Exists = rest.get(filepath).on('success', -> true).on('fail', -> false)
 logger = new winston.Logger
   transports: [
     new winston.transports.Console(),
@@ -63,14 +64,22 @@ handleGet = (req, res) ->
 
   res.set 'Cache-Control', 'public, max-age=60'
   id = req.params.id
-  filename = path.join 'public', uploads, "#{id}.png"
-  fs.exists filename, (exists) ->
+  filename = "#{id}.png"
+
+  sendfile = (exists) ->
     if exists
       logger.info "Image #{id}.png exists! Serving to page."
       res.sendfile filename
     else
       logger.error "Image #{id}.png doesn't exist."
       res.send 404, "Sorry! Image #{id}.png doesn't exist."
+
+  if config.dev
+    filepath = path.join 'public', uploads, filename
+    fs.exists filename, sendfile
+  else
+    filepath = 'http://s3.amazonaws.com/ongeza/' + filename
+    s3exists filename, sendfile
 
 # middleware
 # pipe web server logs through winston
@@ -92,45 +101,47 @@ processPage = (page, ph, db) ->
     page.set 'viewportSize', {width: w, height: h}
 
     sendHash = (result) ->
-      sendNewRes = ->
-        res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
-
-      sendCacheRes = ->
-        res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
-
       data = JSON.stringify result.container.__data__
       # hash = murmur.murmur3 data, 5
       hash = md5 data
       # hash = md5.update(data).digest 'hex'
       # logger.info "hash #{hash}, data #{data}"
       filename = "#{hash}.png"
-      filepath = path.join 'public', uploads, filename
 
-      fs.exists filepath, (exists) ->
-        if exists
-          logger.info "File #{filename} exists. Sending image hash."
-          sendCacheRes()
-        else
-          logger.info "File #{filename} doesn't exist. Creating new image."
-          page.render filepath, sendNewRes
+      sendNewRes = ->
+        logger.info "Sending new image hash."
+        res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
 
-#       if config.dev
-#       else
-#         s3Exists filename, (exists) ->
-#           if exists
-#             logger.info "File #{filename} exists. Sending image hash."
-#             sendCacheRes()
-#           else
-#             logger.info "File #{filename} doesn't exist. Creating new image."
-#             page.render path, -> s3.putFile path, "/#{filename}", (err, s3Res) ->
-#               if err then res.send 500, {error: err.message} else sendNewRes
-#               res.resume
+      sendCacheRes = ->
+        logger.info "File #{filename} exists. Sending cached image hash."
+        res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
+
+      send2s3 = ->
+        s3.putFile filepath, "/#{filename}", (err, s3Res) ->
+          if err
+            logger.error 'send2s3: ' + err.message
+            res.send 500, {error: err.message}
+          else sendNewRes
+          s3Res.resume
+
+      renderPage = (callback) ->
+        logger.info "File #{filename} doesn't exist. Creating new image."
+        page.render filepath, callback
+
+      if config.dev
+        filepath = path.join 'public', uploads, filename
+        fs.exists filepath, (exists) ->
+          if exists then sendCacheRes() else renderPage sendNewRes
+      else
+        filepath = 'http://s3.amazonaws.com/ongeza/' + filename
+        s3Exists filename, (exists) ->
+          if exists then sendCacheRes() else renderPage send2s3
 
     readJSON = (err, raw) ->
       if res.headerSent
         return logger.warn 'handleUpload headers already sent'
       else if err
-        logger.error err.message
+        logger.error 'readJSON: ' + err.message
         return res.send 500, {error: err.message}
       else if not raw
         logger.error 'raw data is blank'
@@ -183,6 +194,7 @@ processPage = (page, ph, db) ->
         hash_list.push hash_obj
 
       if not data_list
+        logger.error 'data_list is blank'
         res.send 500, {error: 'data_list is blank'}
       else if not config.dev
         logger.info 'writing data to json file'
