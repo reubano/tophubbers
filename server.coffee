@@ -85,7 +85,7 @@ handleGet = (req, res, next) ->
       next()
 
     if resp.statusCode isnt 200
-      logger.error "Image #{id}.png doesn't exist."
+      logger.error "Image #{id}.png doesn't exist at s3."
       var err = new Error()
       err.status = 404
       next err
@@ -103,14 +103,15 @@ handleGet = (req, res, next) ->
       res.statusCode = 200
       res.end()
 
+    logger.info "Image #{id}.png exists on s3! Streaming to page."
     resp.pipe(res)
 
   sendfile = (exists) ->
     if exists
-      logger.info "Image #{id}.png exists! Serving to page."
+      logger.info "Image #{id}.png exists on file! Serving to page."
       res.sendfile filepath
     else
-      logger.error "Image #{id}.png doesn't exist."
+      logger.error "Image #{id}.png doesn't exist on file."
       res.send 404, "Sorry! Image #{id}.png doesn't exist."
 
   if config.dev
@@ -169,6 +170,7 @@ processPage = (page, ph, db) ->
         res.send 200, value
 
       send2s3 = ->
+        logger.info "Sending #{filename} to s3."
         s3.putFile filepath, "/#{filename}", (err, s3Res) ->
           if err
             logger.error 'send2s3: ' + err.message
@@ -276,7 +278,6 @@ processPage = (page, ph, db) ->
         value = JSON.parse buffer.toString()
         res.send 201, {data: value}
       else
-        logger.info 'Request not found. Fetching value from server.'
         logger.info 'running restler'
         rest.get(req.body.url)
           .on('success', handleSuccess)
