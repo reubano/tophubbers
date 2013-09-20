@@ -85,10 +85,9 @@ module.exports = class GraphView extends View
 				utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
 				utils.log "fetching script for #{selection}"
 				chart_data = JSON.parse @model.get chart_attr
-				# _.defer makeChart, chart_data, selection, @changed
-				nv.addGraph makeChart chart_data, selection, @changed
-				_.defer @setSVG, @options
-				_.defer @pubRender, @attr
+				nv.addGraph makeChart(chart_data, selection, @changed), =>
+					@setSVG @options
+					@pubRender @attr
 			else
 				utils.log "#{@id} has no #{chart_attr} or no name"
 
@@ -138,7 +137,7 @@ module.exports = class GraphView extends View
 			utils.log "setting html for #{parent} to #{url}"
 			@$(parent).html "<img src=#{url}>"
 			@setImg data
-			_.defer @pubRender, data.attr
+			@pubRender data.attr
 
 	gvFailWhale: (data, xhr, options) =>
 		try
