@@ -12,6 +12,7 @@ phantom = require 'phantom'
 winston = require 'winston'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
+memjs = require 'memjs'
 rest = require 'restler'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
@@ -28,16 +29,19 @@ Common = require './app/lib/common.coffee'
 makeChart = require './app/lib/makechart.coffee'
 config = require './app/config.coffee'
 
-# Set variables
+# Set clients and funcs
 app = express()
 uploads = 'uploads'
+mc = memjs.Client.create()
 s3 = knox.createClient
   key: process.env.AWS_ACCESS_KEY_ID
   secret: process.env.AWS_SECRET_ACCESS_KEY
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
 
 days = 2
+minutes = 30
 maxCacheAge = days * 24 * 60 * 60 * 1000
+expires = minutes * 60 * 1000
 selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
@@ -98,11 +102,18 @@ processPage = (page, ph, db) ->
   logger.info 'Processing phantom page'
 
   handleUpload = (req, res) ->
-    res.set 'Cache-Control', 'public, max-age=60'
     return logger.warn 'handleUpload headers already sent' if res.headerSent
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
+
+    key = "#{id}:#{attr}:#{w}x#{h}"
+    mc.get key, (err, buffer) ->
+      if buffer
+        logger.info 'Hash found! Fetching value from cache.'
+        value = JSON.parse buffer.toString()
+        return res.send 201, {data: value}
+
     page.set 'viewportSize', {width: w, height: h}
 
     sendHash = (result) ->
@@ -112,14 +123,21 @@ processPage = (page, ph, db) ->
       # hash = md5.update(data).digest 'hex'
       # logger.info "hash #{hash}, data #{data}"
       filename = "#{hash}.png"
+      filepath = path.join 'public', uploads, filename
 
       sendNewRes = ->
         logger.info "Sending new image hash."
-        res.send 201, {hash: hash, type: 'new', id: id, attr: attr}
+        value = {hash: hash, type: 'new', id: id, attr: attr}
+        json = JSON.stringify value
+        mc.set key, json, callback, expires
+        res.send 201, value
 
       sendCacheRes = ->
         logger.info "File #{filename} exists. Sending cached image hash."
-        res.send 200, {hash: hash, type: 'cached', id: id, attr: attr}
+        value = {hash: hash, type: 'cached', id: id, attr: attr}
+        json = JSON.stringify value
+        mc.set key, json, callback, expires
+        res.send 200, value
 
       send2s3 = ->
         s3.putFile filepath, "/#{filename}", (err, s3Res) ->
@@ -168,23 +186,22 @@ processPage = (page, ph, db) ->
       logger.info 'reading data from monogodb'
       db.collection('reps').findOne {id: id}, readJSON
 
-  handleTest = (req, res) ->
-    res.set 'Cache-Control', 'public, max-age=60'
-    logger.info 'handleTest'
-    res.send 200, {test: req.body.num * 10} if not res.headerSent
-
   handleFetch = (req, res) ->
-    res.set 'Cache-Control', 'public, max-age=60'
     return logger.warn 'handleFetch headers already sent' if res.headerSent
 
     handleSuccess = (json, response) ->
       logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
+        callback = (err, success) ->
+          logger.error 'postWrite set key:' + err if err
+
         if err
           logger.error 'postWrite: ' + err.message
           res.send 500, {error: err.message}
         else
           logger.info 'Wrote data'
+          value = JSON.stringify hash_list
+          mc.set key, value, callback, expires
           res.send 201, {data: hash_list}
 
       data_list = []
@@ -223,18 +240,25 @@ processPage = (page, ph, db) ->
     handleError = (err, response) ->
       logger.error 'handleError: ' + err.message
 
-    logger.info 'running restler'
-    rest.get(req.body.url)
-      .on('success', handleSuccess)
-      .on('fail', handleFailure)
-      .on('error', handleError)
+    key = 'fetch'
+    mc.get key, (err, buffer) ->
+      if buffer
+        logger.info 'Request found! Fetching value from cache.'
+        value = JSON.parse buffer.toString()
+        res.send 201, {data: value}
+      else
+        logger.info 'Request not found. Fetching value from server.'
+        logger.info 'running restler'
+        rest.get(req.body.url)
+          .on('success', handleSuccess)
+          .on('fail', handleFailure)
+          .on('error', handleError)
 
   # create server routes
   app.all '*', configCORS
   app.get '*', configPush
   app.get "/#{uploads}/:id", handleGet
   app.post '/api/fetch', handleFetch
-  app.post '/api/test', handleTest
   app.post '/api/upload', handleUpload
 
   # start server
