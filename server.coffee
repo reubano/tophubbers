@@ -171,6 +171,11 @@ processPage = (page, ph, db) ->
       logger.info 'reading data from monogodb'
       db.collection('reps').findOne {id: id}, readJSON
 
+  handleTest = (req, res) ->
+    res.set 'Cache-Control', 'public, max-age=60'
+    logger.info 'handleTest'
+    res.send 200, {test: req.body.num * 10} if not res.headerSent
+
   handleFetch = (req, res) ->
     res.set 'Cache-Control', 'public, max-age=60'
 
@@ -235,6 +240,7 @@ processPage = (page, ph, db) ->
   app.get '*', configPush
   app.get "/#{uploads}/:id", handleGet
   app.post '/api/fetch', handleFetch
+  app.post '/api/test', handleTest
   app.post '/api/upload', handleUpload
 
   # start server
