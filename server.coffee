@@ -1,5 +1,11 @@
 # Usage: coffee server.coffee
 
+# nodetime
+if process.env.NODETIME_ACCOUNT_KEY
+  require('nodetime').profile
+    accountKey: process.env.NODETIME_ACCOUNT_KEY
+    appName: 'Ongeza'
+
 # External dependencies
 express = require 'express'
 phantom = require 'phantom'
