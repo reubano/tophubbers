@@ -85,7 +85,8 @@ module.exports = class GraphView extends View
 				utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
 				utils.log "fetching script for #{selection}"
 				chart_data = JSON.parse @model.get chart_attr
-				_.defer makeChart, chart_data, selection, @changed
+				# _.defer makeChart, chart_data, selection, @changed
+				nv.addGraph makeChart chart_data, selection, @changed
 				_.defer @setSVG, @options
 				_.defer @pubRender, @attr
 			else
@@ -133,8 +134,8 @@ module.exports = class GraphView extends View
 		parent = Common.getParent data
 		utils.log "successfully fetched png for #{data.id}!"
 		url = "/uploads/#{data.hash}"
-		utils.log "setting html for #{parent} to #{url}"
 		if @$(parent)
+			utils.log "setting html for #{parent} to #{url}"
 			@$(parent).html "<img src=#{url}>"
 			@setImg data
 			_.defer @pubRender, data.attr
@@ -146,3 +147,4 @@ module.exports = class GraphView extends View
 			response = data
 
 		utils.log "failed to fetch png: #{response}."
+		utils.log response

@@ -147,7 +147,7 @@ processPage = (page, ph, db) ->
         page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
           page.evaluate makeChart, sendHash, chart_data, selector
 
-    if config.dev
+    if not config.dev
       logger.info 'reading data from json file'
       fs.readFile datafile, 'utf8', readJSON
     else
@@ -184,7 +184,7 @@ processPage = (page, ph, db) ->
 
       if not data_list
         res.send 500, {error: 'data_list is blank'}
-      else if config.dev
+      else if not config.dev
         logger.info 'writing data to json file'
         data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
         fs.writeFile datafile, data, postWrite
