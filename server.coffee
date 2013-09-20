@@ -36,12 +36,15 @@ s3 = knox.createClient
   key: process.env.AWS_ACCESS_KEY_ID
   secret: process.env.AWS_SECRET_ACCESS_KEY
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
+  region: 'eu-west-1'
 
 logger = new winston.Logger
   transports: [
     new winston.transports.Console(),
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 
+s3Exists = (filepath) ->
+  rest.get(filepath).on('success', -> true).on('fail', -> false)
 
 # Set variables
 uploads = 'uploads'
@@ -52,7 +55,6 @@ expires = minutes * 60 * 1000
 selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
-s3Exists = rest.get(filepath).on('success', -> true).on('fail', -> false)
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -71,26 +73,50 @@ configPush = (req, res, next) ->
   res.redirect newUrl
 
 # serve images
-handleGet = (req, res) ->
+handleGet = (req, res, next) ->
   return logger.warn 'handleGet headers already sent' if res.headerSent
   res.set 'Cache-Control', 'public, max-age=60'
   id = req.params.id
   filename = "#{id}.png"
 
+  handleResp = (err, resp) ->
+    if err
+      logger.error 'handleResp: ' + err.message
+      next()
+
+    if resp.statusCode isnt 200
+      logger.error "Image #{id}.png doesn't exist."
+      var err = new Error()
+      err.status = 404
+      next err
+
+    res.set 'Content-Length', resp.headers['content-length']
+    res.set 'Content-Type', resp.headers['content-type']
+    # res.set 'Last-Modified', ...
+    res.set 'ETag', id
+
+    if req.fresh
+      res.statusCode = 304
+      res.end()
+
+    if req.method is 'HEAD'
+      res.statusCode = 200
+      res.end()
+
+    resp.pipe(res)
+
   sendfile = (exists) ->
     if exists
       logger.info "Image #{id}.png exists! Serving to page."
-      res.sendfile filename
+      res.sendfile filepath
     else
       logger.error "Image #{id}.png doesn't exist."
       res.send 404, "Sorry! Image #{id}.png doesn't exist."
 
   if config.dev
     filepath = path.join 'public', uploads, filename
-    fs.exists filename, sendfile
-  else
-    filepath = 'http://s3.amazonaws.com/ongeza/' + filename
-    s3exists filename, sendfile
+    fs.exists filepath, sendfile
+  else s3.getFile "/#{filename}", handleResp
 
 # middleware
 # pipe web server logs through winston
@@ -155,12 +181,11 @@ processPage = (page, ph, db) ->
         page.render filepath, callback
 
       if config.dev
-        filepath = path.join 'public', uploads, filename
         fs.exists filepath, (exists) ->
           if exists then sendCacheRes() else renderPage sendNewRes
       else
-        filepath = 'http://s3.amazonaws.com/ongeza/' + filename
-        s3Exists filename, (exists) ->
+        s3filepath = 'http://s3.amazonaws.com/ongeza/' + filename
+        s3Exists s3filepath, (exists) ->
           if exists then sendCacheRes() else renderPage send2s3
 
     readJSON = (err, raw) ->
