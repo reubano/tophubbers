@@ -31,13 +31,20 @@ config = require './app/config.coffee'
 
 # Set clients and funcs
 app = express()
-uploads = 'uploads'
 mc = memjs.Client.create()
 s3 = knox.createClient
   key: process.env.AWS_ACCESS_KEY_ID
   secret: process.env.AWS_SECRET_ACCESS_KEY
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
 
+logger = new winston.Logger
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
+
+
+# Set variables
+uploads = 'uploads'
 days = 2
 minutes = 30
 maxCacheAge = days * 24 * 60 * 60 * 1000
@@ -46,10 +53,6 @@ selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
 s3Exists = rest.get(filepath).on('success', -> true).on('fail', -> false)
-logger = new winston.Logger
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -239,6 +242,7 @@ processPage = (page, ph, db) ->
 
     handleError = (err, response) ->
       logger.error 'handleError: ' + err.message
+      res.send 500, {error: err.message}
 
     key = 'fetch'
     mc.get key, (err, buffer) ->
