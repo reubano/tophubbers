@@ -31,7 +31,7 @@ if (nv.dev) {
   nv.dispatch.on('render_end', function(e) {
     nv.logs.endTime = +new Date();
     nv.logs.totalTime = nv.logs.endTime - nv.logs.startTime;
-    nv.log('total', nv.logs.totalTime); // used for development, to keep track of graph generation times
+    nv.log('render time:', nv.logs.totalTime, 'ms'); // used for development, to keep track of graph generation times
   });
 }
 
@@ -8916,6 +8916,8 @@ nv.models.multiBarHorizontalChart = function() {
 
 
   function chart(selection) {
+    if (typeof selection === "undefined" || selection === null) {return;}
+
     selection.each(function(data) {
       var container = d3.select(this),
           that = this;
