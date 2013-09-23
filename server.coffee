@@ -43,9 +43,6 @@ logger = new winston.Logger
     new winston.transports.Console(),
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 
-s3Exists = (filepath) ->
-  rest.get(filepath).on('success', -> true).on('fail', -> false)
-
 # Set variables
 debug_s3 = false
 debug_mongo = true
@@ -57,10 +54,28 @@ api_expires = 60 * 15  # 15 min (in seconds)
 rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 selector = Common.getSelection()
-port = process.env.PORT or 3333
+# port = process.env.PORT or 3333
+port = 3333
 datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
+
+s3Exists = (filepath, callback) ->
+  mc.get filepath, (err, cached) ->
+    logger.error "s3Exists get #{filepath} #{err.message}" if err
+    if (config.dev and not debug_memcache) or not cached
+      request = rest.get(filepath)
+      request.once 'complete', (result, response) ->
+        if result instanceof Error
+          logger.error 's3Exists: ' + result.message
+          exists = false
+        else if response.statusCode is 200 then exists = true
+        else exists = false
+        callback exists
+        request.removeAllListeners 'error'
+    else
+      logger.info 'File found! Fetching value from memcache.'
+      callback true
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -152,93 +167,146 @@ app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
-processPage = (page, ph, db) ->
-  logger.info 'Processing phantom page'
+processPage = (page, ph, reps) ->
+  logger.info 'Processing phantom page.'
 
   handleUpload = (req, res) ->
-    return logger.warn 'handleUpload headers already sent' if res.headerSent
+    # return logger.warn 'handleUpload headers already sent' if res.headerSent
+
+    sendNewRes = (opts) ->
+      logger.info "Sending new image hash for #{opts.id} #{opts.attr}: #{opts.hash}."
+      value = {hash: opts.hash, type: 'new', id: opts.id, attr: opts.attr}
+      json = JSON.stringify value
+      unless config.dev and not debug_memcache
+        cb = (err, success) ->
+          logger.error "sendNewRes set #{opts.key} #{err.message}" if err
+          logger.info "sendNewRes set #{opts.key}!" if success
+        mc.set opts.key, json, cb, rep_expires  # individual rep data
+      opts.res.send 201, value
+
+    sendCacheRes = (opts) ->
+      logger.info "File #{opts.filename} exists. Sending cached image hash."
+      value = {hash: opts.hash, type: 'cached', id: opts.id, attr: opts.attr}
+      json = JSON.stringify value
+      unless config.dev and not debug_memcache
+        cb = (err, success) ->
+          logger.error "sendCacheRes set #{opts.key} #{err.message}" if err
+          logger.info "sendCacheRes set #{opts.key}!" if success
+        mc.set opts.key, json, cb, rep_expires  # individual rep data
+      opts.res.send 200, value
+
+    send2s3 = (opts) ->
+      callback = (err, opts) ->
+        if err
+          logger.error 'send2s3: ' + err.message
+          opts.res.send 500, {error: err.message}
+        else
+          unless config.dev and not debug_memcache
+            cb = (err, success) ->
+              logger.error "send2s3 set #{opts.key} #{err.message}" if err
+              logger.info "send2s3 set #{opts.key}!" if success
+            mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
+          sendNewRes opts
+
+      logger.info "Sending #{opts.filename} to s3..."
+      hdr = {'x-amz-acl': 'public-read'}
+
+      do (opts) ->
+        s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
+          callback err, opts
+          resp.resume()
+
+    renderPage = ->
+      active = true
+      logger.info "redering next in queue: #{queue.length}"
+
+      _.defer ->
+        graph = queue[0]
+        queue.splice(0, 1)
+        callee = if queue.length then arguments.callee else false
+        graph.generate graph.callback, graph.opts, callee
+
+    addGraph = (callback, opts) ->
+      func = (callback, opts, callee=false) ->
+        logger.info "File #{opts.filename} doesn't exist. Creating new image."
+        opts.page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
+          opts.page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
+            do (opts) ->
+              cb = (result) ->
+                logger.info "pre rendering #{opts.hash} to #{opts.filepath}"
+                opts.page.render opts.filepath, () ->
+                  logger.info "post rendering #{opts.hash} to #{opts.filepath}"
+                  callback opts
+                  if callee then callee() else active = false
+              opts.page.evaluate makeChart, cb, opts.chart_data, selector
+
+      queue.push({generate: func, callback: callback, opts: opts})
+      logger.info "adding to queue: #{queue.length}"
+      renderPage() if not active
+
+    readJSON = (err, raw, opts) ->
+      if err
+        logger.error 'readJSON: ' + err.message
+        return opts.res.send 500, {error: err.message}
+      else if not raw
+        logger.error 'raw data is blank'
+        return opts.res.send 417, {error: 'raw data is blank'}
+
+      logger.info "parsing #{opts.id} #{opts.attr}'s json"
+
+      try
+        chart_data = JSON.parse(raw)[opts.id][opts.attr]
+      catch error
+        chart_data = raw[opts.attr]
+
+      hash = md5 JSON.stringify chart_data
+      filename = "#{hash}.png"
+      filepath = path.join 'public', uploads, filename
+      s3filepath = 'http://ongeza.s3.amazonaws.com/' + filename
+      keys = ['chart_data', 'hash', 'filename', 'filepath', 's3filepath']
+      values = [chart_data, hash, filename, filepath, s3filepath]
+      extra = _.object(keys, values)
+      _.extend opts, extra
+
+      if config.dev and not debug_s3
+        logger.info "Checking filesystem for #{filename}..."
+        do (opts) -> fs.exists filepath, (exists) ->
+          if exists then sendCacheRes opts else addGraph sendNewRes, opts
+      else
+        logger.info "Checking s3 for #{filename}..."
+        do (opts) -> s3Exists s3filepath, (exists) ->
+          if exists
+            cb = (err, success) ->
+              logger.error "sendHash set #{opts.s3filepath} #{err.message}" if err
+              logger.info "sendHash set #{opts.s3filepath}!" if success
+            mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
+            sendCacheRes opts
+          else addGraph send2s3, opts
+
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
+    key = "#{id}:#{attr}"
+    keys = ['id', 'attr', 'key', 'res', 'page']
+    values = [id, attr, key, res, page]
+    opts = _.object(keys, values)
 
-    key = "#{id}:#{attr}:#{w}x#{h}"
     mc.get key, (err, buffer) ->
-      if buffer
-        logger.info 'Hash found! Fetching value from cache.'
-        value = JSON.parse buffer.toString()
-        return res.send 201, {data: value}
-
-    page.set 'viewportSize', {width: w, height: h}
-
-    sendHash = (result) ->
-      data = JSON.stringify result.container.__data__
-      # hash = murmur.murmur3 data, 5
-      hash = md5 data
-      # hash = md5.update(data).digest 'hex'
-      # logger.info "hash #{hash}, data #{data}"
-      filename = "#{hash}.png"
-      filepath = path.join 'public', uploads, filename
-
-      sendNewRes = ->
-        logger.info "Sending new image hash."
-        value = {hash: hash, type: 'new', id: id, attr: attr}
-        json = JSON.stringify value
-        mc.set key, json, callback, expires
-        res.send 201, value
-
-      sendCacheRes = ->
-        logger.info "File #{filename} exists. Sending cached image hash."
-        value = {hash: hash, type: 'cached', id: id, attr: attr}
-        json = JSON.stringify value
-        mc.set key, json, callback, expires
-        res.send 200, value
-
-      send2s3 = ->
-        logger.info "Sending #{filename} to s3."
-        s3.putFile filepath, "/#{filename}", (err, s3Res) ->
-          if err
-            logger.error 'send2s3: ' + err.message
-            res.send 500, {error: err.message}
-          else sendNewRes
-          s3Res.resume
-
-      renderPage = (callback) ->
-        logger.info "File #{filename} doesn't exist. Creating new image."
-        page.render filepath, callback
-
-      if config.dev
-        fs.exists filepath, (exists) ->
-          if exists then sendCacheRes() else renderPage sendNewRes
+      logger.error "handleUpload get #{key} #{err.message}" if err
+      if (config.dev and not debug_memcache) or not buffer
+        page.set 'viewportSize', {width: w, height: h}
+        if config.dev and not debug_mongo
+          logger.info "reading #{id} #{attr} data from json file"
+          do (opts) -> fs.readFile datafile, 'utf8', (err, raw) ->
+              readJSON err, raw, opts
+        else
+          logger.info "reading #{id} #{attr} data from mongodb"
+          do (opts) -> reps.findOne {id: id}, (err, raw) ->
+              readJSON err, raw, opts
       else
-        s3filepath = 'http://s3.amazonaws.com/ongeza/' + filename
-        s3Exists s3filepath, (exists) ->
-          if exists then sendCacheRes() else renderPage send2s3
-
-    readJSON = (err, raw) ->
-      if err
-        logger.error 'readJSON: ' + err.message
-        return res.send 500, {error: err.message}
-      else if not raw
-        logger.error 'raw data is blank'
-        return res.send 417, {error: 'raw data is blank'}
-
-      logger.info 'parsing json'
-
-      try
-        chart_data = JSON.parse(raw)[id][attr]
-      catch error
-        chart_data = raw[attr]
-
-      page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
-        page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
-          page.evaluate makeChart, sendHash, chart_data, selector
-
-    if config.dev
-      logger.info 'reading data from json file'
-      fs.readFile datafile, 'utf8', readJSON
-    else
-      logger.info 'reading data from monogodb'
-      db.collection('reps').findOne {id: id}, readJSON
+        value = JSON.parse buffer.toString()
+        logger.info "#{id} #{attr} hash found on memcache: #{value.hash}."
+        opts.res.send 201, value
 
   handleFetch = (req, res) ->
     return logger.warn 'handleFetch headers already sent' if res.headerSent
@@ -281,7 +349,6 @@ processPage = (page, ph, db) ->
         fs.writeFile datafile, data, postWrite
       else
         logger.info 'writing data to mongodb'
-        reps = db.collection('reps')
         reps.remove {}, {w:1}, (err, num_removed) ->
           if err
             logger.error 'handleSuccess remove reps: ' + err.message
@@ -385,4 +452,4 @@ phantom.create (ph) ->
         logger.error 'mongodb: ' + err.message
       else
         logger.info 'Connected to mongodb'
-        processPage page, ph, db
+        processPage page, ph, db.collection 'reps'
