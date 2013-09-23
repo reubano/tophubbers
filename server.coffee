@@ -53,6 +53,7 @@ maxCacheAge = days * 24 * 60 * 60 * 1000
 api_expires = 60 * 15  # 15 min (in seconds)
 rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
+fs_expires = 60 * 60 * 24  # 1 day (in seconds)
 selector = Common.getSelection()
 # port = process.env.PORT or 3333
 port = 3333
@@ -60,7 +61,19 @@ datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
 
-s3Exists = (filepath, callback) ->
+fileExists = (filepath, callback) ->
+  mc.get filepath, (err, cached) ->
+    logger.error "fileExists get #{filepath} #{err.message}" if err
+    if (config.dev and not debug_memcache) or not cached
+      logger.info "Checking filesystem for #{filepath}..."
+      fs.exists filepath, (exists) -> callback exists, false
+    else
+      logger.info "#{filepath} found in cache"
+      callback true, true
+
+s3Exists = (filename, callback) ->
+  options = {host: 'ongeza.s3.amazonaws.com', port: 443, path: "/#{filename}"}
+
   mc.get filepath, (err, cached) ->
     logger.error "s3Exists get #{filepath} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
@@ -74,8 +87,8 @@ s3Exists = (filepath, callback) ->
         callback exists
         request.removeAllListeners 'error'
     else
-      logger.info 'File found! Fetching value from memcache.'
-      callback true
+      logger.info "#{filepath} found in cache"
+      callback true, true
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -173,27 +186,23 @@ processPage = (page, ph, reps) ->
   handleUpload = (req, res) ->
     # return logger.warn 'handleUpload headers already sent' if res.headerSent
 
-    sendNewRes = (opts) ->
-      logger.info "Sending new image hash for #{opts.id} #{opts.attr}: #{opts.hash}."
-      value = {hash: opts.hash, type: 'new', id: opts.id, attr: opts.attr}
-      json = JSON.stringify value
+    sendRes = (opts, type='cached') ->
+      logger.info "Sending image hash for #{opts.id} #{opts.attr}: #{opts.hash}."
+      value = {hash: opts.hash, type: type, id: opts.id, attr: opts.attr}
       unless config.dev and not debug_memcache
         cb = (err, success) ->
-          logger.error "sendNewRes set #{opts.key} #{err.message}" if err
-          logger.info "sendNewRes set #{opts.key}!" if success
-        mc.set opts.key, json, cb, rep_expires  # individual rep data
-      opts.res.send 201, value
-
-    sendCacheRes = (opts) ->
-      logger.info "File #{opts.filename} exists. Sending cached image hash."
-      value = {hash: opts.hash, type: 'cached', id: opts.id, attr: opts.attr}
-      json = JSON.stringify value
-      unless config.dev and not debug_memcache
-        cb = (err, success) ->
-          logger.error "sendCacheRes set #{opts.key} #{err.message}" if err
-          logger.info "sendCacheRes set #{opts.key}!" if success
-        mc.set opts.key, json, cb, rep_expires  # individual rep data
+          logger.error "sendRes set #{opts.key} #{err.message}" if err
+          logger.info "sendRes set #{opts.key}!" if success
+        mc.set opts.key, JSON.stringify(value), cb, rep_expires  # individual rep data
       opts.res.send 200, value
+
+    send2fs = (opts) ->
+      unless config.dev and not debug_memcache
+        cb = (err, success) ->
+          logger.error "send2fs set #{opts.filepath} #{err.message}" if err
+          logger.info "send2fs set #{opts.filepath}!" if success
+        mc.set opts.filepath, true, cb, fs_expires  # file system images
+      sendRes opts, 'new'
 
     send2s3 = (opts) ->
       callback = (err, opts) ->
@@ -203,10 +212,10 @@ processPage = (page, ph, reps) ->
         else
           unless config.dev and not debug_memcache
             cb = (err, success) ->
-              logger.error "send2s3 set #{opts.key} #{err.message}" if err
-              logger.info "send2s3 set #{opts.key}!" if success
+              logger.error "send2s3 set #{opts.s3filepath} #{err.message}" if err
+              logger.info "send2s3 set #{opts.s3filepath}!" if success
             mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
-          sendNewRes opts
+          sendRes opts, 'new'
 
       logger.info "Sending #{opts.filename} to s3..."
       hdr = {'x-amz-acl': 'public-read'}
@@ -269,18 +278,24 @@ processPage = (page, ph, reps) ->
       _.extend opts, extra
 
       if config.dev and not debug_s3
-        logger.info "Checking filesystem for #{filename}..."
-        do (opts) -> fs.exists filepath, (exists) ->
-          if exists then sendCacheRes opts else addGraph sendNewRes, opts
-      else
-        logger.info "Checking s3 for #{filename}..."
-        do (opts) -> s3Exists s3filepath, (exists) ->
+        do (opts) -> fileExists filepath, (exists, cached) ->
           if exists
+            logger.info "File #{opts.filepath} exists on file system. Sending cached image hash."
+            cb = (err, success) ->
+              logger.error "sendHash set #{opts.filepath} #{err.message}" if err
+              logger.info "sendHash set #{opts.filepath}!" if success
+            mc.set opts.filepath, true, cb, fs_expires if not cached
+            sendRes opts
+          else addGraph send2fs, opts
+      else
+        do (opts) -> s3Exists filename, (exists, cached) ->
+          if exists
+            logger.info "File #{opts.s3filepath} exists on s3. Sending cached image hash."
             cb = (err, success) ->
               logger.error "sendHash set #{opts.s3filepath} #{err.message}" if err
               logger.info "sendHash set #{opts.s3filepath}!" if success
-            mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
-            sendCacheRes opts
+            mc.set opts.s3filepath, true, cb, s3_expires if not cached
+            sendRes opts
           else addGraph send2s3, opts
 
     id = req.body?.id or 'E0008'
