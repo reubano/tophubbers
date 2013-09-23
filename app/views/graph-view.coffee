@@ -143,7 +143,7 @@ module.exports = class GraphView extends View
 		try
 			response = JSON.parse(data.responseText).error
 		catch error
-			response = data
+			response = data.message
 
 		utils.log "failed to fetch png: #{response}."
 		utils.log response
