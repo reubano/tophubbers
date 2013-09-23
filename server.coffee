@@ -119,6 +119,30 @@ handleGet = (req, res, next) ->
     fs.exists filepath, sendfile
   else s3.getFile "/#{filename}", handleResp
 
+flushCache = (req, res) ->
+  id = req.body.id
+  if id is 'cache'
+    # won't work for multi-server environments
+    mc.flush (err, success) ->
+      if err
+        logger.error "Flush #{err.message}"
+        res.send 500, {error: err.message}
+      if success
+        logger.info 'Flushed memcache!'
+        res.send 203, 'Flushed memcache!' # look up delete stat code
+  else if id is 's3'
+    res.send 200, 'delete s3 and s3 file exists cache'
+  else res.send 404, 'command not supported'
+
+getStatus = (req, res) ->
+  mc.stats (err, server, status) ->
+    if err
+      logger.error "Status #{err.message}"
+      res.send 500, {error: err.message}
+    else if server and status
+      logger.info 'Got memcache status!'
+      res.send 200, {server: server, status: status}
+
 # middleware
 # pipe web server logs through winston
 winstonStream = {write: (message, encoding) -> logger.info message}
@@ -288,6 +312,8 @@ processPage = (page, ph, db) ->
   app.all '*', configCORS
   app.get '*', configPush
   app.get "/#{uploads}/:id", handleGet
+  app.post "/api/flush", flushCache
+  app.post "/api/stats", getStatus
   app.post '/api/fetch', handleFetch
   app.post '/api/upload', handleUpload
 
