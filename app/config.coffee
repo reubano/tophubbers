@@ -18,6 +18,7 @@ switch window?.location?.hostname ? require('os').hostname()
 		api_logs = 'http://flogger.herokuapp.com/api/logs'
 		age = 12  # in hours
 
+debug = true
 ua = navigator?.userAgent?.toLowerCase()
 mobile = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
 console.log "mobile device: #{mobile}"
@@ -31,7 +32,7 @@ config =
 	api_upload: api_upload
 	api_forms: api_forms
 	api_logs: api_logs
-	mobile: mobile
+	mobile: mobile or (mode is 'development' and debug)
 	rpp: 100  # form results per page
 	max_age: age
 	to_chart: 'work_data'
