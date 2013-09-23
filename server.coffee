@@ -64,7 +64,7 @@ queue = []
 
 # CORS support
 configCORS = (req, res, next) ->
-  logger.info "Configing CORS"
+  logger.info "Configuring CORS"
   if not req.get('Origin') then return next()
   res.set 'Access-Control-Allow-Origin', '*'
   res.set 'Access-Control-Allow-Methods', 'GET, POST'
@@ -146,7 +146,7 @@ getStatus = (req, res) ->
 # middleware
 # pipe web server logs through winston
 winstonStream = {write: (message, encoding) -> logger.info message}
-app.use express.logger {stream:winstonStream}
+app.use express.logger {stream: winstonStream}
 app.use express.bodyParser()
 app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
@@ -376,7 +376,7 @@ phantom.create (ph) ->
 
     mongo.connect process.env.MONGOHQ_URL, (err, db) ->
       if err
-        logger.error 'monogo: ' + err.message
+        logger.error 'mongodb: ' + err.message
       else
         logger.info 'Connected to mongodb'
         processPage page, ph, db
