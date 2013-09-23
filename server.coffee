@@ -29,7 +29,7 @@ Common = require './app/lib/common.coffee'
 makeChart = require './app/lib/makechart.coffee'
 config = require './app/config.coffee'
 
-# Set clients and funcs
+# Set clients
 app = express()
 mc = memjs.Client.create()
 s3 = knox.createClient
@@ -47,14 +47,20 @@ s3Exists = (filepath) ->
   rest.get(filepath).on('success', -> true).on('fail', -> false)
 
 # Set variables
+debug_s3 = false
+debug_mongo = true
+debug_memcache = true
 uploads = 'uploads'
 days = 2
-minutes = 30
 maxCacheAge = days * 24 * 60 * 60 * 1000
-expires = minutes * 60 * 1000
+api_expires = 60 * 15  # 15 min (in seconds)
+rep_expires = 60 * 60  # 1 hour (in seconds)
+s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 selector = Common.getSelection()
 port = process.env.PORT or 3333
 datafile = path.join 'public', uploads, 'data.json'
+active = false
+queue = []
 
 # CORS support
 configCORS = (req, res, next) ->
