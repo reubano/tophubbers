@@ -79,40 +79,28 @@ configPush = (req, res, next) ->
   res.redirect newUrl
 
 # serve images
-handleGet = (req, res, next) ->
+handleGet = (req, res) ->
   return logger.warn 'handleGet headers already sent' if res.headerSent
   res.set 'Cache-Control', 'public, max-age=60'
-  id = req.params.id
-  filename = "#{id}.png"
 
-  handleResp = (err, resp) ->
+  handleResp = (err, resp, id, res) ->
     if err
       logger.error 'handleResp: ' + err.message
-      next()
-
-    if resp.statusCode isnt 200
+      res.send 500, {error: err.message}
+    else if resp.statusCode isnt 200
       logger.error "Image #{id}.png doesn't exist at s3."
-      err = new Error()
-      err.status = 404
-      next err
+      res.send 404, "Sorry! Image #{id}.png doesn't exist."
+    else
+      res.set 'Content-Length', resp.headers['content-length']
+      res.set 'Content-Type', resp.headers['content-type']
+      # res.set 'Last-Modified', ...
+      res.set 'ETag', id
+      return res.send 304 if req.fresh
+      return res.send 200 if req.method is 'HEAD'
+      logger.info "Image #{id}.png exists on s3! Streaming to page."
+      resp.pipe(res)
 
-    res.set 'Content-Length', resp.headers['content-length']
-    res.set 'Content-Type', resp.headers['content-type']
-    # res.set 'Last-Modified', ...
-    res.set 'ETag', id
-
-    if req.fresh
-      res.statusCode = 304
-      res.end()
-
-    if req.method is 'HEAD'
-      res.statusCode = 200
-      res.end()
-
-    logger.info "Image #{id}.png exists on s3! Streaming to page."
-    resp.pipe(res)
-
-  sendfile = (exists) ->
+  sendfile = (exists, filepath, id, res) ->
     if exists
       logger.info "Image #{id}.png exists on file! Serving to page."
       res.sendfile filepath
@@ -120,10 +108,16 @@ handleGet = (req, res, next) ->
       logger.error "Image #{id}.png doesn't exist on file."
       res.send 404, "Sorry! Image #{id}.png doesn't exist."
 
-  if config.dev
+  id = req.params.id
+  filename = "#{id}.png"
+
+  if config.dev and not debug_s3
     filepath = path.join 'public', uploads, filename
-    fs.exists filepath, sendfile
-  else s3.getFile "/#{filename}", handleResp
+    do (filepath, id, res) ->
+      fs.exists filepath, (exists) -> sendfile exists, filepath, id, res
+  else
+    do (id, res) ->
+      s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
 
 flushCache = (req, res) ->
   id = req.body.id
