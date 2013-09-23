@@ -242,20 +242,22 @@ processPage = (page, ph, db) ->
 
   handleFetch = (req, res) ->
     return logger.warn 'handleFetch headers already sent' if res.headerSent
+    key = 'fetch'
 
-    handleSuccess = (json, response) ->
+    handleSuccess = (json, resp, reqst, res) ->
       logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
-        callback = (err, success) ->
-          logger.error 'postWrite set key:' + err if err
-
         if err
           logger.error 'postWrite: ' + err.message
           res.send 500, {error: err.message}
         else
           logger.info 'Wrote data'
           value = JSON.stringify hash_list
-          mc.set key, value, callback, expires
+          unless config.dev and not debug_memcache
+            cb = (err, success) ->
+              logger.error "postWrite set #{key} #{err.message}" if err
+              logger.info "postWrite set #{key}!" if success
+            mc.set key, value, cb, api_expires  # api work_data
           res.send 201, {data: hash_list}
 
       data_list = []
@@ -273,40 +275,44 @@ processPage = (page, ph, db) ->
       if not data_list
         logger.error 'data_list is blank'
         res.send 500, {error: 'data_list is blank'}
-      else if config.dev
+      else if config.dev and not debug_mongo
         logger.info 'writing data to json file'
         data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
         fs.writeFile datafile, data, postWrite
       else
         logger.info 'writing data to mongodb'
         reps = db.collection('reps')
-        reps.remove {w:1}, (err, num_removed) ->
+        reps.remove {}, {w:1}, (err, num_removed) ->
           if err
-            logger.error 'handleSuccess: ' + err.message
+            logger.error 'handleSuccess remove reps: ' + err.message
             res.send 500, {error: err.message}
-          else
-            reps.insert data_list, {w:1}, postWrite
+          else reps.insert data_list, {w:1}, postWrite
 
-    handleFailure = (data, response) ->
-      logger.error 'handleFailure: ' + err.message
+      reqst.removeAllListeners 'error'
+
+    handleFailure = (data, resp, reqst, res) ->
+      logger.error 'handleFailure: ' + data[0].message
       res.send 417, {response: data}
+      reqst.removeAllListeners 'error'
 
-    handleError = (err, response) ->
+    handleError = (err, resp, reqst, res) ->
       logger.error 'handleError: ' + err.message
       res.send 500, {error: err.message}
+      reqst.removeAllListeners 'error'
 
-    key = 'fetch'
     mc.get key, (err, buffer) ->
-      if buffer
-        logger.info 'Request found! Fetching value from cache.'
+      logger.error "handleFetch get #{key} #{err.message}" if err
+      if (config.dev and not debug_memcache) or not buffer
+        logger.info 'running restler'
+        reqst = rest.get(req.body.url)
+        do (reqst, res) ->
+          reqst.once 'success', (json, resp) -> handleSuccess json, resp, reqst, res
+          reqst.once 'fail', (data, resp) -> handleFailure data, resp, reqst, res
+          reqst.once 'error', (err, resp) -> handleError err, resp, reqst, res
+      else
+        logger.info 'Hash list found! Fetching value from memcache.'
         value = JSON.parse buffer.toString()
         res.send 201, {data: value}
-      else
-        logger.info 'running restler'
-        rest.get(req.body.url)
-          .on('success', handleSuccess)
-          .on('fail', handleFailure)
-          .on('error', handleError)
 
   # create server routes
   app.all '*', configCORS
