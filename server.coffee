@@ -100,11 +100,11 @@ handleGet = (req, res) ->
 
   handleResp = (err, resp, id, res) ->
     if err
-      logger.error 'handleResp: ' + err.message
+      logger.error 'handleResp ' + err.message
       res.send 500, {error: err.message}
     else if resp.statusCode isnt 200
       logger.error "Image #{id}.png doesn't exist at s3."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist."
+      res.send 404, "Sorry! Image #{id}.png doesn't exist at s3."
     else
       res.set 'Content-Length', resp.headers['content-length']
       res.set 'Content-Type', resp.headers['content-type']
@@ -121,7 +121,7 @@ handleGet = (req, res) ->
       res.sendfile filepath
     else
       logger.error "Image #{id}.png doesn't exist on file."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist."
+      res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
 
   id = req.params.id
   filename = "#{id}.png"
@@ -198,7 +198,7 @@ processPage = (page, ph, reps) ->
     send2s3 = (opts) ->
       callback = (err, opts) ->
         if err
-          logger.error 'send2s3: ' + err.message
+          logger.error 'send2s3 ' + err.message
           opts.res.send 500, {error: err.message}
         else
           unless config.dev and not debug_memcache
@@ -228,7 +228,7 @@ processPage = (page, ph, reps) ->
 
     addGraph = (callback, opts) ->
       func = (callback, opts, callee=false) ->
-        logger.info "File #{opts.filename} doesn't exist. Creating new image."
+        logger.info "File #{opts.filename} doesn't exist in cache. Creating new image."
         opts.page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
           opts.page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
             do (opts) ->
@@ -246,7 +246,7 @@ processPage = (page, ph, reps) ->
 
     readJSON = (err, raw, opts) ->
       if err
-        logger.error 'readJSON: ' + err.message
+        logger.error 'readJSON ' + err.message
         return opts.res.send 500, {error: err.message}
       else if not raw
         logger.error 'raw data is blank'
@@ -316,7 +316,7 @@ processPage = (page, ph, reps) ->
       logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
         if err
-          logger.error 'postWrite: ' + err.message
+          logger.error 'postWrite ' + err.message
           res.send 500, {error: err.message}
         else
           logger.info 'Wrote data'
@@ -351,7 +351,7 @@ processPage = (page, ph, reps) ->
         logger.info 'writing data to mongodb'
         reps.remove {}, {w:1}, (err, num_removed) ->
           if err
-            logger.error 'handleSuccess remove reps: ' + err.message
+            logger.error 'handleSuccess remove reps ' + err.message
             res.send 500, {error: err.message}
           else reps.insert data_list, {w:1}, postWrite
 
@@ -449,7 +449,7 @@ phantom.create (ph) ->
 
     mongo.connect process.env.MONGOHQ_URL, (err, db) ->
       if err
-        logger.error 'mongodb: ' + err.message
+        logger.error 'mongodb ' + err.message
       else
         logger.info 'Connected to mongodb'
         processPage page, ph, db.collection 'reps'
