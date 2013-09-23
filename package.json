@@ -37,7 +37,6 @@
     "knox": "0.8.x",
     "nodetime": "0.8.x",
     "memjs": "0.7.x",
-    "restler": "2.x",
     "blueimp-md5": "1.x"
   },
   "devDependencies": {

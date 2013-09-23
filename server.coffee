@@ -13,7 +13,7 @@ winston = require 'winston'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
-rest = require 'restler'
+http = require 'http'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
 md5 = require('blueimp-md5').md5
@@ -77,15 +77,10 @@ s3Exists = (filename, callback) ->
   mc.get filepath, (err, cached) ->
     logger.error "s3Exists get #{filepath} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
-      request = rest.get(filepath)
-      request.once 'complete', (result, response) ->
-        if result instanceof Error
-          logger.error 's3Exists: ' + result.message
-          exists = false
-        else if response.statusCode is 200 then exists = true
-        else exists = false
-        callback exists
-        request.removeAllListeners 'error'
+      logger.info "Checking s3 for #{filepath}..."
+      do (callback) ->
+        get = http.get options, (res) -> callback res.statusCode is 200, false
+        get.on 'error', (err) -> logger.error 's3Exists ' + err
     else
       logger.info "#{filepath} found in cache"
       callback true, true
@@ -327,7 +322,7 @@ processPage = (page, ph, reps) ->
     return logger.warn 'handleFetch headers already sent' if res.headerSent
     key = 'fetch'
 
-    handleSuccess = (json, resp, reqst, res) ->
+    handleSuccess = (json, res) ->
       logger.info 'handleSuccess'
       postWrite = (err, result=false) ->
         if err
@@ -370,27 +365,33 @@ processPage = (page, ph, reps) ->
             res.send 500, {error: err.message}
           else reps.insert data_list, {w:1}, postWrite
 
-      reqst.removeAllListeners 'error'
-
-    handleFailure = (data, resp, reqst, res) ->
-      logger.error 'handleFailure: ' + data[0].message
-      res.send 417, {response: data}
-      reqst.removeAllListeners 'error'
-
-    handleError = (err, resp, reqst, res) ->
-      logger.error 'handleError: ' + err.message
-      res.send 500, {error: err.message}
-      reqst.removeAllListeners 'error'
-
     mc.get key, (err, buffer) ->
       logger.error "handleFetch get #{key} #{err.message}" if err
+
       if (config.dev and not debug_memcache) or not buffer
-        logger.info 'running restler'
-        reqst = rest.get(req.body.url)
-        do (reqst, res) ->
-          reqst.once 'success', (json, resp) -> handleSuccess json, resp, reqst, res
-          reqst.once 'fail', (data, resp) -> handleFailure data, resp, reqst, res
-          reqst.once 'error', (err, resp) -> handleError err, resp, reqst, res
+        logger.info "getting #{req.body.url}"
+        urlpath = ''
+        host = req.body.url.split('//')[1].split('/')[0].split(':')[0]
+        if req.body.url.split(':').length is 3
+          hasport = true
+          urlport = req.body.url.split(':')[2].split('/')[0]
+
+        (urlpath += '/' + x for x in req.body.url.split('/')[3..])
+        options = {host: host, port: urlport ? 80, path: urlpath}
+        do (res) ->
+          get = http.get options, (resp) ->
+            json = ''
+            resp.setEncoding 'utf8'
+            resp.on 'data', (chunk) -> json += chunk
+            resp.on 'end', -> handleSuccess JSON.parse(json), res
+
+            if resp.statusCode isnt 200
+              logger.error 'handleFailure ' + data
+              res.send 417, {response: data}
+
+          get.on 'error', (err) ->
+            logger.error 'handleError ' + err.message
+            res.send 500, {error: err.message}
       else
         logger.info 'Hash list found! Fetching value from memcache.'
         value = JSON.parse buffer.toString()
