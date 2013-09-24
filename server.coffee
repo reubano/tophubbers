@@ -222,13 +222,13 @@ processPage = (page, ph, reps) ->
 
     renderPage = ->
       active = true
-      logger.info "redering next in queue: #{queue.length}"
 
       _.defer ->
         graph = queue[0]
         queue.splice(0, 1)
         callee = if queue.length then arguments.callee else false
         graph.generate graph.callback, graph.opts, callee
+        logger.info "redering next in queue: #{queue.length}"
 
     addGraph = (callback, opts) ->
       func = (callback, opts, callee=false) ->
@@ -338,8 +338,7 @@ processPage = (page, ph, reps) ->
             mc.set key, value, cb, api_expires  # api work_data
           res.send 201, {data: hash_list}
 
-      data_list = []
-      hash_list = []
+      data_list = hash_list = []
 
       for rep in json.data
         raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
