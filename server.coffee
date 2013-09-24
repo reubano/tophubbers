@@ -336,7 +336,8 @@ processPage = (page, ph, reps) ->
             mc.set key, value, cb, api_expires  # api work_data
           res.send 201, {data: hash_list}
 
-      data_list = hash_list = []
+      data_list = []
+      hash_list = []
 
       for rep in json.data
         raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
