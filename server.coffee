@@ -385,12 +385,10 @@ processPage = (page, ph, reps) ->
       if (config.dev and not debug_memcache) or not buffer
         do (res) -> request {url: req.body.url, json: true}, (err, resp, json) ->
           if err
-            logger.error 'handleError ' + err.message
+            logger.error 'handleFetch ' + err.message
             res.send 500, {error: err.message}
           else if resp.statusCode is 200 then handleSuccess json, res
-          else
-            logger.error 'handleFailure'
-            res.send 417
+          else logger.error('handleFetch') and res.send 417
       else
         logger.info 'Hash list found! Fetching value from memcache.'
         value = JSON.parse buffer.toString()
