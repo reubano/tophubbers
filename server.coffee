@@ -233,18 +233,16 @@ processPage = (page, ph, reps) ->
     addGraph = (callback, opts) ->
       func = (callback, opts, callee=false) ->
         logger.info "File #{opts.filename} doesn't exist in cache. Creating new image."
-        opts.page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
-          opts.page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
-            do (opts) ->
-              cb = (result) ->
-                logger.info "pre rendering #{opts.hash} to #{opts.filepath}"
-                opts.page.render opts.filepath, () ->
-                  logger.info "post rendering #{opts.hash} to #{opts.filepath}"
-                  callback opts
-                  if callee then callee() else active = false
-              opts.page.evaluate makeChart, cb, opts.chart_data, selector
+        do (opts) ->
+          cb = (result) ->
+            logger.info "pre rendering #{opts.hash} to #{opts.filepath}"
+            opts.page.render opts.filepath, ->
+              logger.info "post rendering #{opts.hash} to #{opts.filepath}"
+              callback opts
+              if callee then callee() else active = false
+          opts.page.evaluate makeChart, cb, opts.chart_data, selector
 
-      queue.push({generate: func, callback: callback, opts: opts})
+      queue.push {generate: func, callback: callback, opts: opts}
       logger.info "adding to queue: #{queue.length}"
       renderPage() if not active
 
@@ -467,4 +465,6 @@ phantom.create (ph) ->
         logger.error 'mongodb ' + err.message
       else
         logger.info 'Connected to mongodb'
-        processPage page, ph, db.collection 'reps'
+        page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
+          page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
+            processPage page, ph, db.collection 'reps'
