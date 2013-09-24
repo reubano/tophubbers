@@ -14,8 +14,6 @@ knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
 request = require 'request'
-# murmur = require 'murmurhash-js'
-# md5 = require('crypto').createHash('md5')
 md5 = require('blueimp-md5').md5
 _ = require 'underscore'
 
