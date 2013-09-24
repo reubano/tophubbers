@@ -222,8 +222,8 @@ processPage = (page, ph, reps) ->
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.filepath} for send2fs"
-        mc.set opts.filepath, true, cb, fs_expires  # file system images
+        logger.info "setting #{opts.dst_filepath} for send2fs"
+        mc.set opts.dst_filepath, true, cb, fs_expires  # file system images
       sendRes opts, 'new'
 
     send2s3 = (opts) ->
@@ -233,15 +233,15 @@ processPage = (page, ph, reps) ->
           opts.res.send 500, {error: err.message}
         else
           unless config.dev and not debug_memcache
-            mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
-            logger.info "setting #{opts.filepath} for send2s3"
+            logger.info "setting #{opts.dst_filepath} for send2s3"
+            mc.set opts.dst_filepath, true, cb, s3_expires  # s3 images
           sendRes opts, 'new'
 
       logger.info "Sending #{opts.filename} to s3..."
       hdr = {'x-amz-acl': 'public-read'}
 
       do (opts) ->
-        s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
+        s3.putFile opts.src_filepath, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
           resp.resume()
 
@@ -284,33 +284,31 @@ processPage = (page, ph, reps) ->
 
       hash = md5 JSON.stringify chart_data
       filename = "#{hash}.png"
-      filepath = path.join 'public', uploads, filename
-      s3filepath = 'http://ongeza.s3.amazonaws.com/' + filename
-      keys = ['chart_data', 'hash', 'filename', 'filepath', 's3filepath']
-      values = [chart_data, hash, filename, filepath, s3filepath]
+      src_filepath = path.join 'public', uploads, filename
+
+      if config.dev and not debug_s3
+        dst_filepath = src_filepath
+        existsFunc = fileExists
+        sendFunc = send2fs
+      else
+        dst_filepath = filename
+        existsFunc = s3Exists
+        sendFunc = send2s3
+
+      keys = ['chart_data', 'hash', 'filename', 'src_filepath', 'dst_filepath', 'existsFunc']
+      values = [chart_data, hash, filename, src_filepath, dst_filepath, existsFunc]
       extra = _.object(keys, values)
       _.extend opts, extra
 
-      if config.dev and not debug_s3
-        do (opts) -> fileExists filepath, (exists, cached) ->
-          if exists
-            logger.info "File #{opts.filepath} exists on file system. Sending cached image hash."
-            cb = (err, success) ->
-              logger.error "sendHash set #{opts.filepath} #{err.message}" if err
-              logger.info "sendHash set #{opts.filepath}!" if success
-            mc.set opts.filepath, true, cb, fs_expires if not cached
-            sendRes opts
-          else addGraph send2fs, opts
-      else
-        do (opts) -> s3Exists filename, (exists, cached) ->
-          if exists
-            logger.info "File #{opts.filename} exists on s3. Sending cached image hash."
-            cb = (err, success) ->
-              logger.error "sendHash set #{opts.filename} #{err.message}" if err
-              logger.info "sendHash set #{opts.filename}!" if success
-            mc.set opts.filename, true, cb, s3_expires if not cached
-            sendRes opts
-          else addGraph send2s3, opts
+      do (opts) -> existsFunc dst_filepath, (exists, cached) ->
+        if exists
+          logger.info "File #{opts.dst_filepath} exists."
+          sendRes opts
+          logger.info "setting #{opts.dst_filepath} for readJSON"
+          mc.set opts.dst_filepath, true, cb, fs_expires if not cached
+        else
+          logger.info "File #{opts.dst_filepath} doesn't exist in cache."
+          addGraph sendFunc, opts
 
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
