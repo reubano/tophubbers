@@ -226,12 +226,12 @@ processPage = (page, ph, reps) ->
       _.defer ->
         graph = queue[0]
         queue.splice(0, 1)
-        callee = if queue.length then arguments.callee else false
-        graph.generate graph.callback, graph.opts, callee
         logger.info "redering next in queue: #{queue.length}"
+        repeat = queue.length
+        graph.generate graph.callback, graph.opts, repeat
 
     addGraph = (callback, opts) ->
-      func = (callback, opts, callee=false) ->
+      func = (callback, opts, repeat=false) ->
         logger.info "File #{opts.filename} doesn't exist in cache. Creating new image."
         do (opts) ->
           cb = (result) ->
@@ -239,7 +239,7 @@ processPage = (page, ph, reps) ->
             opts.page.render opts.filepath, ->
               logger.info "post rendering #{opts.hash} to #{opts.filepath}"
               callback opts
-              if callee then callee() else active = false
+              if repeat then renderPage() else active = false
           opts.page.evaluate makeChart, cb, opts.chart_data, selector
 
       queue.push {generate: func, callback: callback, opts: opts}
