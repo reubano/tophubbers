@@ -77,9 +77,13 @@ s3Exists = (path, callback) ->
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{path}..."
       do (callback) -> request path, (err, res, body) ->
-        callback res.statusCode is 200, false
-        logger.error 's3Exists' if res.statusCode isnt 200
-        logger.error 's3Exists ' + err.message if err
+        if err
+          logger.error 's3Exists ' + err.message
+          callback false, false
+        else
+          status = res.statusCode
+          logger.error "s3Exists status: #{status}" if /^5/.test status
+          callback status is 200, false
     else
       logger.info "#{path} found in cache"
       callback true, true
