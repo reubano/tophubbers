@@ -13,7 +13,7 @@ winston = require 'winston'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
-http = require 'http'
+request = require 'request'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
 md5 = require('blueimp-md5').md5
@@ -44,7 +44,7 @@ logger = new winston.Logger
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 
 # Set variables
-debug_s3 = false
+debug_s3 = true
 debug_mongo = true
 debug_memcache = true
 uploads = 'uploads'
@@ -71,18 +71,17 @@ fileExists = (filepath, callback) ->
       logger.info "#{filepath} found in cache"
       callback true, true
 
-s3Exists = (filename, callback) ->
-  options = {host: 'ongeza.s3.amazonaws.com', port: 443, path: "/#{filename}"}
-
-  mc.get filepath, (err, cached) ->
-    logger.error "s3Exists get #{filepath} #{err.message}" if err
+s3Exists = (path, callback) ->
+  mc.get path, (err, cached) ->
+    logger.error "s3Exists get #{path} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
-      logger.info "Checking s3 for #{filepath}..."
-      do (callback) ->
-        get = http.get options, (res) -> callback res.statusCode is 200, false
-        get.on 'error', (err) -> logger.error 's3Exists ' + err
+      logger.info "Checking s3 for #{path}..."
+      do (callback) -> request path, (err, res, body) ->
+        callback res.statusCode is 200, false
+        logger.error 's3Exists' if res.statusCode isnt 200
+        logger.error 's3Exists ' + err.message if err
     else
-      logger.info "#{filepath} found in cache"
+      logger.info "#{path} found in cache"
       callback true, true
 
 # CORS support
@@ -222,13 +221,11 @@ processPage = (page, ph, reps) ->
 
     renderPage = ->
       active = true
-
-      _.defer ->
-        graph = queue[0]
-        queue.splice(0, 1)
-        logger.info "redering next in queue: #{queue.length}"
-        repeat = queue.length
-        graph.generate graph.callback, graph.opts, repeat
+      graph = queue[0]
+      queue.splice(0, 1)
+      logger.info "redering next in queue: #{queue.length}"
+      repeat = queue.length
+      graph.generate graph.callback, graph.opts, repeat
 
     addGraph = (callback, opts) ->
       func = (callback, opts, repeat=false) ->
@@ -281,7 +278,7 @@ processPage = (page, ph, reps) ->
             sendRes opts
           else addGraph send2fs, opts
       else
-        do (opts) -> s3Exists filename, (exists, cached) ->
+        do (opts) -> s3Exists s3filepath, (exists, cached) ->
           if exists
             logger.info "File #{opts.s3filepath} exists on s3. Sending cached image hash."
             cb = (err, success) ->
@@ -367,29 +364,14 @@ processPage = (page, ph, reps) ->
       logger.error "handleFetch get #{key} #{err.message}" if err
 
       if (config.dev and not debug_memcache) or not buffer
-        logger.info "getting #{req.body.url}"
-        urlpath = ''
-        host = req.body.url.split('//')[1].split('/')[0].split(':')[0]
-        if req.body.url.split(':').length is 3
-          hasport = true
-          urlport = req.body.url.split(':')[2].split('/')[0]
-
-        (urlpath += '/' + x for x in req.body.url.split('/')[3..])
-        options = {host: host, port: urlport ? 80, path: urlpath}
-        do (res) ->
-          get = http.get options, (resp) ->
-            json = ''
-            resp.setEncoding 'utf8'
-            resp.on 'data', (chunk) -> json += chunk
-            resp.on 'end', -> handleSuccess JSON.parse(json), res
-
-            if resp.statusCode isnt 200
-              logger.error 'handleFailure ' + data
-              res.send 417, {response: data}
-
-          get.on 'error', (err) ->
+        do (res) -> request {url: req.body.url, json: true}, (err, resp, json) ->
+          if err
             logger.error 'handleError ' + err.message
             res.send 500, {error: err.message}
+          else if resp.statusCode is 200 then handleSuccess json, res
+          else
+            logger.error 'handleFailure'
+            res.send 417
       else
         logger.info 'Hash list found! Fetching value from memcache.'
         value = JSON.parse buffer.toString()
