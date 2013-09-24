@@ -58,6 +58,10 @@ datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
 
+cb = (err, success) ->
+  logger.error "while setting cache #{err.message}" if err
+  logger.info "successfully set cache!" if success
+
 getS3Files = (callback) ->
   s3.list {}, (err, data) ->
     if err then callback err, false
@@ -212,17 +216,13 @@ processPage = (page, ph, reps) ->
       logger.info "Sending image hash for #{opts.id} #{opts.attr}: #{opts.hash}."
       value = {hash: opts.hash, type: type, id: opts.id, attr: opts.attr}
       unless config.dev and not debug_memcache
-        cb = (err, success) ->
-          logger.error "sendRes set #{opts.key} #{err.message}" if err
-          logger.info "sendRes set #{opts.key}!" if success
+        logger.info "setting #{opts.key} for sendRes"
         mc.set opts.key, JSON.stringify(value), cb, rep_expires  # individual rep data
       opts.res.send 200, value
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
-        cb = (err, success) ->
-          logger.error "send2fs set #{opts.filepath} #{err.message}" if err
-          logger.info "send2fs set #{opts.filepath}!" if success
+        logger.info "setting #{opts.filepath} for send2fs"
         mc.set opts.filepath, true, cb, fs_expires  # file system images
       sendRes opts, 'new'
 
@@ -233,10 +233,8 @@ processPage = (page, ph, reps) ->
           opts.res.send 500, {error: err.message}
         else
           unless config.dev and not debug_memcache
-            cb = (err, success) ->
-              logger.error "send2s3 set #{opts.s3filepath} #{err.message}" if err
-              logger.info "send2s3 set #{opts.s3filepath}!" if success
             mc.set opts.s3filepath, true, cb, s3_expires  # s3 images
+            logger.info "setting #{opts.filepath} for send2s3"
           sendRes opts, 'new'
 
       logger.info "Sending #{opts.filename} to s3..."
@@ -355,9 +353,7 @@ processPage = (page, ph, reps) ->
           logger.info 'Wrote data'
           value = JSON.stringify hash_list
           unless config.dev and not debug_memcache
-            cb = (err, success) ->
-              logger.error "postWrite set #{key} #{err.message}" if err
-              logger.info "postWrite set #{key}!" if success
+            logger.info "setting #{key} for postWrite"
             mc.set key, value, cb, api_expires  # api work_data
           res.send 201, {data: hash_list}
 
