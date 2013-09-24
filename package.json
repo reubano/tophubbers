@@ -34,7 +34,6 @@
     "phantom": "0.5",
     "mongodb": "1.x",
     "request": "2.x",
-    "d3": "3.x",
     "knox": "0.8.x",
     "nodetime": "0.8.x",
     "memjs": "0.7.x",

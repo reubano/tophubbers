@@ -17,7 +17,6 @@ request = require 'request'
 # murmur = require 'murmurhash-js'
 # md5 = require('crypto').createHash('md5')
 md5 = require('blueimp-md5').md5
-d3 = require 'd3'
 _ = require 'underscore'
 
 # Internal dependencies
