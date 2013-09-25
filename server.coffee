@@ -432,9 +432,12 @@ processPage = (page, ph, reps) ->
   app.listen port, ->
     logger.info "Listening on #{port}"
     logger.info """
-      Try curl --data 'url=http://localhost:5000/work_data' http://localhost:#{port}/api/fetch
-      Then curl --data 'id=E0018&attr=prev_work_hash' http://localhost:#{port}/api/upload
-      Then go to http://localhost:#{port}/#{uploads}/<hash>"""
+      debug s3: #{debug_s3}
+      debug mongodb: #{debug_mongo}
+      debug memcache: #{debug_memcache}
+      Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
+      Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
+      Then go to #{config.api_fetch[..-10]}#{uploads}/<hash>"""
 
 phantom.create (ph) ->
   logger.info 'Creating phantom page'
