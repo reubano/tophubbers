@@ -141,19 +141,34 @@ handleGet = (req, res) ->
     do (id, res) ->
       s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
 
-flushCache = (req, res) ->
+handleFlush = (req, res) ->
   id = req.body.id
+  cb = (err, success, res) ->
+    if err
+      logger.error "Flush #{err.message}"
+      res.send 500, {error: err.message}
+    if success
+      logger.info 'Flush complete!'
+      res.send 200, 'Flush complete!' # not sure why 204 doesn't work
+
   if id is 'cache'
     # won't work for multi-server environments
-    mc.flush (err, success) ->
-      if err
-        logger.error "Flush #{err.message}"
-        res.send 500, {error: err.message}
-      if success
-        logger.info 'Flushed memcache!'
-        res.send 203, 'Flushed memcache!' # look up delete stat code
+    do (res) -> mc.flush (err, success) -> cb err, success, res
   else if id is 's3'
-    res.send 200, 'delete s3 and s3 file exists cache'
+    do (res) -> s3.list {}, (err, data) ->
+      if err
+        logger.error "s3.list #{err.message}"
+        res.send 500, {error: err.message}
+      else
+        s3Files = _.pluck data.Contents, 'Key'
+        do (res) -> s3.deleteMultiple s3Files, (err, resp) ->
+          if err
+            logger.error "s3.deleteMultiple #{err.message}"
+            res.send 500, {error: err.message}
+          else
+            logger.info 'Successfully deleted s3 files!'
+            do (res) -> mc.flush (err, success) -> cb err, success, res
+            resp.resume()
   else res.send 404, 'command not supported'
 
 getStatus = (req, res) ->
@@ -381,7 +396,7 @@ processPage = (page, ph, reps) ->
   app.all '*', configCORS
   app.get '*', configPush
   app.get "/#{uploads}/:id", handleGet
-  app.post "/api/flush", flushCache
+  app.post "/api/flush", handleFlush
   app.post "/api/stats", getStatus
   app.post '/api/fetch', handleFetch
   app.post '/api/upload', handleUpload
