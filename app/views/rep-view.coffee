@@ -25,7 +25,6 @@ module.exports = class RepView extends View
 		utils.log 'initialize rep-view for ' + @id
 		console.log @forms
 		console.log options
-		utils.log 'User name is ' + @name
 
 		@checkOnline().done(@sendForms).done(@fetchForms)
 		@delegate 'click', '#network-form-submit', @networkFormSubmit
@@ -98,13 +97,13 @@ module.exports = class RepView extends View
 
 	networkFormSubmit: =>
 		json = @objectify('#network-form')
-		utils.log 'saving form data...'
+		utils.log 'saving network form data...'
 		utils.log json
 		@forms.create json
 
 	reviewFormSubmit: =>
 		json = @objectify('#review-form')
-		utils.log 'saving form data...'
+		utils.log 'saving review form data...', 'info'
 		utils.log json
 		@forms.create json
 

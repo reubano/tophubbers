@@ -111,7 +111,7 @@ module.exports = class Controller extends Chaplin.Controller
 
 			for model in models
 				for attr in attrs
-					chart_attr = attr + config.chart_suffix
+					chart_attr = attr + config.parsed_suffix
 					id = model.get 'id'
 
 					# if (not model.get(chart_attr) or model.hasChanged(attr))

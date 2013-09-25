@@ -1,5 +1,4 @@
 makeChart = (data, selection, changed=false, resize=false) ->
-	nvlog = (e) -> nv.log 'New State:', JSON.stringify(e)
 	retLab = (data) -> data.label
 	retVal = (data) -> data.value
 	formatMinutes = (d) ->
@@ -44,7 +43,7 @@ makeChart = (data, selection, changed=false, resize=false) ->
 		.call(chart)
 
 	nv.utils.windowResize(chart.update) if resize
-	chart.dispatch.on 'stateChange', nvlog
+	chart.dispatch.on 'stateChange', -> console.log 'stateChange'
 	chart
 
 module.exports = makeChart

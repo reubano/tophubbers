@@ -112,7 +112,7 @@ module.exports = class SessionController extends Controller
 
 	# Publish an event to notify all application components of the login
 	publishLogin: ->
-		utils.log 'session-controller publishLogin'
+		utils.log 'session-controller publishLogin', 'info'
 		@loginStatusDetermined = true
 		@publishEvent 'login', @user
 		@publishEvent 'loginStatus', true
