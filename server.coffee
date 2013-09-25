@@ -57,6 +57,7 @@ port = 3333
 datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
+queued_files = []
 
 cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
@@ -168,6 +169,7 @@ handleFlush = (req, res) ->
       res.send 500, {error: err.message}
     else
       logger.info 'Successfully deleted s3 files!'
+      queued_files = []
       do (res) -> mc.flush (err, success) -> flushCB err, success, res
       resp.resume() if not err
 
@@ -250,8 +252,19 @@ processPage = (page, ph, reps) ->
       active = true
       graph = queue[0]
       queue.splice(0, 1)
-      logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
-      graph.generate graph.callback, graph.opts, queue.length
+
+      _render = (graph) ->
+        logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
+        graph.generate graph.callback, graph.opts, queue.length
+
+      if graph.isDupe
+        opts = graph.opts
+        logger.info "Repeating search for #{opts.filename} before rendering..."
+        do (graph) -> opts.existsFunc opts.filename, (exists, cached) ->
+          sendRes(graph.opts) and active = queue.length if exists
+          renderPage() if exists and queue.length
+          _render graph if not exists
+      else _render graph
 
     addGraph = (callback, opts) ->
       func = (callback, opts, repeat=false) ->
@@ -264,7 +277,9 @@ processPage = (page, ph, reps) ->
               if repeat then renderPage() else active = false
           opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
-      queue.push {generate: func, callback: callback, opts: opts}
+      dupe = opts.filename in queued_files
+      queue.push {generate: func, callback: callback, opts: opts, isDupe: dupe}
+      queued_files.push opts.filename
       logger.info "adding #{opts.filename} to queue: #{queue.length}"
       renderPage() if not active
 
