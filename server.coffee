@@ -227,7 +227,7 @@ app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
 processPage = (page, ph, reps) ->
-  logger.info 'Processing phantom page.'
+  logger.info 'Processing phantom page'
 
   handleUpload = (req, res) ->
     # return logger.warn 'handleUpload headers already sent' if res.headerSent
@@ -440,7 +440,7 @@ processPage = (page, ph, reps) ->
 
   # start server
   app.listen port, ->
-    logger.info "Listening on #{port}"
+    logger.info "Listening on port #{port}"
     logger.info """
       debug s3: #{debug_s3}
       debug mongodb: #{debug_mongo}
