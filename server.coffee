@@ -58,9 +58,9 @@ datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
 
-cb = (err, success) ->
-  logger.error "while setting cache #{err.message}" if err
-  logger.info "successfully set cache!" if success
+cb = (err, success, type='create') ->
+  logger.error "for #{type} cache key #{err.message}" if err
+  logger.info "successfully #{type}d cache key!" if success
 
 getS3Files = (callback) ->
   s3.list {}, (err, data) ->
