@@ -72,7 +72,7 @@ getS3List = (callback) ->
           s3List = _.pluck data.Contents, 'Key'
           callback false, s3List
           logger.info "setting s3List for getS3List"
-          mc.set 's3List', JSON.stringify(s3List), cb, s3_expires
+          mc.set 's3List', JSON.stringify(s3List), cb, 60
     else
       logger.info "s3List found in cache"
       callback false, JSON.parse buffer.toString()
@@ -207,6 +207,15 @@ getStatus = (req, res) ->
     else if server and status
       logger.info 'Got memcache status!'
       res.send 200, {server: server, status: status}
+
+getList = (req, res) ->
+  getS3List (err, s3Files) ->
+    if err
+      logger.error 'getS3List ' + err.message
+      res.send 500, {error: err.message}
+    else
+      logger.info 'Got memcache status!'
+      res.send 200, {files: s3Files}
 
 # middleware
 # pipe web server logs through winston
@@ -425,6 +434,7 @@ processPage = (page, ph, reps) ->
   app.get "/#{uploads}/:id", handleGet
   app.post "/api/flush", handleFlush
   app.post "/api/stats", getStatus
+  app.post "/api/list", getList
   app.post '/api/fetch', handleFetch
   app.post '/api/upload', handleUpload
 
