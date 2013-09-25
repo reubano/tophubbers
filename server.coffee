@@ -249,24 +249,22 @@ processPage = (page, ph, reps) ->
       active = true
       graph = queue[0]
       queue.splice(0, 1)
-      logger.info "redering next in queue: #{queue.length}"
-      repeat = queue.length
-      graph.generate graph.callback, graph.opts, repeat
+      logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
+      graph.generate graph.callback, graph.opts, queue.length
 
     addGraph = (callback, opts) ->
       func = (callback, opts, repeat=false) ->
-        logger.info "File #{opts.filename} doesn't exist in cache. Creating new image."
         do (opts) ->
-          cb = (result) ->
-            logger.info "pre rendering #{opts.hash} to #{opts.filepath}"
+          evalCB = (result) ->
+            logger.info "pre rendering #{opts.filepath}"
             opts.page.render opts.filepath, ->
-              logger.info "post rendering #{opts.hash} to #{opts.filepath}"
+              logger.info "post rendering #{opts.filepath}"
               callback opts
               if repeat then renderPage() else active = false
-          opts.page.evaluate makeChart, cb, opts.chart_data, selector
+          opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
       queue.push {generate: func, callback: callback, opts: opts}
-      logger.info "adding to queue: #{queue.length}"
+      logger.info "adding #{opts.filename} to queue: #{queue.length}"
       renderPage() if not active
 
     readJSON = (err, raw, opts) ->
