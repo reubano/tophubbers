@@ -63,12 +63,20 @@ cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
 
-getS3Files = (callback) ->
-  s3.list {}, (err, data) ->
-    if err then callback err, false
+getS3List = (callback) ->
+  mc.get 's3List', (err, buffer) ->
+    logger.error "getS3List get s3list #{err.message}" if err
+    if (config.dev and not debug_memcache) or not buffer
+      s3.list {}, (err, data) ->
+        if err then callback err, false
+        else
+          s3List = _.pluck data.Contents, 'Key'
+          callback false, s3List
+          logger.info "setting s3List for getS3List"
+          mc.set 's3List', JSON.stringify(s3List), cb, s3_expires
     else
-      s3Files = _.pluck data.Contents, 'Key'
-      callback false, s3Files
+      logger.info "s3List found in cache"
+      callback false, JSON.parse buffer.toString()
 
 fileExists = (filename, callback) ->
   filepath = path.join 'public', uploads, filename
@@ -86,9 +94,9 @@ s3Exists = (filename, callback) ->
     logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
-      do (callback) -> getS3Files (err, s3Files) ->
+      do (callback) -> getS3List (err, s3Files) ->
         if err
-          logger.error 'getS3Files ' + err.message
+          logger.error 'getS3List ' + err.message
           callback false, false
         else if filename in s3Files then callback true, false
         else callback false, false
@@ -170,12 +178,13 @@ handleFlush = (req, res) ->
     else
       logger.info 'Successfully deleted s3 files!'
       queued_files = []
+      mc.delete 's3List', (err, success) -> cb err, success, 'delete'
       do (res) -> mc.flush (err, success) -> flushCB err, success, res
       resp.resume() if not err
 
   getCB = (err, files, res) ->
     if err
-      logger.error 'getS3Files ' + err.message
+      logger.error 'getS3List ' + err.message
       res.send 500, {error: err.message}
     else do (res) ->
       s3.deleteMultiple files, (err, resp) -> deleteCB err, resp, res
@@ -188,7 +197,7 @@ handleFlush = (req, res) ->
       if err
         logger.error "s3.list #{err.message}"
         res.send 500, {error: err.message}
-      else do (res) -> getS3Files (err, s3Files) -> getCB err, s3Files, res
+      else do (res) -> getS3List (err, s3Files) -> getCB err, s3Files, res
   else res.send 404, 'command not supported'
 
 getStatus = (req, res) ->
