@@ -1,4 +1,12 @@
 # Usage: coffee server.coffee
+# TODO: minify pngs (post processing or via render options)
+# TODO: add syslog drains
+# TODO: implement toobusy
+# TODO: implement s3 and request timeouts
+# TODO: add node cluster
+# TODO: migrate to EU region
+# TODO: setup nodetime
+# TODO: try base64 uri encoding
 
 # nodetime
 if process.env.NODETIME_ACCOUNT_KEY
