@@ -270,9 +270,9 @@ processPage = (page, ph, reps) ->
       func = (callback, opts, repeat=false) ->
         do (opts) ->
           evalCB = (result) ->
-            logger.info "pre rendering #{opts.filepath}"
+            logger.info "pre rendering #{opts.filename}"
             opts.page.render opts.filepath, ->
-              logger.info "post rendering #{opts.filepath}"
+              # logger.info "post rendering #{opts.filename}"
               callback opts
               if repeat then renderPage() else active = false
           opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
