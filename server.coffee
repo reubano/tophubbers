@@ -169,7 +169,7 @@ handleFlush = (req, res) ->
     else
       logger.info 'Successfully deleted s3 files!'
       do (res) -> mc.flush (err, success) -> flushCB err, success, res
-      resp.resume()
+      resp.resume() if not err
 
   getCB = (err, files, res) ->
     if err
@@ -244,7 +244,7 @@ processPage = (page, ph, reps) ->
       do (opts) ->
         s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
-          resp.resume()
+          resp.resume() if not err
 
     renderPage = ->
       active = true
