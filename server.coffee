@@ -61,6 +61,13 @@ datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
 
+getS3Files = (callback) ->
+  s3.list {}, (err, data) ->
+    if err then callback err, false
+    else
+      s3Files = _.pluck data.Contents, 'Key'
+      callback false, s3Files
+
 fileExists = (filepath, callback) ->
   mc.get filepath, (err, cached) ->
     logger.error "fileExists get #{filepath} #{err.message}" if err
@@ -71,21 +78,19 @@ fileExists = (filepath, callback) ->
       logger.info "#{filepath} found in cache"
       callback true, true
 
-s3Exists = (path, callback) ->
-  mc.get path, (err, cached) ->
-    logger.error "s3Exists get #{path} #{err.message}" if err
+s3Exists = (filename, callback) ->
+  mc.get filename, (err, cached) ->
+    logger.error "s3Exists get #{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
-      logger.info "Checking s3 for #{path}..."
-      do (callback) -> request path, (err, res, body) ->
+      logger.info "Checking s3 for #{filename}..."
+      do (callback) -> getS3Files (err, s3Files) ->
         if err
-          logger.error 's3Exists ' + err.message
+          logger.error 'getS3Files ' + err.message
           callback false, false
-        else
-          status = res.statusCode
-          logger.error "s3Exists status: #{status}" if /^5/.test status
-          callback status is 200, false
+        else if filename in s3Files then callback true, false
+        else callback false, false
     else
-      logger.info "#{path} found in cache"
+      logger.info "#{filename} found in cache"
       callback true, true
 
 # CORS support
@@ -147,7 +152,7 @@ handleGet = (req, res) ->
 
 handleFlush = (req, res) ->
   id = req.body.id
-  cb = (err, success, res) ->
+  flushCB = (err, success, res) ->
     if err
       logger.error "Flush #{err.message}"
       res.send 500, {error: err.message}
@@ -155,24 +160,31 @@ handleFlush = (req, res) ->
       logger.info 'Flush complete!'
       res.send 200, 'Flush complete!' # not sure why 204 doesn't work
 
+  deleteCB = (err, resp, res) ->
+    if err
+      logger.error "s3.deleteMultiple #{err.message}"
+      res.send 500, {error: err.message}
+    else
+      logger.info 'Successfully deleted s3 files!'
+      do (res) -> mc.flush (err, success) -> flushCB err, success, res
+      resp.resume()
+
+  getCB = (err, files, res) ->
+    if err
+      logger.error 'getS3Files ' + err.message
+      res.send 500, {error: err.message}
+    else do (res) ->
+      s3.deleteMultiple files, (err, resp) -> deleteCB err, resp, res
+
   if id is 'cache'
     # won't work for multi-server environments
-    do (res) -> mc.flush (err, success) -> cb err, success, res
+    do (res) -> mc.flush (err, success) -> flushCB err, success, res
   else if id is 's3'
     do (res) -> s3.list {}, (err, data) ->
       if err
         logger.error "s3.list #{err.message}"
         res.send 500, {error: err.message}
-      else
-        s3Files = _.pluck data.Contents, 'Key'
-        do (res) -> s3.deleteMultiple s3Files, (err, resp) ->
-          if err
-            logger.error "s3.deleteMultiple #{err.message}"
-            res.send 500, {error: err.message}
-          else
-            logger.info 'Successfully deleted s3 files!'
-            do (res) -> mc.flush (err, success) -> cb err, success, res
-            resp.resume()
+      else do (res) -> getS3Files (err, s3Files) -> getCB err, s3Files, res
   else res.send 404, 'command not supported'
 
 getStatus = (req, res) ->
@@ -297,13 +309,13 @@ processPage = (page, ph, reps) ->
             sendRes opts
           else addGraph send2fs, opts
       else
-        do (opts) -> s3Exists s3filepath, (exists, cached) ->
+        do (opts) -> s3Exists filename, (exists, cached) ->
           if exists
-            logger.info "File #{opts.s3filepath} exists on s3. Sending cached image hash."
+            logger.info "File #{opts.filename} exists on s3. Sending cached image hash."
             cb = (err, success) ->
-              logger.error "sendHash set #{opts.s3filepath} #{err.message}" if err
-              logger.info "sendHash set #{opts.s3filepath}!" if success
-            mc.set opts.s3filepath, true, cb, s3_expires if not cached
+              logger.error "sendHash set #{opts.filename} #{err.message}" if err
+              logger.info "sendHash set #{opts.filename}!" if success
+            mc.set opts.filename, true, cb, s3_expires if not cached
             sendRes opts
           else addGraph send2s3, opts
 
