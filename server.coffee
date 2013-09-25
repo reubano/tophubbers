@@ -69,9 +69,10 @@ getS3Files = (callback) ->
       s3Files = _.pluck data.Contents, 'Key'
       callback false, s3Files
 
-fileExists = (filepath, callback) ->
-  mc.get filepath, (err, cached) ->
-    logger.error "fileExists get #{filepath} #{err.message}" if err
+fileExists = (filename, callback) ->
+  filepath = path.join 'public', uploads, filename
+  mc.get "local:#{filename}", (err, cached) ->
+    logger.error "fileExists get local:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking filesystem for #{filepath}..."
       fs.exists filepath, (exists) -> callback exists, false
@@ -80,8 +81,8 @@ fileExists = (filepath, callback) ->
       callback true, true
 
 s3Exists = (filename, callback) ->
-  mc.get filename, (err, cached) ->
-    logger.error "s3Exists get #{filename} #{err.message}" if err
+  mc.get "s3:#{filename}", (err, cached) ->
+    logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
       do (callback) -> getS3Files (err, s3Files) ->
@@ -222,8 +223,8 @@ processPage = (page, ph, reps) ->
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.dst_filepath} for send2fs"
-        mc.set opts.dst_filepath, true, cb, fs_expires  # file system images
+        logger.info "setting #{opts.prefix}:#{opts.filename}"
+        mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires
       sendRes opts, 'new'
 
     send2s3 = (opts) ->
@@ -233,15 +234,15 @@ processPage = (page, ph, reps) ->
           opts.res.send 500, {error: err.message}
         else
           unless config.dev and not debug_memcache
-            logger.info "setting #{opts.dst_filepath} for send2s3"
-            mc.set opts.dst_filepath, true, cb, s3_expires  # s3 images
+            logger.info "setting #{opts.prefix}:#{opts.filename}"
+            mc.set "#{opts.prefix}:#{opts.filename}", true, cb, s3_expires
           sendRes opts, 'new'
 
       logger.info "Sending #{opts.filename} to s3..."
       hdr = {'x-amz-acl': 'public-read'}
 
       do (opts) ->
-        s3.putFile opts.src_filepath, "/#{opts.filename}", hdr, (err, resp) ->
+        s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
           resp.resume()
 
@@ -284,30 +285,30 @@ processPage = (page, ph, reps) ->
 
       hash = md5 JSON.stringify chart_data
       filename = "#{hash}.png"
-      src_filepath = path.join 'public', uploads, filename
+      filepath = path.join 'public', uploads, filename
 
       if config.dev and not debug_s3
-        dst_filepath = src_filepath
         existsFunc = fileExists
         sendFunc = send2fs
+        prefix = 'local'
       else
-        dst_filepath = filename
         existsFunc = s3Exists
         sendFunc = send2s3
+        prefix = 's3'
 
-      keys = ['chart_data', 'hash', 'filename', 'src_filepath', 'dst_filepath', 'existsFunc']
-      values = [chart_data, hash, filename, src_filepath, dst_filepath, existsFunc]
+      keys = ['chart_data', 'hash', 'filename', 'filepath', 'prefix', 'existsFunc']
+      values = [chart_data, hash, filename, filepath, prefix, existsFunc]
       extra = _.object(keys, values)
       _.extend opts, extra
 
-      do (opts) -> existsFunc dst_filepath, (exists, cached) ->
+      do (opts) -> existsFunc filename, (exists, cached) ->
         if exists
-          logger.info "File #{opts.dst_filepath} exists."
+          logger.info "File #{opts.filename} exists."
           sendRes opts
-          logger.info "setting #{opts.dst_filepath} for readJSON"
-          mc.set opts.dst_filepath, true, cb, fs_expires if not cached
+          logger.info "setting #{opts.prefix}:#{opts.filename} for readJSON"
+          mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
         else
-          logger.info "File #{opts.dst_filepath} doesn't exist in cache."
+          logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
           addGraph sendFunc, opts
 
     id = req.body?.id or 'E0008'
