@@ -65,6 +65,7 @@ s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 s3List_expires = 60 * 5  # 5 minutes (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
 rq_timeout = 20000 # request timeout (in milliseconds)
+sv_timeout = 25000 # server timeout (in milliseconds)
 selector = Common.getSelection()
 port = process.env.PORT or config.port
 datafile = path.join 'public', uploads, 'data.json'
@@ -461,7 +462,7 @@ processPage = (page, ph, reps) ->
   app.post '/api/upload', handleUpload
 
   # start server
-  app.listen port, ->
+  server = app.listen port, ->
     logger.info "Listening on port #{port}"
     logger.info """
       debug s3: #{debug_s3}
@@ -470,6 +471,13 @@ processPage = (page, ph, reps) ->
       Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
       Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
       Then go to #{config.api_fetch[..-10]}#{uploads}/<hash>"""
+
+  server.on 'connection', (socket) ->
+    logger.info 'A new connection was made by a client.'
+    socket.setTimeout sv_timeout
+    socket.on 'timeout', () ->
+      logger.error 'request timeout'
+      socket.end()
 
 phantom.create (ph) ->
   logger.info 'Creating phantom page'
