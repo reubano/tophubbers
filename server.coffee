@@ -63,6 +63,7 @@ maxCacheAge = days * 24 * 60 * 60 * 1000
 api_expires = 60 * 15  # 15 min (in seconds)
 rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
+s3List_expires = 60 * 5  # 5 minutes (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
 selector = Common.getSelection()
 port = process.env.PORT or config.port
@@ -110,7 +111,7 @@ getS3List = (callback) ->
           s3List = _.pluck data.Contents, 'Key'
           callback false, s3List
           logger.info "setting s3List for getS3List"
-          mc.set 's3List', JSON.stringify(s3List), cb, 60
+          mc.set 's3List', JSON.stringify(s3List), cb, s3List_expires
     else
       logger.info "s3List found in cache"
       callback false, JSON.parse buffer.toString()
@@ -131,11 +132,11 @@ s3Exists = (filename, callback) ->
     logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
-      do (callback) -> getS3List (err, s3Files) ->
+      do (callback) -> getS3List (err, s3List) ->
         if err
           logger.error 'getS3List ' + err.message
           callback false, false
-        else if filename in s3Files then callback true, false
+        else if filename in s3List then callback true, false
         else callback false, false
     else
       logger.info "#{filename} found in cache"
@@ -218,7 +219,7 @@ handleFlush = (req, res) ->
       if err
         logger.error "s3.list #{err.message}"
         res.send 500, {error: err.message}
-      else do (res) -> getS3List (err, s3Files) -> getCB err, s3Files, res
+      else do (res) -> getS3List (err, s3List) -> getCB err, s3List, res
   else res.send 404, 'command not supported'
 
 getStatus = (req, res) ->
@@ -231,13 +232,13 @@ getStatus = (req, res) ->
       res.send 200, {server: server, status: status}
 
 getList = (req, res) ->
-  getS3List (err, s3Files) ->
+  getS3List (err, s3List) ->
     if err
       logger.error 'getS3List ' + err.message
       res.send 500, {error: err.message}
     else
       logger.info 'Got memcache status!'
-      res.send 200, {files: s3Files}
+      res.send 200, {files: s3List}
 
 # phantomjs
 processPage = (page, ph, reps) ->
@@ -269,6 +270,12 @@ processPage = (page, ph, reps) ->
           unless config.dev and not debug_memcache
             logger.info "setting #{opts.prefix}:#{opts.filename}"
             mc.set "#{opts.prefix}:#{opts.filename}", true, cb, s3_expires
+            getS3List (err, s3List) ->
+              if err then logger.error 'getS3List ' + err.message
+              else
+                s3List.push opts.filename
+                mc.set 's3List', JSON.stringify(s3List), cb, s3List_expires
+
           sendRes opts, 'new'
 
       logger.info "Sending #{opts.filename} to s3..."
