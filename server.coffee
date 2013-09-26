@@ -1,5 +1,4 @@
 # Usage: coffee server.coffee
-# TODO: implement toobusy
 # TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
 # TODO: add node cluster
 # TODO: migrate to EU region
@@ -20,6 +19,8 @@ knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
 papertrail = require('winston-papertrail').Papertrail
+toobusy = require 'toobusy'
+toobusy.maxLag(100)
 request = require 'request'
 md5 = require('blueimp-md5').md5
 _ = require 'underscore'
@@ -80,6 +81,8 @@ app.use express.logger {stream: winstonStream}
 app.use express.bodyParser()
 app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
+app.use (req, res, next) ->
+  if toobusy() then res.send 503, "I'm busy right now, sorry." else next()
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -478,6 +481,11 @@ processPage = (page, ph, reps) ->
     socket.on 'timeout', () ->
       logger.error 'request timeout'
       socket.end()
+
+  process.on 'SIGINT', () ->
+    server.close()
+    toobusy.shutdown()
+    process.exit()
 
 phantom.create (ph) ->
   logger.info 'Creating phantom page'
