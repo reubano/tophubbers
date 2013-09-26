@@ -1,7 +1,7 @@
 # Usage: coffee server.coffee
-# TODO: minify pngs (post processing or via render options)
 # TODO: add syslog drains
 # TODO: implement toobusy
+# TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
 # TODO: implement s3 and request timeouts
 # TODO: add node cluster
 # TODO: migrate to EU region
