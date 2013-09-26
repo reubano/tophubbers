@@ -66,6 +66,31 @@ active = false
 queue = []
 queued_files = []
 
+# middleware
+pipe web server logs through winston
+winstonStream = {write: (message, encoding) -> logger.info message}
+app.use express.logger {stream: winstonStream}
+app.use express.bodyParser()
+app.use express.compress()
+app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
+
+# CORS support
+configCORS = (req, res, next) ->
+  logger.info "Configuring CORS"
+  if not req.get('Origin') then return next()
+  res.set 'Access-Control-Allow-Origin', '*'
+  res.set 'Access-Control-Allow-Methods', 'GET, POST'
+  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
+  if 'OPTIONS' is req.method then return res.send 200
+  next()
+
+# pushState hack
+configPush = (req, res, next) ->
+  if uploads in req.url.split('/') then return next()
+  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
+  res.redirect newUrl
+
+# utility functions
 cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
@@ -111,23 +136,7 @@ s3Exists = (filename, callback) ->
       logger.info "#{filename} found in cache"
       callback true, true
 
-# CORS support
-configCORS = (req, res, next) ->
-  logger.info "Configuring CORS"
-  if not req.get('Origin') then return next()
-  res.set 'Access-Control-Allow-Origin', '*'
-  res.set 'Access-Control-Allow-Methods', 'GET, POST'
-  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
-  if 'OPTIONS' is req.method then return res.send 200
-  next()
-
-# pushState hack
-configPush = (req, res, next) ->
-  if uploads in req.url.split('/') then return next()
-  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
-  res.redirect newUrl
-
-# serve images
+# routing functions
 handleGet = (req, res) ->
   return logger.warn 'handleGet headers already sent' if res.headerSent
   res.set 'Cache-Control', 'public, max-age=60'
@@ -224,14 +233,6 @@ getList = (req, res) ->
     else
       logger.info 'Got memcache status!'
       res.send 200, {files: s3Files}
-
-# middleware
-# pipe web server logs through winston
-winstonStream = {write: (message, encoding) -> logger.info message}
-app.use express.logger {stream: winstonStream}
-app.use express.bodyParser()
-app.use express.compress()
-app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
 processPage = (page, ph, reps) ->
