@@ -1,5 +1,4 @@
 # Usage: coffee server.coffee
-# TODO: add syslog drains
 # TODO: implement toobusy
 # TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
 # TODO: implement s3 and request timeouts
@@ -21,6 +20,7 @@ winston = require 'winston'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
+papertrail = require('winston-papertrail').Papertrail
 request = require 'request'
 md5 = require('blueimp-md5').md5
 _ = require 'underscore'
@@ -43,10 +43,17 @@ s3 = knox.createClient
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
   region: 'eu-west-1'
 
-logger = new winston.Logger
+if config.dev then logger = new winston.Logger
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console {handleExceptions: true, colorize: true},
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
+else
+  pt = new papertrail
+    handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
+    colorize: true
+  logger = new winston.Logger {transports: [pt]}
+
+logger.exitOnError = false
 
 # Set variables
 debug_s3 = false

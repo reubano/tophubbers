@@ -36,6 +36,7 @@
     "request": "2.x",
     "knox": "0.8.x",
     "nodetime": "0.8.x",
+    "winston-papertrail": "0.1.x",
     "memjs": "0.7.x",
     "blueimp-md5": "1.x"
   },
