@@ -1,7 +1,6 @@
 # Usage: coffee server.coffee
 # TODO: implement toobusy
 # TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
-# TODO: implement s3 and request timeouts
 # TODO: add node cluster
 # TODO: migrate to EU region
 # TODO: setup nodetime
@@ -65,6 +64,7 @@ rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 s3List_expires = 60 * 5  # 5 minutes (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
+rq_timeout = 20000 # request timeout (in milliseconds)
 selector = Common.getSelection()
 port = process.env.PORT or config.port
 datafile = path.join 'public', uploads, 'data.json'
@@ -438,7 +438,8 @@ processPage = (page, ph, reps) ->
       logger.error "handleFetch get #{key} #{err.message}" if err
 
       if (config.dev and not debug_memcache) or not buffer
-        do (res) -> request {url: req.body.url, json: true}, (err, resp, json) ->
+        options = {timeout: rq_timeout, url: req.body.url, json: true}
+        do (res) -> request options, (err, resp, json) ->
           if err
             logger.error 'handleFetch ' + err.message
             res.send 500, {error: err.message}
