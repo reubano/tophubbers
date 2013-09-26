@@ -200,7 +200,7 @@ handleFlush = (req, res) ->
 
   getCB = (err, files, res) ->
     if err
-      logger.error 'getS3List ' + err.message
+      logger.error 'getCB ' + err.message
       res.send 500, {error: err.message}
     else do (res) ->
       s3.deleteMultiple files, (err, resp) -> deleteCB err, resp, res
