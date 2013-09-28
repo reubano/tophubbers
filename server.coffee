@@ -168,21 +168,21 @@ handleGet = (req, res) ->
       logger.info "Image #{id}.png exists on s3! Streaming to page."
       resp.pipe(res)
 
-  sendfile = (exists, filepath, id, res) ->
-    if exists
-      logger.info "Image #{id}.png exists on file! Serving to page."
-      res.sendfile filepath
-    else
+  sendfile = (filepath, id, res) ->
+    handleError = (err, res) ->
       logger.error "Image #{id}.png doesn't exist on file."
       res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
+
+    stream = fs.createReadStream filepath
+    res.writeHead 200, {'Content-Type': 'image/png'}
+    do (res) -> stream.on('error', (err) -> handleError err, res).pipe(res)
 
   id = req.params.id
   filename = "#{id}.png"
 
   if config.dev and not debug_s3
     filepath = path.join 'public', uploads, filename
-    do (filepath, id, res) ->
-      fs.exists filepath, (exists) -> sendfile exists, filepath, id, res
+    sendfile filepath, id, res
   else
     do (id, res) ->
       s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
@@ -286,7 +286,8 @@ processPage = (page, ph, reps) ->
       hdr = {'x-amz-acl': 'public-read'}
 
       do (opts) ->
-        s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
+        stream = fs.createReadStream(opts.filepath, {encoding: 'utf8'})
+        s3.putStream stream, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
           resp.resume() if not err
 
