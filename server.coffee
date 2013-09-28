@@ -1,5 +1,4 @@
 # Usage: coffee server.coffee
-# TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
 # TODO: add node cluster
 # TODO: migrate to EU region
 # TODO: setup nodetime
@@ -25,6 +24,7 @@ request = require 'request'
 streamifier = require 'streamifier'
 s3Lister = require 's3-lister'
 JSONStream = require 'JSONStream'
+pngquant = require 'pngquant'
 md5 = require('blueimp-md5').md5
 es = require 'event-stream'
 _ = require 'underscore'
@@ -183,7 +183,9 @@ handleGet = (req, res) ->
 
     stream = fs.createReadStream filepath
     res.writeHead 200, {'Content-Type': 'image/png'}
-    do (res) -> stream.on('error', (err) -> handleError err, res).pipe(res)
+    do (res) -> stream
+      .on('error', (err) -> handleError err, res)
+      .pipe(new pngquant [4, '--ordered']).pipe(res)
 
   id = req.params.id
   filename = "#{id}.png"
@@ -288,7 +290,8 @@ processPage = (page, ph, reps) ->
       hdr = {'x-amz-acl': 'public-read'}
 
       do (opts) ->
-        stream = fs.createReadStream(opts.filepath, {encoding: 'utf8'})
+        quantizer = new pngquant [4, '--ordered']
+        stream = fs.createReadStream(opts.filepath).pipe(quantizer)
         s3.putStream stream, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
           resp.resume() if not err
