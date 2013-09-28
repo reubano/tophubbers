@@ -297,7 +297,7 @@ processPage = (page, ph, reps) ->
 
       _render = (graph) ->
         logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
-        graph.generate graph.callback, graph.opts, queue.length
+        graph.generate graph.opts, queue.length
 
       if graph.isDupe
         opts = graph.opts
@@ -308,19 +308,19 @@ processPage = (page, ph, reps) ->
           _render graph if not exists
       else _render graph
 
-    addGraph = (callback, opts) ->
-      func = (callback, opts, repeat=false) ->
+    addGraph = (opts) ->
+      func = (opts, repeat=false) ->
         do (opts) ->
           evalCB = (result) ->
             logger.info "pre rendering #{opts.filename}"
             opts.page.render opts.filepath, ->
               # logger.info "post rendering #{opts.filename}"
-              callback opts
+              opts.sendFunc opts
               if repeat then renderPage() else active = false
           opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
       dupe = opts.filename in queued_files
-      queue.push {generate: func, callback: callback, opts: opts, isDupe: dupe}
+      queue.push {generate: func, opts: opts, isDupe: dupe}
       queued_files.push opts.filename
       logger.info "adding #{opts.filename} to queue: #{queue.length}"
       renderPage() if not active
@@ -353,8 +353,13 @@ processPage = (page, ph, reps) ->
         sendFunc = send2s3
         prefix = 's3'
 
-      keys = ['chart_data', 'hash', 'filename', 'filepath', 'prefix', 'existsFunc']
-      values = [chart_data, hash, filename, filepath, prefix, existsFunc]
+      keys = [
+        'chart_data', 'hash', 'filename', 'filepath', 'prefix','existsFunc',
+        'sendFunc']
+
+      values = [
+        chart_data, hash, filename, filepath, prefix, existsFunc, sendFunc]
+
       extra = _.object(keys, values)
       _.extend opts, extra
 
@@ -366,7 +371,7 @@ processPage = (page, ph, reps) ->
           mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
         else
           logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
-          addGraph sendFunc, opts
+          addGraph opts
 
     id = req.body?.id or 'E0008'
     attr = req.body?.attr or 'cur_work_hash'
