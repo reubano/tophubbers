@@ -1,5 +1,5 @@
 debug_mobile = true
-debug_prod = true
+debug_prod = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev

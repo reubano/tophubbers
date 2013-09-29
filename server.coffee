@@ -41,7 +41,7 @@ logger = new winston.Logger
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 
 # Set variables
-debug_s3 = true
+debug_s3 = false
 debug_mongo = true
 debug_memcache = true
 uploads = 'uploads'
