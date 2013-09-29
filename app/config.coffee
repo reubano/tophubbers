@@ -3,11 +3,10 @@ debug_prod = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
-default_port = 3333
+port = 3333
 
 if dev and not debug_prod
 	console.log 'development envrionment set'
-	port = process.env.PORT or default_port
 	mode = 'development'
 	api_fetch = "http://localhost:#{port}/api/fetch"
 	api_upload = "http://localhost:#{port}/api/upload"
@@ -35,7 +34,7 @@ console.log "debug production: #{debug_prod}"
 config =
 	mode: mode
 	prod: prod
-	default_port: default_port
+	port: port
 	debug_mobile: debug_mobile
 	debug_prod: debug_prod
 	dev: dev
