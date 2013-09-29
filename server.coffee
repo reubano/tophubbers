@@ -67,7 +67,7 @@ queue = []
 queued_files = []
 
 # middleware
-pipe web server logs through winston
+# pipe web server logs through winston
 winstonStream = {write: (message, encoding) -> logger.info message}
 app.use express.logger {stream: winstonStream}
 app.use express.bodyParser()
