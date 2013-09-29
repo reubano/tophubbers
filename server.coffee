@@ -111,6 +111,10 @@ cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
 
+handleError = (err, res, src, code=500) ->
+  logger.error "#{src} #{err.message}"
+  res.send code, {error: err.message}
+
 getS3List = es.map (tmp, callback) ->
   mc.get 's3List', (err, buffer) ->
     logger.error "getS3List get s3list #{err.message}" if err
@@ -141,12 +145,11 @@ s3Exists = (filename, callback) ->
     logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
-      handleError = (err, callback) ->
-        logger.error 'getS3List ' + err.message
-        callback false, false
 
       do (callback) -> getS3List()
-        .on('error', (err) -> handleError err, callback)
+        .on('error', (err) ->
+          logger.error 'getS3List ' + err.message
+          callback false, false)
         .pipe es.mapSync (s3List) ->
           if filename in s3List then callback true, false
           else callback false, false
@@ -177,14 +180,10 @@ handleGet = (req, res) ->
       resp.pipe(res)
 
   sendfile = (filepath, id, res) ->
-    handleError = (err, res) ->
-      logger.error "Image #{id}.png doesn't exist on file."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
-
     stream = fs.createReadStream filepath
     res.writeHead 200, {'Content-Type': 'image/png'}
     do (res) -> stream
-      .on('error', (err) -> handleError err, res)
+      .on('error', (err) -> handleError err, res, 'sendfile', 400)
       .pipe(new pngquant [4, '--ordered']).pipe(res)
 
   id = req.params.id
@@ -222,10 +221,6 @@ handleFlush = (req, res) ->
         do (res) -> mc.flush (err, success) -> flushCB err, success, res
         resp.resume() if not err
 
-    handleError = (err, res) ->
-      logger.error "getS3List #{err.message}"
-      res.send 500, {error: err.message}
-
     do (res) -> getS3List()
       .on('error', (err) -> handleError err, res, 'getS3List')
       .pipe es.mapSync (s3List) -> do (res) ->
@@ -242,11 +237,9 @@ getStatus = (req, res) ->
       res.send 200, {server: server, status: status}
 
 getList = (req, res) ->
-  handleError = (err, res) ->
-    logger.error 'getS3List ' + err.message
-    res.send 500, {error: err.message}
-
-  do (res) -> getS3List().on('error', (err) -> handleError err, res).pipe(res)
+  do (res) -> getS3List()
+    .on('error', (err) -> handleError err, res, 'getS3List')
+    .pipe(res)
 
 # phantomjs
 processPage = (page, ph, reps) ->
@@ -366,9 +359,6 @@ processPage = (page, ph, reps) ->
       logger.error "handleUpload get #{key} #{err.message}" if err
       if (config.dev and not debug_memcache) or not buffer
         page.set 'viewportSize', {width: w, height: h}
-        handleError = (err, opts) ->
-          logger.error 'readJSON ' + err.message
-          opts.res.send 500, {error: err.message}
 
         if config.dev and not debug_mongo
           logger.info "streaming #{id} #{attr} data from json file"
