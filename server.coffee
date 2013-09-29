@@ -492,7 +492,7 @@ processPage = (page, ph, reps) ->
       logger.error 'request timeout'
       socket.end()
 
-  process.on 'SIGINT', () ->
+  process.on 'SIGINT', ->
     server.close()
     toobusy.shutdown()
     process.exit()
