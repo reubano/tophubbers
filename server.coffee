@@ -1,4 +1,11 @@
 # Usage: coffee server.coffee
+# TODO: implement toobusy
+# TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
+# TODO: implement s3 and request timeouts
+# TODO: add node cluster
+# TODO: migrate to EU region
+# TODO: setup nodetime
+# TODO: try base64 uri encoding
 
 # nodetime
 if process.env.NODETIME_ACCOUNT_KEY
@@ -13,6 +20,7 @@ winston = require 'winston'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
+papertrail = require('winston-papertrail').Papertrail
 request = require 'request'
 md5 = require('blueimp-md5').md5
 _ = require 'underscore'
@@ -35,13 +43,18 @@ s3 = knox.createClient
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
   region: 'eu-west-1'
 
-logger = new winston.Logger
+if config.dev then logger = new winston.Logger
   transports: [
-    new winston.transports.Console(),
+    new winston.transports.Console {colorize: true},
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
+else
+  pt = new papertrail
+    handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
+    colorize: true
+  logger = new winston.Logger {transports: [pt]}
 
 # Set variables
-debug_s3 = true
+debug_s3 = false
 debug_mongo = true
 debug_memcache = true
 uploads = 'uploads'
@@ -52,12 +65,37 @@ rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
 selector = Common.getSelection()
-port = process.env.PORT or 3333
+port = process.env.PORT or config.port
 datafile = path.join 'public', uploads, 'data.json'
 active = false
 queue = []
 queued_files = []
 
+# middleware
+# pipe web server logs through winston
+winstonStream = {write: (message, encoding) -> logger.info message}
+app.use express.logger {stream: winstonStream}
+app.use express.bodyParser()
+app.use express.compress()
+app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
+
+# CORS support
+configCORS = (req, res, next) ->
+  logger.info "Configuring CORS"
+  if not req.get('Origin') then return next()
+  res.set 'Access-Control-Allow-Origin', '*'
+  res.set 'Access-Control-Allow-Methods', 'GET, POST'
+  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
+  if 'OPTIONS' is req.method then return res.send 200
+  next()
+
+# pushState hack
+configPush = (req, res, next) ->
+  if uploads in req.url.split('/') then return next()
+  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
+  res.redirect newUrl
+
+# utility functions
 cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
@@ -103,23 +141,7 @@ s3Exists = (filename, callback) ->
       logger.info "#{filename} found in cache"
       callback true, true
 
-# CORS support
-configCORS = (req, res, next) ->
-  logger.info "Configuring CORS"
-  if not req.get('Origin') then return next()
-  res.set 'Access-Control-Allow-Origin', '*'
-  res.set 'Access-Control-Allow-Methods', 'GET, POST'
-  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
-  if 'OPTIONS' is req.method then return res.send 200
-  next()
-
-# pushState hack
-configPush = (req, res, next) ->
-  if uploads in req.url.split('/') then return next()
-  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
-  res.redirect newUrl
-
-# serve images
+# routing functions
 handleGet = (req, res) ->
   return logger.warn 'handleGet headers already sent' if res.headerSent
   res.set 'Cache-Control', 'public, max-age=60'
@@ -183,7 +205,7 @@ handleFlush = (req, res) ->
 
   getCB = (err, files, res) ->
     if err
-      logger.error 'getS3List ' + err.message
+      logger.error 'getCB ' + err.message
       res.send 500, {error: err.message}
     else do (res) ->
       s3.deleteMultiple files, (err, resp) -> deleteCB err, resp, res
@@ -216,14 +238,6 @@ getList = (req, res) ->
     else
       logger.info 'Got memcache status!'
       res.send 200, {files: s3Files}
-
-# middleware
-# pipe web server logs through winston
-winstonStream = {write: (message, encoding) -> logger.info message}
-app.use express.logger {stream: winstonStream}
-app.use express.bodyParser()
-app.use express.compress()
-app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 
 # phantomjs
 processPage = (page, ph, reps) ->
