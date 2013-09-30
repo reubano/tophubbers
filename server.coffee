@@ -257,7 +257,7 @@ processPage = (page, ph, reps) ->
       value = {hash: opts.hash, type: type, id: opts.id, attr: opts.attr}
       unless config.dev and not debug_memcache
         logger.info "setting #{opts.key} for sendRes"
-        mc.set opts.key, JSON.stringify(value), cb, rep_expires  # individual rep data
+        mc.set opts.key, JSON.stringify(value), cb, rep_expires
       opts.res.send 200, value
 
     send2fs = (opts) ->
@@ -416,7 +416,7 @@ processPage = (page, ph, reps) ->
           logger.error 'postWrite ' + err.message
           res.send 500, {error: err.message}
         else
-          logger.info 'Wrote data'
+          logger.info 'Wrote hash list'
           value = {data: hash_list}
           unless config.dev and not debug_memcache
             logger.info "setting #{key} for postWrite"
