@@ -53,7 +53,9 @@ if config.dev then logger = new winston.Logger
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 else
   pt = new papertrail
-    handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
+    handleExceptions: true
+    host: 'logs.papertrailapp.com'
+    port: 55976
     colorize: true
   logger = new winston.Logger {transports: [pt]}
 
@@ -71,8 +73,8 @@ rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 s3List_expires = 60 * 5  # 5 minutes (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
-rq_timeout = 20000 # request timeout (in milliseconds)
-sv_timeout = 25000 # server timeout (in milliseconds)
+rq_timeout = 20 * 1000 # request timeout (in milliseconds)
+sv_timeout = 100 * 1000 # server timeout (in milliseconds)
 selector = Common.getSelection()
 port = process.env.PORT or config.port
 datafile = path.join 'public', uploads, 'data.json'
@@ -88,7 +90,10 @@ app.use express.bodyParser()
 app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 app.use (req, res, next) ->
-  if toobusy() then res.send 503, "I'm busy right now, sorry." else next()
+  if not toobusy() then next()
+  else
+    logger.warn 'server too busy'
+    res.send 503, "I'm busy right now, sorry."
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -192,9 +197,8 @@ handleGet = (req, res) ->
   if config.dev and not debug_s3
     filepath = path.join 'public', uploads, filename
     sendfile filepath, id, res
-  else
-    do (id, res) ->
-      s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
+  else do (id, res) ->
+    s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
 
 handleFlush = (req, res) ->
   id = req.body.id
@@ -456,7 +460,9 @@ processPage = (page, ph, reps) ->
             logger.error 'handleFetch ' + err.message
             res.send 500, {error: err.message}
           else if resp.statusCode is 200 then handleSuccess json, res
-          else logger.error('handleFetch') and res.send 417
+          else
+            logger.error "handleFetch: #{options.url} returned #{resp.statusCode}"
+            res.send 417
       else
         logger.info 'Hash list found! Streaming value from memcache.'
         res.type 'application/json'
@@ -489,7 +495,7 @@ processPage = (page, ph, reps) ->
     logger.info 'A new connection was made by a client.'
     socket.setTimeout sv_timeout
     socket.on 'timeout', () ->
-      logger.error 'request timeout'
+      logger.error 'server timeout'
       socket.end()
 
   process.on 'SIGINT', ->
