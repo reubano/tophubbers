@@ -417,11 +417,11 @@ processPage = (page, ph, reps) ->
           res.send 500, {error: err.message}
         else
           logger.info 'Wrote data'
-          value = JSON.stringify hash_list
+          value = {data: hash_list}
           unless config.dev and not debug_memcache
             logger.info "setting #{key} for postWrite"
-            mc.set key, value, cb, api_expires  # api work_data
-          res.send 201, {data: hash_list}
+            mc.set key, JSON.stringify(value), cb, api_expires  # api work_data
+          res.send 201, value
 
       data_list = []
       hash_list = []
