@@ -45,15 +45,13 @@ s3 = knox.createClient
 
 if config.dev then logger = new winston.Logger
   transports: [
-    new winston.transports.Console {handleExceptions: true, colorize: true},
+    new winston.transports.Console {colorize: true},
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 else
   pt = new papertrail
     handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
     colorize: true
   logger = new winston.Logger {transports: [pt]}
-
-logger.exitOnError = false
 
 # Set variables
 debug_s3 = false
