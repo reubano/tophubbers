@@ -367,6 +367,22 @@ processPage = (page, ph, reps) ->
           logger.error 'readJSON ' + err.message
           opts.res.send 500, {error: err.message}
 
+        mergeExtra = es.mapSync (extra) ->
+          logger.info 'mergeExtra'
+          _.extend opts, extra
+          filename = opts.filename
+          existsFunc = opts.existsFunc
+
+          do (opts) -> existsFunc filename, (exists, cached) ->
+            if exists
+              logger.info "File #{opts.filename} exists."
+              sendRes opts
+              logger.info "setting #{opts.prefix}:#{opts.filename} for handleRender"
+              mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
+            else
+              logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
+              addGraph opts
+
         if config.dev and not debug_mongo
           logger.info "streaming #{id} #{attr} data from json file"
           stream = fs.createReadStream datafile, {encoding: 'utf8'}
@@ -377,22 +393,6 @@ processPage = (page, ph, reps) ->
         else
           logger.info "streaming #{id} #{attr} data from mongodb"
           parse = JSONStream.parse attr
-
-          mergeExtra = es.mapSync (extra) ->
-            logger.info 'mergeExtra'
-            _.extend opts, extra
-            filename = opts.filename
-            existsFunc = opts.existsFunc
-
-            do (opts) -> existsFunc filename, (exists, cached) ->
-              if exists
-                logger.info "File #{opts.filename} exists."
-                sendRes opts
-                logger.info "setting #{opts.prefix}:#{opts.filename} for handleUpload"
-                mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
-              else
-                logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
-                addGraph opts
 
           do (opts) -> reps.findOne {id: id}, {raw: false}, (err, raw) ->
             # figure out how to parse raw buffer
