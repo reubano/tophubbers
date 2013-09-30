@@ -494,9 +494,7 @@ processPage = (page, ph, reps) ->
   server.on 'connection', (socket) ->
     logger.info 'A new connection was made by a client.'
     socket.setTimeout sv_timeout
-    socket.on 'timeout', () ->
-      logger.error 'server timeout'
-      socket.end()
+    socket.on 'timeout', -> logger.error('server timeout') and socket.end()
 
   process.on 'SIGINT', ->
     server.close()
