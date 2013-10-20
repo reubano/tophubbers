@@ -9,6 +9,7 @@ if dev and not debug_prod
 	mode = 'development'
 	api_fetch = "/api/fetch"
 	api_upload = "/api/upload"
+	api_uploads = "/api/uploads"
 	api_get = "http://localhost:5001/"
 	api_forms = "http://localhost:5002/api/forms"
 	api_logs = "http://localhost:8888/api/logs"
@@ -16,9 +17,10 @@ if dev and not debug_prod
 else
 	console.log 'production envrionment set'
 	mode = 'production'
-	api_get = 'http://ongeza-api.herokuapp.com/'
 	api_fetch = 'http://ongeza.herokuapp.com/api/fetch'
 	api_upload = 'http://ongeza.herokuapp.com/api/upload'
+	api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
+	api_get = 'http://ongeza-api.herokuapp.com/'
 	api_forms = 'http://ongeza-forms.herokuapp.com/api/forms'
 	api_logs = 'http://flogger.herokuapp.com/api/logs'
 	age = 12 # in hours
@@ -36,9 +38,10 @@ config =
 	debug_mobile: debug_mobile
 	debug_prod: debug_prod
 	dev: dev
-	api_get: api_get
 	api_fetch: api_fetch
 	api_upload: api_upload
+	api_uploads: api_uploads
+	api_get: api_get
 	api_forms: api_forms
 	api_logs: api_logs
 	mobile: mobile or (dev and debug_mobile)

@@ -132,13 +132,9 @@ module.exports = class GraphView extends View
 	gvSuccess: (data, resp, options) =>
 		parent = Common.getParent data
 		utils.log "successfully fetched png for #{data.id}!"
-		if config.dev and config.debug_prod
-			endpoint = "#{config.api_fetch[..-10]}uploads/"
-		else
-			endpoint = '/uploads/'
 
-		url = "#{endpoint}#{data.hash}"
 		if @$(parent)
+			url = "#{config.api_uploads}/#{data.hash}"
 			utils.log "setting html for #{parent} to #{url}"
 			@$(parent).html "<img src=#{url}>"
 			@setImg data

@@ -63,7 +63,6 @@ encoding = {encoding: 'utf-8'}
 debug_s3 = false
 debug_mongo = true
 debug_memcache = true
-uploads = 'uploads'
 days = 2
 maxCacheAge = days * 24 * 60 * 60 * 1000
 api_expires = 60 * 15  # 15 min (in seconds)
@@ -74,7 +73,7 @@ fs_expires = 60 * 60 * 24  # 1 day (in seconds)
 rq_timeout = 20000 # request timeout (in milliseconds)
 sv_timeout = 25000 # server timeout (in milliseconds)
 selector = Common.getSelection()
-datafile = path.join 'public', uploads, 'data.json'
+datafile = path.join 'public', 'uploads', 'data.json'
 port = process.env.PORT or 3333
 active = false
 queue = []
@@ -102,7 +101,7 @@ configCORS = (req, res, next) ->
 
 # pushState hack
 configPush = (req, res, next) ->
-  if uploads in req.url.split('/') then return next()
+  if 'api' in req.url.split('/') then return next()
   newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
   res.redirect newUrl
 
@@ -126,7 +125,7 @@ getS3List = es.map (tmp, callback) ->
       callback null, stream.pipe(convert)
 
 fileExists = (filename, callback) ->
-  filepath = path.join 'public', uploads, filename
+  filepath = path.join 'public', 'uploads', filename
   mc.get "local:#{filename}", (err, cached) ->
     logger.error "fileExists get local:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
@@ -189,7 +188,7 @@ handleGet = (req, res) ->
   filename = "#{id}.png"
 
   if config.dev and not debug_s3
-    filepath = path.join 'public', uploads, filename
+    filepath = path.join 'public', 'uploads', filename
     sendfile filepath, id, res
   else
     do (id, res) ->
@@ -331,7 +330,7 @@ processPage = (page, ph, reps) ->
     readJSON = es.map (chart_data, callback) ->
       hash = md5 JSON.stringify chart_data
       filename = "#{hash}.png"
-      filepath = path.join 'public', uploads, filename
+      filepath = path.join 'public', 'uploads', filename
 
       if config.dev and not debug_s3
         existsFunc = fileExists
@@ -474,7 +473,7 @@ processPage = (page, ph, reps) ->
   # create server routes
   app.all '*', configCORS
   app.get '*', configPush
-  app.get "/#{uploads}/:id", handleGet
+  app.get "/api/uploads/:id", handleGet
   app.post "/api/flush", handleFlush
   app.post "/api/stats", getStatus
   app.post "/api/list", getList
@@ -490,7 +489,7 @@ processPage = (page, ph, reps) ->
       debug memcache: #{debug_memcache}
       Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
       Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
-      Then go to #{config.api_fetch[..-10]}#{uploads}/<hash>"""
+      Then go to #{config.api_uploads}/<hash>"""
 
   server.on 'connection', (socket) ->
     logger.info 'A new connection was made by a client.'
