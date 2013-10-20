@@ -1,5 +1,4 @@
 # Usage: coffee server.coffee
-# TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
 # TODO: add node cluster
 # TODO: migrate to EU region
 # TODO: setup nodetime
@@ -25,6 +24,7 @@ request = require 'request'
 streamifier = require 'streamifier'
 s3Lister = require 's3-lister'
 JSONStream = require 'JSONStream'
+pngquant = require 'pngquant'
 md5 = require('blueimp-md5').md5
 es = require 'event-stream'
 _ = require 'underscore'
@@ -53,7 +53,9 @@ if config.dev then logger = new winston.Logger
     new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
 else
   pt = new papertrail
-    handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
+    handleExceptions: true
+    host: 'logs.papertrailapp.com'
+    port: 55976
     colorize: true
   logger = new winston.Logger {transports: [pt]}
 
@@ -70,8 +72,8 @@ rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
 s3List_expires = 60 * 5  # 5 minutes (in seconds)
 fs_expires = 60 * 60 * 24  # 1 day (in seconds)
-rq_timeout = 20000 # request timeout (in milliseconds)
-sv_timeout = 25000 # server timeout (in milliseconds)
+rq_timeout = 20 * 1000 # request timeout (in milliseconds)
+sv_timeout = 100 * 1000 # server timeout (in milliseconds)
 selector = Common.getSelection()
 datafile = path.join 'public', 'uploads', 'data.json'
 port = process.env.PORT or 3333
@@ -87,7 +89,10 @@ app.use express.bodyParser()
 app.use express.compress()
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 app.use (req, res, next) ->
-  if toobusy() then res.send 503, "I'm busy right now, sorry." else next()
+  if not toobusy() then next()
+  else
+    logger.warn 'server too busy'
+    res.send 503, "I'm busy right now, sorry."
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -109,6 +114,10 @@ configPush = (req, res, next) ->
 cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
+
+handleError = (err, res, src, code=500) ->
+  logger.error "#{src} #{err.message}"
+  res.send code, {error: err.message}
 
 getS3List = es.map (tmp, callback) ->
   mc.get 's3List', (err, buffer) ->
@@ -140,12 +149,11 @@ s3Exists = (filename, callback) ->
     logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
-      handleError = (err, callback) ->
-        logger.error 'getS3List ' + err.message
-        callback false, false
 
       do (callback) -> getS3List()
-        .on('error', (err) -> handleError err, callback)
+        .on('error', (err) ->
+          logger.error 'getS3List ' + err.message
+          callback false, false)
         .pipe es.mapSync (s3List) ->
           if filename in s3List then callback true, false
           else callback false, false
@@ -176,13 +184,11 @@ handleGet = (req, res) ->
       resp.pipe(res)
 
   sendfile = (filepath, id, res) ->
-    handleError = (err, res) ->
-      logger.error "Image #{id}.png doesn't exist on file."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
-
     stream = fs.createReadStream filepath
     res.setHeader 'Content-Type', 'image/png'
-    do (res) -> stream.on('error', (err) -> handleError err, res).pipe(res)
+    do (res) -> stream
+      .on('error', (err) -> handleError err, res, 'sendfile', 400)
+      .pipe(new pngquant [4, '--ordered']).pipe(res)
 
   id = req.params.id
   filename = "#{id}.png"
@@ -190,9 +196,8 @@ handleGet = (req, res) ->
   if config.dev and not debug_s3
     filepath = path.join 'public', 'uploads', filename
     sendfile filepath, id, res
-  else
-    do (id, res) ->
-      s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
+  else do (id, res) ->
+    s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
 
 handleFlush = (req, res) ->
   id = req.body.id
@@ -219,10 +224,6 @@ handleFlush = (req, res) ->
         do (res) -> mc.flush (err, success) -> flushCB err, success, res
         resp.resume() if not err
 
-    handleError = (err, res) ->
-      logger.error "getS3List #{err.message}"
-      res.send 500, {error: err.message}
-
     do (res) -> getS3List()
       .on('error', (err) -> handleError err, res, 'getS3List')
       .pipe es.mapSync (s3List) -> do (res) ->
@@ -239,11 +240,9 @@ getStatus = (req, res) ->
       res.send 200, {server: server, status: status}
 
 getList = (req, res) ->
-  handleError = (err, res) ->
-    logger.error 'getS3List ' + err.message
-    res.send 500, {error: err.message}
-
-  do (res) -> getS3List().on('error', (err) -> handleError err, res).pipe(res)
+  do (res) -> getS3List()
+    .on('error', (err) -> handleError err, res, 'getS3List')
+    .pipe(res)
 
 # phantomjs
 processPage = (page, ph, reps) ->
@@ -257,7 +256,7 @@ processPage = (page, ph, reps) ->
       value = {hash: opts.hash, type: type, id: opts.id, attr: opts.attr}
       unless config.dev and not debug_memcache
         logger.info "setting #{opts.key} for sendRes"
-        mc.set opts.key, JSON.stringify(value), cb, rep_expires  # individual rep data
+        mc.set opts.key, JSON.stringify(value), cb, rep_expires
       opts.res.send 200, value
 
     send2fs = (opts) ->
@@ -287,7 +286,8 @@ processPage = (page, ph, reps) ->
       hdr = {'x-amz-acl': 'public-read'}
 
       do (opts) ->
-        stream = fs.createReadStream(opts.filepath, {encoding: 'utf8'})
+        quantizer = new pngquant [4, '--ordered']
+        stream = fs.createReadStream(opts.filepath).pipe(quantizer)
         s3.putStream stream, "/#{opts.filename}", hdr, (err, resp) ->
           callback err, opts
           resp.resume() if not err
@@ -362,9 +362,6 @@ processPage = (page, ph, reps) ->
       logger.error "handleUpload get #{key} #{err.message}" if err
       if (config.dev and not debug_memcache) or not buffer
         page.set 'viewportSize', {width: w, height: h}
-        handleError = (err, opts) ->
-          logger.error 'readJSON ' + err.message
-          opts.res.send 500, {error: err.message}
 
         mergeExtra = es.mapSync (extra) ->
           logger.info 'mergeExtra'
@@ -418,12 +415,12 @@ processPage = (page, ph, reps) ->
           logger.error 'postWrite ' + err.message
           res.send 500, {error: err.message}
         else
-          logger.info 'Wrote data'
-          value = JSON.stringify hash_list
+          logger.info 'Wrote hash list'
+          value = {data: hash_list}
           unless config.dev and not debug_memcache
             logger.info "setting #{key} for postWrite"
-            mc.set key, value, cb, api_expires  # api work_data
-          res.send 201, {data: hash_list}
+            mc.set key, JSON.stringify(value), cb, api_expires  # api work_data
+          res.send 201, value
 
       data_list = []
       hash_list = []
@@ -462,7 +459,9 @@ processPage = (page, ph, reps) ->
             logger.error 'handleFetch ' + err.message
             res.send 500, {error: err.message}
           else if resp.statusCode is 200 then handleSuccess json, res
-          else logger.error('handleFetch') and res.send 417
+          else
+            logger.error "handleFetch: #{options.url} returned #{resp.statusCode}"
+            res.send 417
       else
         logger.info 'Hash list found! Streaming value from memcache.'
         res.type 'application/json'
@@ -494,11 +493,9 @@ processPage = (page, ph, reps) ->
   server.on 'connection', (socket) ->
     logger.info 'A new connection was made by a client.'
     socket.setTimeout sv_timeout
-    socket.on 'timeout', () ->
-      logger.error 'request timeout'
-      socket.end()
+    socket.on 'timeout', -> logger.error('server timeout') and socket.end()
 
-  process.on 'SIGINT', () ->
+  process.on 'SIGINT', ->
     server.close()
     toobusy.shutdown()
     process.exit()
