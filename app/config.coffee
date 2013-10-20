@@ -13,7 +13,7 @@ if dev and not debug_prod
 	api_get = "http://localhost:5001/"
 	api_forms = "http://localhost:5002/api/forms"
 	api_logs = "http://localhost:8888/api/logs"
-	age = 72  # in hours
+	age = 72 # in hours
 else
 	console.log 'production envrionment set'
 	mode = 'production'
@@ -45,7 +45,7 @@ config =
 	api_forms: api_forms
 	api_logs: api_logs
 	mobile: mobile or (dev and debug_mobile)
-	rpp: 100  # form results per page
+	rpp: 100 # form results per page
 	max_age: age
 	to_chart: 'work_data'
 	data_attrs: ['cur_work_data', 'prev_work_data']

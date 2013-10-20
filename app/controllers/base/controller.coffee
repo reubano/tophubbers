@@ -28,7 +28,7 @@ module.exports = class Controller extends Chaplin.Controller
 		# add logic to fetch png if on mobile and 'work_data' is in url
 		# post url to 'api/fetch' to fetch rep data serverside
 		if config.mobile and (/work_data/).test url
-			utils.log "sending #{url} to api"
+			utils.log "fetching #{url} server side"
 			$.ajax
 				url: config.api_fetch
 				data: {url: url}
@@ -36,7 +36,7 @@ module.exports = class Controller extends Chaplin.Controller
 				dataType: 'json'
 				beforeSend: (res, settings) -> res.url = settings.url
 		else
-			utils.log 'fetching ' + url
+			utils.log "fetching #{url} client side"
 			$.ajax
 				url: url
 				type: 'get'
