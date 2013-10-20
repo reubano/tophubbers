@@ -414,22 +414,24 @@ processPage = (page, ph, reps) ->
 
       data_list = []
       hash_list = []
+      data_obj = {}
 
       for rep in json.data
         raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
         hashes = (md5 JSON.stringify r for r in raw)
-        data_obj = _.object config.hash_attrs, raw
         hash_obj = _.object config.hash_attrs, hashes
-        data_obj.id = hash_obj.id = rep.id
-        data_list.push data_obj
+        hash_obj.id = rep.id
         hash_list.push hash_obj
+        _.extend data_obj, _.object hashes, raw
+
+      keys = _.uniq _.keys data_obj
+      (data_list.push {hash: k, data: data_obj[k]} for k in keys)
 
       do (hash_list) -> if not data_list
         handleError {message: 'chart data is blank'}, res, 'handleJSONSuccess'
       else if config.dev and not debug_mongo
         logger.info 'writing data to json file'
-        data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
-        fs.writeFile datafile, data, (err, result) ->
+        fs.writeFile datafile, JSON.stringify(data_obj), (err, result) ->
           postWrite err, hash_list, key, result
       else
         logger.info 'writing data to mongodb'
