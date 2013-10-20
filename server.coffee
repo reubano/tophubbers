@@ -117,9 +117,14 @@ cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
 
-handleError = (err, res, src, code=500) ->
-  logger.error "#{src} #{err.message}"
+handleError = (err, res, src, code=500, error=true) ->
+  logFun = if error then logger.error else logger.warn
+  logFun "#{src} #{err.message}"
   res.send code, {error: err.message}
+
+handleSuccess = (res, message, code=200) ->
+  logger.info message
+  res.send code, message
 
 getS3List = es.map (tmp, callback) ->
   mc.get 's3List', (err, buffer) ->
@@ -169,12 +174,8 @@ handleGet = (req, res) ->
   res.set 'Cache-Control', 'public, max-age=60'
 
   handleResp = (err, resp, id, res) ->
-    if err
-      logger.error 'handleResp ' + err.message
-      res.send 500, {error: err.message}
-    else if resp.statusCode isnt 200
-      logger.error "Image #{id}.png doesn't exist at s3."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist at s3."
+    if err then handleError err, res, 'handleResp'
+    else if resp.statusCode isnt 200 then handleError err, res, 'handleResp', 404
     else
       res.set 'Content-Length', resp.headers['content-length']
       res.set 'Content-Type', resp.headers['content-type']
@@ -189,7 +190,7 @@ handleGet = (req, res) ->
     stream = fs.createReadStream filepath
     res.setHeader 'Content-Type', 'image/png'
     do (res) -> stream
-      .on('error', (err) -> handleError err, res, 'sendfile', 400)
+      .on('error', (err) -> handleError err, res, 'sendfile', 404)
       .pipe(new pngquant [4, '--ordered']).pipe(res)
 
   id = req.params.id
@@ -204,21 +205,15 @@ handleGet = (req, res) ->
 handleFlush = (req, res) ->
   id = req.body.id
   flushCB = (err, success, res) ->
-    if err
-      logger.error "Flush #{err.message}"
-      res.send 500, {error: err.message}
-    if success
-      logger.info 'Flush complete!'
-      res.send 200, 'Flush complete!' # not sure why 204 doesn't work
+    if err then handleError err, res, 'Flush'
+    if success then handleSuccess res, 'Flush complete!' # why 204 doesn't work?
 
   if id is 'cache'
     # won't work for multi-server environments
     do (res) -> mc.flush (err, success) -> flushCB err, success, res
   else if id is 's3'
     deleteCB = (err, resp, res) ->
-      if err
-        logger.error "s3.deleteMultiple #{err.message}"
-        res.send 500, {error: err.message}
+      if err then handleError err, res, 's3.deleteMultiple'
       else
         logger.info 'Successfully deleted s3 files!'
         queued_files = []
@@ -232,14 +227,11 @@ handleFlush = (req, res) ->
         s3.deleteMultiple s3List, (err, resp) -> deleteCB err, resp, res
   else res.send 404, 'command not supported'
 
-getStatus = (req, res) ->
-  mc.stats (err, server, status) ->
-    if err
-      logger.error "Status #{err.message}"
-      res.send 500, {error: err.message}
-    else if server and status
-      logger.info 'Got memcache status!'
-      res.send 200, {server: server, status: status}
+getStatus = (req, res) -> mc.stats (err, server, status) ->
+  if err then handleError err, res, 'Status'
+  else if server and status then handleSuccess res,
+    {server: server, status: status}
+  else handleError {message: "#{server} status is #{status}"}, res, 'Status'
 
 getList = (req, res) ->
   do (res) -> getS3List()
@@ -269,9 +261,7 @@ processPage = (page, ph, reps) ->
 
     send2s3 = (opts) ->
       callback = (err, opts) ->
-        if err
-          logger.error 'send2s3 ' + err.message
-          opts.res.send 500, {error: err.message}
+        if err then handleError err, res, 'send2s3'
         else
           unless config.dev and not debug_memcache
             logger.info "setting #{opts.prefix}:#{opts.filename}"
@@ -410,12 +400,10 @@ processPage = (page, ph, reps) ->
     return logger.warn 'handleFetch headers already sent' if res.headerSent
     key = 'fetch'
 
-    handleSuccess = (json, res) ->
-      logger.info 'handleSuccess'
-      postWrite = (err, result=false) ->
-        if err
-          logger.error 'postWrite ' + err.message
-          res.send 500, {error: err.message}
+    handleJSONSuccess = (json, res, key) ->
+      logger.info 'handleJSONSuccess'
+      postWrite = (err, hash_list, key, result=false) ->
+        if err then handleError err, res, 'postWrite'
         else
           logger.info 'Wrote hash list'
           value = {data: hash_list}
@@ -436,34 +424,31 @@ processPage = (page, ph, reps) ->
         data_list.push data_obj
         hash_list.push hash_obj
 
-      if not data_list
-        logger.error 'data_list is blank'
-        res.send 500, {error: 'data_list is blank'}
+      do (hash_list) -> if not data_list
+        handleError {message: 'chart data is blank'}, res, 'handleJSONSuccess'
       else if config.dev and not debug_mongo
         logger.info 'writing data to json file'
         data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
-        fs.writeFile datafile, data, postWrite
+        fs.writeFile datafile, data, (err, result) ->
+          postWrite err, hash_list, key, result
       else
         logger.info 'writing data to mongodb'
         reps.remove {}, {w:1}, (err, num_removed) ->
-          if err
-            logger.error 'handleSuccess remove reps ' + err.message
-            res.send 500, {error: err.message}
-          else reps.insert data_list, {w:1}, postWrite
+          if err then handleError err, res, 'handleJSONSuccess remove reps'
+          else do (hash_list) -> reps.insert data_list, {w:1}, (err, result) ->
+            postWrite err, hash_list, key, result
 
-    mc.get key, (err, buffer) ->
+    do (key) -> mc.get key, (err, buffer) ->
       logger.error "handleFetch get #{key} #{err.message}" if err
 
       if (config.dev and not debug_memcache) or not buffer
         options = {timeout: rq_timeout, url: req.body.url, json: true}
         do (res) -> request options, (err, resp, json) ->
-          if err
-            logger.error 'handleFetch ' + err.message
-            res.send 500, {error: err.message}
-          else if resp.statusCode is 200 then handleSuccess json, res
+          if err then handleError err, res, 'handleFetch'
+          else if resp.statusCode is 200 then handleJSONSuccess json, res, key
           else
-            logger.error "handleFetch: #{options.url} returned #{resp.statusCode}"
-            res.send 417
+            err = {message: "#{options.url} returned #{resp.statusCode}"}
+            handleError err, res, 'handleFetch', 417
       else
         logger.info 'Hash list found! Streaming value from memcache.'
         res.type 'application/json'
