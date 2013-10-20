@@ -34,14 +34,14 @@ module.exports = class Controller extends Chaplin.Controller
 				data: {url: url}
 				type: 'post'
 				dataType: 'json'
-				beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+				beforeSend: (res, settings) -> res.url = settings.url
 		else
 			utils.log 'fetching ' + url
 			$.ajax
 				url: url
 				type: 'get'
 				dataType: 'json'
-				beforeSend: (jqXHR, settings) -> jqXHR.url = settings.url
+				beforeSend: (res, settings) -> res.url = settings.url
 
 	fetchData: (list=false, id=false, attrs=false) =>
 		@id = id
@@ -64,10 +64,10 @@ module.exports = class Controller extends Chaplin.Controller
 				utils.log 'using cached ' + r.item + ' data'
 				@setCharts 'HTTP 200', 'success', url: r.url
 
-	failWhale: (jqXHR, textStatus, errorThrown) =>
-		@parser.href = jqXHR.url
-		utils.log 'failed to fetch ' + jqXHR.url
-		utils.log 'error: ' + errorThrown if errorThrown
+	failWhale: (res, textStatus, err) =>
+		@parser.href = res.url
+		utils.log 'failed to fetch ' + res.url
+		utils.log "error: #{err}", 'error' if err
 		$.get config.api_get + 'reset'
 
 	saveCollection: =>
@@ -83,22 +83,22 @@ module.exports = class Controller extends Chaplin.Controller
 		date = new Date().toString()
 		(model.set tstamp, date for model in @collection.models)
 
-	setReps: (response, textStatus, jqXHR) =>
-		if response?.data?
-			@parser.href = jqXHR.url
+	setReps: (data, textStatus, res) =>
+		if data?.data?
+			@parser.href = res.url
 			attr = (@parser.pathname.replace /\//g, '')
 			tstamp = attr + '_tstamp'
 			utils.log 'setting collection with ' + attr
-			utils.log response.data, false
-			@collection.set response.data, remove: false
+			utils.log data.data, false
+			@collection.set data.data, remove: false
 			@saveTstamp(tstamp)
 			@saveCollection()
 			@publishEvent 'repsSet'
 			utils.log 'collection length: ' + @collection.length
 			@displayCollection()
 
-	setCharts: (response, textStatus, jqXHR) =>
-		@parser.href = jqXHR.url
+	setCharts: (data, textStatus, res) =>
+		@parser.href = res.url
 		source = (@parser.pathname.replace /\//g, '')
 		chartable = source is config.to_chart
 		is_work_data = (/work_data/).test source

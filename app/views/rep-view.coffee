@@ -107,13 +107,12 @@ module.exports = class RepView extends View
 		utils.log json
 		@forms.create json
 
-	viewRequest: (model, resp, options) ->
+	viewRequest: (model, textStatus, res) ->
 		utils.log 'rep-view caught request event'
 		utils.log model, false
-		utils.log resp, false
-		utils.log options, false
+		utils.log res, false
 
-	success: (model, resp, options) =>
+	success: (model, textStatus, res) =>
 		utils.log 'rep-view caught sync event'
 		if model.get('id')
 			utils.log 'successfully posted form #' + model.get('id') + '!'
@@ -124,10 +123,9 @@ module.exports = class RepView extends View
 			mediator.synced = true
 
 		utils.log model, false
-		utils.log resp, false
-		utils.log options, false
+		utils.log res, false
 
-	failWhale: (model, xhr, options) =>
+	failWhale: (model, textStatus, res) =>
 		if model.get('id')
 			utils.log 'failed to post form for ' + model.get('id')
 			@$('#fail-modal').modal()
@@ -135,5 +133,4 @@ module.exports = class RepView extends View
 			utils.log 'failed to fetch forms'
 
 		utils.log model, false
-		utils.log xhr, false
-		utils.log options, false
+		utils.log res, false
