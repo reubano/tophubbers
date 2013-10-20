@@ -3,13 +3,12 @@ debug_prod = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
-port = 3333
 
 if dev and not debug_prod
 	console.log 'development envrionment set'
 	mode = 'development'
-	api_fetch = "http://localhost:#{port}/api/fetch"
-	api_upload = "http://localhost:#{port}/api/upload"
+	api_fetch = "/api/fetch"
+	api_upload = "/api/upload"
 	api_get = "http://localhost:5001/"
 	api_forms = "http://localhost:5002/api/forms"
 	api_logs = "http://localhost:8888/api/logs"
@@ -34,7 +33,6 @@ console.log "debug production: #{debug_prod}"
 config =
 	mode: mode
 	prod: prod
-	port: port
 	debug_mobile: debug_mobile
 	debug_prod: debug_prod
 	dev: dev
