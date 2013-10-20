@@ -181,7 +181,7 @@ handleGet = (req, res) ->
       res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
 
     stream = fs.createReadStream filepath
-    res.writeHead 200, {'Content-Type': 'image/png'}
+    res.setHeader 'Content-Type', 'image/png'
     do (res) -> stream.on('error', (err) -> handleError err, res).pipe(res)
 
   id = req.params.id
