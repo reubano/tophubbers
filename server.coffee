@@ -352,8 +352,8 @@ processPage = (page, ph, reps) ->
 
       callback null, _.object(keys, values)
 
-    id = req.body?.id or 'E0008'
-    attr = req.body?.attr or 'cur_work_hash'
+    id = req.body.id
+    attr = req.body.attr
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
     key = "#{id}:#{attr}"
     keys = ['id', 'attr', 'key', 'res', 'page']
