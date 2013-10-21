@@ -101,9 +101,8 @@ module.exports = class Controller extends Chaplin.Controller
 		@parser.href = res.url
 		source = (@parser.pathname.replace /\//g, '')
 		chartable = source is config.to_chart
-		is_work_data = (/work_data/).test source
 
-		if chartable and not config.mobile and is_work_data
+		if chartable and not config.mobile
 			utils.log 'setting chart data for ' + source
 
 			models = if @id then [@collection.get(@id)] else @collection.models
@@ -125,10 +124,9 @@ module.exports = class Controller extends Chaplin.Controller
 						utils.log attr + ' not present'
 						# text = id + ': ' + chart_attr + ' present and '
 						# utils.log text + attr + ' unchanged'
-		else if config.mobile and is_work_data
+		else if chartable and config.mobile
 			utils.log "#{source} svg rendering disabled on mobile"
-		else
-			utils.log source + ' not chartable'
+		else utils.log source + ' not chartable'
 
 		@displayCollection()
 
