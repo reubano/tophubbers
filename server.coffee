@@ -539,10 +539,14 @@ phantom.create (ph) ->
       </html>"""
 
     mongo.connect process.env.MONGOHQ_URL, (err, db) ->
-      if err
+      if err and (not config.dev or debug_mongo)
         logger.error 'mongodb ' + err.message
+        process.exit()
+      else if err and config.dev and not debug_mongo then reps = {}
       else
         logger.info 'Connected to mongodb'
-        page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
-          page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
-            processPage page, ph, db.collection 'reps'
+        reps = db.collection 'reps'
+
+      page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
+        page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
+          processPage page, ph, reps
