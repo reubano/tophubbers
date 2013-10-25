@@ -40,6 +40,7 @@ makeChart = require './app/lib/makechart.coffee'
 config = require './app/config.coffee'
 
 # Set clients
+transports = []
 app = express()
 mc = memjs.Client.create()
 s3 = knox.createClient
@@ -48,17 +49,16 @@ s3 = knox.createClient
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
   region: 'eu-west-1'
 
-if config.dev then logger = new winston.Logger
-  transports: [
-    new winston.transports.Console {colorize: true},
-    new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
+if config.dev
+  transports.push new winston.transports.Console {colorize: true}
+  options = {filename: 'server.log', maxsize: 2097152}
+  transports.push new winston.transports.File options
 else
-  pt = new papertrail
-    handleExceptions: true
-    host: 'logs.papertrailapp.com'
-    port: 55976
-    colorize: true
-  logger = new winston.Logger {transports: [pt]}
+  host = 'logs.papertrailapp.com'
+  options = {handleExceptions: true, host: host, port: 55976, colorize: true}
+  transports.push new papertrail options
+
+logger = new winston.Logger {transports: transports}
 
 # Set variables
 lister = new s3Lister s3
