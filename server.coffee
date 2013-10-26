@@ -486,14 +486,17 @@ processPage = (page, ph, reps) ->
 
   # start server
   server = app.listen port, ->
+    suffix = if config.dev then "localhost:#{port}" else 'ongeza.herokuapp.com'
+    home = "http://#{suffix}"
+
     logger.info "Listening on port #{port}"
-    logger.info """
-      debug s3: #{debug_s3}
-      debug mongodb: #{debug_mongo}
-      debug memcache: #{debug_memcache}
-      Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
-      Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
-      Then go to #{config.api_uploads}/<hash>"""
+    logger.info "debug s3: #{debug_s3}"
+    logger.info "debug mongodb: #{debug_mongo}"
+    logger.info "debug memcache: #{debug_memcache}"
+    logger.info "Try curl #{home}#{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'"
+    logger.info "Then curl #{home}#{config.api_render} -H 'Accept: */*' --data 'hash=<hash>&id=E0018&attr=cur_work_hash'"
+    logger.info "Then curl #{home}/api/progress/<hash>/E0018/cur_work_hash"
+    logger.info "Then curl #{home}#{config.api_uploads}/<hash>"
 
   process.on 'SIGINT', ->
     server.close()
