@@ -7,10 +7,10 @@ utils = require 'lib/utils'
 
 module.exports = class GraphView extends View
 	template: template
-#	listen:
-#		addedToParent: 'getChartScript'
-#		addedToParent: 'addedToParentAlert'
-#		visibilityChange: 'visibilityChangeAlert'
+#	 listen:
+#		 addedToParent: 'getChartScript'
+#		 addedToParent: 'addedToParentAlert'
+#		 visibilityChange: 'visibilityChangeAlert'
 
 	initialize: (options) =>
 		super
@@ -26,13 +26,13 @@ module.exports = class GraphView extends View
 		@listen_attrs = if @mobile then config.hash_attrs else config.data_attrs
 		changes = ('change:' + attr + @listen_suffix for attr in @listen_attrs)
 
-		@listenTo @model, changes[0], ->
+		@listenTo @model, changes[0], =>
 			utils.log 'graph-view heard ' + changes[0]
 			@changed = @listen_attrs[0]
 			@unsetCache @changed
 			@render() if @changed in @attrs
 
-		@listenTo @model, changes[1], ->
+		@listenTo @model, changes[1], =>
 			utils.log 'graph-view heard ' + changes[1]
 			@changed = @listen_attrs[1]
 			@unsetCache @changed
@@ -74,7 +74,9 @@ module.exports = class GraphView extends View
 				@pubRender @attr
 			else if @mobile and name
 				utils.log "fetching #{@text} from server"
-				$.post(config.api_upload, @options).done(@gvSuccess).fail(@gvFailWhale)
+				data = {hash: @model.get @attr}
+				_.extend data, @options
+				$.post(config.api_render, data).done(@gvSuccess).fail(@gvFailWhale)
 			else if svg and not @changed and not ignore_cache
 				utils.log "drawing #{@text} from cache"
 				@$(@parent).html svg
@@ -85,9 +87,10 @@ module.exports = class GraphView extends View
 				utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
 				utils.log "fetching script for #{selection}"
 				chart_data = JSON.parse @model.get chart_attr
-				nv.addGraph makeChart(chart_data, selection, @changed), =>
-					@setSVG @options
-					@pubRender @attr
+				do (@options, @attr) =>
+					nv.addGraph makeChart(chart_data, selection, @changed), =>
+						@setSVG @options
+						@pubRender @attr
 			else
 				utils.log "#{@id} has no #{chart_attr} or no name"
 
@@ -104,9 +107,9 @@ module.exports = class GraphView extends View
 
 	setImg: (options) =>
 		parent = Common.getParent options
-		html = @$(parent).html()
+		html = $(parent).html()
 
-		if html and html.length is 53
+		if html and html.length is 57
 			img = html.replace(/\"/g, '\'')
 			attr = options.attr + config.img_suffix
 			utils.log "setting #{options.id} #{attr}"
@@ -129,22 +132,31 @@ module.exports = class GraphView extends View
 		else
 			utils.log 'html blank or malformed for ' + parent
 
-	gvSuccess: (data, resp, options) =>
-		parent = Common.getParent data
-		utils.log "successfully fetched png for #{data.id}!"
+	gvSuccess: (data, textStatus, res) =>
+		if data?.id?
+			parent = Common.getParent data
+			utils.log "successfully fetched png for #{data.id}!"
 
-		if @$(parent)
-			url = "#{config.api_uploads}/#{data.hash}"
-			utils.log "setting html for #{parent} to #{url}"
-			@$(parent).html "<img src=#{url}>"
-			@setImg data
-			@pubRender data.attr
+			if $(parent)
+				url = "#{config.api_uploads}/#{data.hash}"
+				utils.log "setting html for #{parent} to #{url}"
+				$(parent).html "<img src=#{url}>"
+				@setImg data
+				@pubRender data.attr
+			else utils.log "selection #{parent} doesn't exist", 'error'
+		else
+			progress = res.getResponseHeader 'Location'
+			console.log "trying to get progress: #{progress}"
+			$.get(progress).done(@gvSuccess).fail(@gvFailWhale)
 
-	gvFailWhale: (data, xhr, options) =>
-		try
-			response = JSON.parse(data.responseText).error
-		catch error
-			response = data?.message ? data
-
-		utils.log "failed to fetch png: #{response}."
-		utils.log response
+	gvFailWhale: (res, textStatus, err) =>
+		if res.status is 503
+			wait = parseInt res.getResponseHeader 'Retry-After'
+			console.log "retrying #{res.getResponseHeader 'Location'} in #{wait/1000}s"
+			do (res) => _.delay @gvSuccess, wait, {}, 'OK', res
+		else
+			try
+				error = JSON.parse(res.responseText).error
+			catch error
+				error = res.responseText
+			utils.log "failed to fetch png: #{error}.", 'error'

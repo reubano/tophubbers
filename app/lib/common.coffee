@@ -12,12 +12,14 @@ Common =
 		if not d then return console.log "no #{attr} found for #{id}"
 		console.log "#{id}: generating #{attr} chart data..."
 
-		if d.rows
-			endRows = (label: obj.date, value: obj.start for obj in d.rows)
-			durRows = (label: obj.date, value: obj.duration for obj in d.rows)
-		else
-			endRows = []
-			durRows = []
+		endRows = []
+		durRows = []
+
+		for obj in d.rows
+			end_val = parseFloat obj.start.toFixed(3)
+			dur_val = parseFloat obj.duration.toFixed(3)
+			endRows.push {label: obj.date, value: end_val}
+			durRows.push {label: obj.date, value: dur_val}
 
 		if d.missing
 			endMiss = (label: obj, value: 0 for obj in d.missing)
