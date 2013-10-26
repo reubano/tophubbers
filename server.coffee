@@ -15,6 +15,7 @@ if process.env.NODETIME_ACCOUNT_KEY
 express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
+through = require 'through'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
@@ -367,7 +368,7 @@ processPage = (page, ph, reps) ->
           logger.error 'readJSON ' + err.message
           opts.res.send 500, {error: err.message}
 
-        mergeExtra = es.mapSync (extra) ->
+        mergeExtra = through (extra) ->
           logger.info 'mergeExtra'
           _.extend opts, extra
           filename = opts.filename
