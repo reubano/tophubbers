@@ -26,16 +26,17 @@ else
 	age = 12 # in hours
 
 ua = navigator?.userAgent?.toLowerCase()
-mobile = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
+mobile_device = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
+force_mobile = (dev and debug_mobile)
+mobile = mobile_device or force_mobile
+
 console.log "host: #{host}"
 console.log "mobile device: #{mobile}"
-console.log "debug mobile: #{debug_mobile}"
 console.log "debug production: #{debug_prod}"
 
 config =
 	mode: mode
 	prod: prod
-	debug_mobile: debug_mobile
 	debug_prod: debug_prod
 	dev: dev
 	api_fetch: api_fetch
@@ -44,7 +45,7 @@ config =
 	api_get: api_get
 	api_forms: api_forms
 	api_logs: api_logs
-	mobile: mobile or (dev and debug_mobile)
+	mobile: mobile
 	rpp: 100 # form results per page
 	max_age: age
 	to_chart: 'work_data'
