@@ -80,6 +80,7 @@ winstonStream = {write: (message, encoding) -> logger.info message}
 app.use express.logger {stream: winstonStream}
 app.use express.bodyParser()
 app.use express.compress()
+app.use express.timeout sv_timeout
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 app.use (req, res, next) ->
   if toobusy() then res.send 503, "I'm busy right now, sorry." else next()
@@ -469,6 +470,9 @@ processPage = (page, ph, reps) ->
   app.post '/api/fetch', handleFetch
   app.post '/api/upload', handleUpload
 
+  # timeout err handler
+  app.use (err, req, res, next) -> handleError err, res, 'app', 504
+
   # start server
   server = app.listen port, ->
     logger.info "Listening on port #{port}"
@@ -479,13 +483,6 @@ processPage = (page, ph, reps) ->
       Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
       Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
       Then go to #{config.api_fetch[..-10]}#{uploads}/<hash>"""
-
-  server.on 'connection', (socket) ->
-    logger.info 'A new connection was made by a client.'
-    socket.setTimeout sv_timeout
-    socket.on 'timeout', () ->
-      logger.error 'request timeout'
-      socket.end()
 
   process.on 'SIGINT', ->
     server.close()
