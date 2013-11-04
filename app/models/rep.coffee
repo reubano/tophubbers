@@ -3,22 +3,19 @@ Common = require 'lib/common'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
-  defaults:
-    called: no
-
   initialize: ->
     super
     @set created: new Date().toString() if @isNew() or not @has 'created'
-    ss = if @has 'score_sort' then @get 'score_sort' else @get 'score'
-    @set score_sort: ss
+    if @has('score_sort') or @has('score')
+      ss = if @has 'score_sort' then @get 'score_sort' else @get 'score'
+      @set score_sort: ss
 
   toggle: ->
-    @set called: not @get 'called'
-    score_sort = if @get('called') then 0 else @get 'score'
-    @set score_sort: JSON.stringify score_sort
+    @set called: if @has('called') then not @get('called') else true
+    @set score_sort: if @get('called') then 0 else @get 'score'
     utils.log 'called: ' + @get 'called'
     utils.log 'score: ' + @get 'score'
-    utils.log 'score sort: ' + score_sort
+    utils.log 'score sort: ' + @get 'score_sort'
 
   getChartData: (attr) ->
     Common.getChartData attr, @get(attr), @get 'id'
