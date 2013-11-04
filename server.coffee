@@ -108,7 +108,7 @@ app.use (req, res, next) ->
 
 # CORS support
 configCORS = (req, res, next) ->
-  logger.info "Configuring CORS"
+  # logger.info "Configuring CORS"
   if not req.get('Origin') then return next()
   res.set 'Access-Control-Allow-Origin', '*'
   res.set 'Access-Control-Allow-Methods', 'GET, POST'
@@ -222,7 +222,7 @@ getProgress = (req, res) ->
       value = {hash: opts.hash, id: opts.id, attr: opts.attr}
       handleSuccess opts.res, value
     else if (opts.hash not in queued_hashes)
-      err = {message: "#{opts.filename} doesn't exist in #{opts.src} and not enqueued"}
+      err = {message: "#{opts.filename} doesn't exist in #{opts.src} and #{opts.hash} not enqueued"}
       handleError err, opts.res, 'handleExists', 404
     else if (config.dev and not debug_memcache)
       err = {message: "#{opts.filename} doesn't exist in #{opts.src} and memcache not enabled"}
@@ -416,6 +416,7 @@ processPage = (page, ph, reps) ->
 
     do (opts) -> mc.get "#{hash}:#{id}:#{attr}", (err, buffer) ->
       logger.error "handleRender get #{opts.hash} #{err.message}" if err
+
       if (config.dev and not debug_memcache) or not buffer
         opts.page.set 'viewportSize', {width: opts.w, height: opts.h}
 

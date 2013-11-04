@@ -19,6 +19,8 @@ module.exports = class HomeController extends Controller
 
   show: (params) =>
     utils.log 'show home'
+    refresh = params?.refresh ? false
+    @fetchAndPub() if refresh
     @view = new View {@model}
 
   fetchAndPub: =>
@@ -33,8 +35,3 @@ module.exports = class HomeController extends Controller
       data:
         'results_per_page=' + config.rpp + '&q=' + JSON.stringify
           "order_by": [{"field": "date", "direction": "desc"}]
-
-  refresh: =>
-    @redirectToRoute 'home#show'
-    @fetchAndPub()
-

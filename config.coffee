@@ -3,17 +3,12 @@ exports.config =
   # modules:
   #   wrapper: false
 
-  # conventions:
-  #   vendor: /^vendor.nvd3/
-
   plugins:
     coffeelint:
       pattern: /^app\/.*\.coffee$/
       options:
-        no_tabs:
-          level: "ignore"
         indentation:
-          value: 1
+          value: 2
           level: "error"
 
   files:

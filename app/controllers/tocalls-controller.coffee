@@ -8,25 +8,20 @@ module.exports = class TocallsController extends Controller
   res: ['rep_info', 'score']
   collection: Chaplin.mediator.reps
 
-  initialize: =>
-    utils.log 'initialize tocalls-controller'
+  initialize: => utils.log 'initialize tocalls-controller'
+  comparator: (model) -> - model.get 'score_sort'
 
-    if @collection.length is 0
-      utils.log 'no collection so fetching all data...'
-      @fetchData(@res)
-    else
+  index: (params) =>
+    refresh = params?.refresh ? false
+    expired = params?.expired ? true
+
+    if refresh or @collection.length is 0
+      if refresh then utils.log 'refreshing data...'
+      else utils.log 'no collection so fetching all data...'
+      @fetchData @res
+    else if expired
       utils.log 'fetching expired data...'
-      @fetchExpiredData(@res)
+      @fetchExpiredData @res
 
-  comparator: (model) ->
-    - model.get 'score_sort'
-
-  index: =>
     @collection.comparator = @comparator
     @view = new View {@collection}
-
-  refresh: =>
-    utils.log 'refreshing data...'
-    @redirectToRoute 'tocalls#index'
-    @fetchData(@res)
-
