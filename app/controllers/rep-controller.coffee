@@ -11,31 +11,25 @@ module.exports = class RepController extends Controller
 
   initialize: =>
     utils.log 'initialize rep-controller'
-    utils.log @collection
+    console.log @collection
 
   show: (params) =>
     @id = params.id
     @ignore_cache = params?.ignore_cache ? false
+    refresh = params?.refresh ? false
     utils.log 'show route id is ' + @id
     utils.log 'ignore_cache is ' + @ignore_cache
 
-    if @collection.length is 0 and @collection.get(@id)
-      utils.log 'no collection so fetching all data...'
-      @fetchData(@res, @id)
-      @subscribeEvent 'repsSet', ->
-        @showView @collection.get @id
-        @unsubscribeEvent 'repsSet', -> null
+    if (refresh or @collection.length is 0) and @collection.get(@id)
+      if refresh then utils.log 'refreshing data...'
+      else utils.log 'no collection so fetching all data...'
+      @fetchData @res, @id
+      @showView @collection.get @id
     else if @collection.get(@id)
       utils.log 'fetching expired data...'
-      @fetchExpiredData(@res, @id)
+      @fetchExpiredData @res, @id
       @showView @collection.get @id
-    else
-      @redirectToRoute 'home#show'
-
-  refresh: (params) =>
-    utils.log 'refreshing data...'
-    @fetchData(@res, params.id)
-    @redirectToRoute 'rep#show', id: params.id
+    else @redirectToRoute 'home#show'
 
   showView: (model) =>
     utils.log 'rendering showView'

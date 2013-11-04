@@ -6,7 +6,6 @@ module.exports = (match) ->
   match 'login', 'auth#login'
   match 'refresh/all', 'home#refresh'
   match 'refresh/graphs', 'graphs#refresh'
-  match 'refresh/rep/:id', 'rep#refresh'
 
   # Dynamic checklist of reps ordered and categorized by progress
   match 'tocalls', 'tocalls#index'
@@ -27,3 +26,4 @@ module.exports = (match) ->
   # Mint like progress bars
   match 'rep/:id', 'rep#show'
   match 'rep/:id/:ignore_cache', 'rep#show'
+  match 'rep/:id/:ignore_cache/:refresh', 'rep#show'
