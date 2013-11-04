@@ -6,7 +6,6 @@ module.exports = (match) ->
   match 'login', 'auth#login'
   match 'refresh/all', 'home#refresh'
   match 'refresh/graphs', 'graphs#refresh'
-  match 'refresh/progresses', 'progresses#refresh'
   match 'refresh/rep/:id', 'rep#refresh'
 
   # Dynamic checklist of reps ordered and categorized by progress
@@ -20,6 +19,7 @@ module.exports = (match) ->
   # Data table of reps ordered by watch score
   # Mint like progress bars summarizing points for each rep
   match 'progresses', 'progresses#index'
+  match 'progresses/:refresh', 'progresses#index'
 
   # Cumulative working month graph
   # Customer feedback score
