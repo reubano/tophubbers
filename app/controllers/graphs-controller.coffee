@@ -10,29 +10,23 @@ module.exports = class GraphsController extends Controller
   attrs: if config.mobile then [config.hash_attrs[0]] else [config.data_attrs[0]]
   collection: Chaplin.mediator.reps
 
-  initialize: =>
-    utils.log 'initialize graphs-controller'
-
-    if @collection.length is 0
-      utils.log 'no collection so fetching all data...'
-      @fetchData(@res, false, @attrs)
-    else
-      utils.log 'fetching expired data...'
-      @fetchExpiredData(@res, false, @attrs)
-
-  comparator: (model) ->
-    model.get('id')
+  initialize: => utils.log 'initialize graphs-controller'
+  comparator: (model) -> model.get('id')
 
   index: (params) =>
     @ignore_cache = params?.ignore_cache ? false
+    refresh = params?.refresh ? false
+
+    if refresh or @collection.length is 0
+      if refresh then utils.log 'refreshing data...'
+      else utils.log 'no collection so fetching all data...'
+      @fetchData @res, false, @attrs
+    else
+      utils.log 'fetching expired data...'
+      @fetchExpiredData @res, false, @attrs
 
     @collection.comparator = @comparator
     @view = new View
       collection: @collection
       attrs: @attrs
       ignore_cache: @ignore_cache
-
-  refresh: =>
-    utils.log 'refreshing data...'
-    @fetchData(@res, false, @attrs)
-    @redirectToRoute 'graphs#index'

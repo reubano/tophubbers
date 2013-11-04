@@ -5,7 +5,6 @@ module.exports = (match) ->
   match 'logout', 'auth#logout'
   match 'login', 'auth#login'
   match 'refresh/all', 'home#refresh'
-  match 'refresh/graphs', 'graphs#refresh'
 
   # Dynamic checklist of reps ordered and categorized by progress
   match 'tocalls', 'tocalls#index'
@@ -14,6 +13,7 @@ module.exports = (match) ->
   # Cumulative working month graph sorted by employee num
   match 'graphs', 'graphs#index'
   match 'graphs/:ignore_cache', 'graphs#index'
+  match 'graphs/:ignore_cache/:refresh', 'graphs#index'
 
   # Data table of reps ordered by watch score
   # Mint like progress bars summarizing points for each rep
