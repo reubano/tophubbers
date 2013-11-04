@@ -1,10 +1,9 @@
 module.exports = (match) ->
   match '', 'home#show'
   match 'home', 'home#show'
-  match 'home/:login', 'home#show'
+  match 'home/:refresh', 'home#show'
   match 'logout', 'auth#logout'
   match 'login', 'auth#login'
-  match 'refresh/all', 'home#refresh'
 
   # Dynamic checklist of reps ordered and categorized by progress
   match 'tocalls', 'tocalls#index'
