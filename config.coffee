@@ -3,9 +3,6 @@ exports.config =
   # modules:
   #   wrapper: false
 
-  # conventions:
-  #   vendor: /^vendor.nvd3/
-
   plugins:
     coffeelint:
       pattern: /^app\/.*\.coffee$/
