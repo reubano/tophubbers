@@ -12,12 +12,11 @@ module.exports = class Controller extends Chaplin.Controller
     @compose 'site', SiteView
     utils.log 'beforeAction'
     @publishEvent 'clearView'
-    @compose 'auth', ->
+    @compose 'auth', =>
       SessionController = require 'controllers/session-controller'
       @controller = new SessionController params
 
-    @compose 'navbar', =>
-      @view = new NavbarView {@model}
+    @compose 'navbar', => @view = new NavbarView {@model}
 
   parser: document.createElement('a')
 
@@ -76,7 +75,7 @@ module.exports = class Controller extends Chaplin.Controller
 
   displayCollection: =>
     utils.log @collection, false
-    utils.log @collection.at(1).getAttributes(), false
+    utils.log @collection.get('E0008').getAttributes(), false
 
   saveTstamp: (tstamp) =>
     utils.log 'saving ' + tstamp
@@ -94,6 +93,7 @@ module.exports = class Controller extends Chaplin.Controller
       @saveTstamp(tstamp)
       @saveCollection()
       @publishEvent 'repsSet'
+      utils.log 'published repsSet'
       utils.log 'collection length: ' + @collection.length
       @displayCollection()
 
@@ -127,8 +127,6 @@ module.exports = class Controller extends Chaplin.Controller
     else if chartable and config.mobile
       utils.log "#{source} svg rendering disabled on mobile"
     else utils.log source + ' not chartable'
-
-    @displayCollection()
 
   cacheExpired: (attr) =>
     # check if the cache has expired

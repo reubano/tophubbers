@@ -108,7 +108,7 @@ app.use (req, res, next) ->
 
 # CORS support
 configCORS = (req, res, next) ->
-  logger.info "Configuring CORS"
+  # logger.info "Configuring CORS"
   if not req.get('Origin') then return next()
   res.set 'Access-Control-Allow-Origin', '*'
   res.set 'Access-Control-Allow-Methods', 'GET, POST'
