@@ -263,7 +263,9 @@ getUploads = (req, res) ->
 
   handleResp = (err, resp, hash, res) ->
     if err then handleError err, res, 'handleResp'
-    else if resp.statusCode isnt 200 then handleError err, res, 'handleResp', 404
+    else if resp.statusCode isnt 200
+      err = {message: "statusCode is #{resp.statusCode}"}
+      handleError err, res, 'handleResp', 404
     else
       res.set 'Content-Length', resp.headers['content-length']
       res.set 'Content-Type', resp.headers['content-type']
