@@ -198,8 +198,8 @@ s3Exists = (filename, callback) ->
 # routing functions
 getProgress = (req, res) ->
   handleTimeout = (timeout, opts, wait_time, render_time) ->
-    if not timeout
-      do (opts, wait_time, render_time) -> mc.get "#{opts.hash}:#{opts.id}:#{opts.attr}", (err, buffer) ->
+    if not timeout then do (opts, wait_time, render_time) ->
+      mc.get "#{opts.hash}:#{opts.id}:#{opts.attr}", (err, buffer) ->
         if err
           handleError err, opts.res, 'handleTimeout', 504
         else if not buffer
@@ -222,8 +222,8 @@ getProgress = (req, res) ->
     logger.error "handleStart get start_ph #{err.message}" if err
     now = (new Date()).getTime()
 
-    if not buffer
-      do (opts) -> mc.get "#{opts.hash}:wait_ph", (err, buffer) ->
+    if not buffer then do (opts) ->
+      mc.get "#{opts.hash}:wait_ph", (err, buffer) ->
         logger.error "getProgress get wait_ph #{err.message}" if err
         if not buffer then setKey "#{opts.hash}:wait_ph", now, wait_expires
         else waiting = now - parseInt buffer.toString()
@@ -281,9 +281,8 @@ getUploads = (req, res) ->
       resp.pipe(res)
 
   sendfile = (filepath, res) ->
-    stream = fs.createReadStream filepath
     res.setHeader 'Content-Type', 'image/png'
-    do (res) -> stream
+    do (res) -> fs.createReadStream(filepath)
       .on('error', (err) -> handleError err, res, 'sendfile', 404)
       .pipe(new pngquant [4, '--ordered']).pipe(res)
 
@@ -444,16 +443,14 @@ processPage = (page, ph, reps) ->
 
         if config.dev and not debug_mongo
           logger.info "streaming #{opts.hash} data from json file"
-          stream = fs.createReadStream datafile, {encoding: 'utf8'}
-          parse = JSONStream.parse opts.hash
-          do (opts) -> stream
+
+          do (opts) -> fs.createReadStream(datafile, {encoding: 'utf8'})
             .on('error', (err) -> handleError err, opts.res, 'handleRender: fs')
-            .pipe(parse)
+            .pipe(JSONStream.parse opts.hash)
             .on('error', (err) -> handleError err, opts.res, 'handleRender: parse')
             .pipe(mergeData)
         else
           logger.info "streaming #{opts.hash} data from mongodb"
-          parse = JSONStream.parse 'data'
 
           do (opts) -> reps.findOne {hash: opts.hash}, {raw: false}, (err, raw) ->
             # figure out how to parse raw buffer
@@ -463,7 +460,7 @@ processPage = (page, ph, reps) ->
             else
               data = JSON.stringify raw
               streamifier.createReadStream(data, encoding)
-                .pipe(parse)
+                .pipe(JSONStream.parse 'data')
                 .on('error', (err) -> handleError err, opts.res, 'handleRender: parse')
                 .pipe(mergeData)
       else
