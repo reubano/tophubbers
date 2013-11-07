@@ -126,6 +126,19 @@ configPush = (req, res, next) ->
 cb = (err, success, type='create') ->
   logger.error "for #{type} cache key #{err.message}" if err
   logger.info "successfully #{type}d cache key!" if success
+setKey = (key, value, expires) ->
+  logger.info "setting #{key}..."
+  cb = (err, success) ->
+    logger.error "#{err.message} creating #{key}" if err
+    logger.info "successfully created #{key}!" if success
+
+  mc.set key, value, cb, expires
+
+delKey = (key) ->
+  logger.info "deleting #{key}..."
+  mc.delete key, (err, success) ->
+    logger.error "#{err.message} creating #{key}" if err
+    logger.info "successfully deleted #{key}!" if success
 
 handleError = (err, res, src, code=500, error=true) ->
   logFun = if error then logger.error else logger.warn
@@ -208,7 +221,7 @@ getProgress = (req, res) ->
     if not buffer
       do (opts) -> mc.get "#{opts.hash}:wait_ph", (err, buffer) ->
         logger.error "getProgress get wait_ph #{err.message}" if err
-        if not buffer then mc.set "#{opts.hash}:wait_ph", now, cb, wait_expires
+        if not buffer then setKey "#{opts.hash}:wait_ph", now, wait_expires
         else waiting = now - parseInt buffer.toString()
         wait_time = waiting ? 0
         handleTimeout wait_time > wait_timeout, opts, wait_time, 0
@@ -296,7 +309,7 @@ handleFlush = (req, res) ->
       if err then handleError err, res, 's3.deleteMultiple'
       else
         logger.info 'Successfully deleted s3 files!'
-        mc.delete 's3List', (err, success) -> cb err, success, 'delete'
+        delKey 's3List'
         flushQueues()
         do (res) -> mc.flush (err, success) -> flushCB err, success, res
         resp.resume() if not err
@@ -325,15 +338,13 @@ processPage = (page, ph, reps) ->
   handleRender = (req, res) ->
     sendRes = (opts) ->
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.hash}:#{opts.id}:#{opts.attr} for sendRes"
-        mc.set "#{opts.hash}:#{opts.id}:#{opts.attr}", opts.progress, cb, rep_expires
+        setKey "#{opts.hash}:#{opts.id}:#{opts.attr}", opts.progress, rep_expires
       opts.res.location opts.progress
       handleSuccess opts.res, opts.progress
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.prefix}:#{opts.filename}"
-        mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires
+        setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires
 
     send2s3 = (opts) ->
       callback = (err, opts) ->
@@ -372,13 +383,12 @@ processPage = (page, ph, reps) ->
           opts.sendFunc opts
           if queue.length then renderPage() else active = false
 
-        do (opts) ->
-          evalCB = (result) ->
-            logger.info "rendering #{opts.filename}"
-            mc.set "#{opts.hash}:start_ph", (new Date()).getTime(), cb, ph_start_expires
-            do (opts) -> opts.page.render opts.filepath, -> renderCB opts
+        evalCB = do (opts) -> (result) ->
+          logger.info "rendering #{opts.filename}"
+          setKey "#{opts.hash}:start_ph", (new Date()).getTime(), ph_start_expires
+          do (opts) -> opts.page.render opts.filepath, -> renderCB opts
 
-          opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
+        opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
       # look into nodejs.org/api/timers.html#timers_setimmediate_callback_arg
       if opts.hash in queued_hashes
@@ -427,8 +437,7 @@ processPage = (page, ph, reps) ->
           do (opts) -> opts.existsFunc opts.filename, (exists, cached) ->
             if exists
               logger.info "File #{opts.filename} exists."
-              logger.info "setting #{opts.prefix}:#{opts.filename} for handleRender"
-              mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
+              setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires if not cached
             else
               logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
               addGraph opts
@@ -475,8 +484,7 @@ processPage = (page, ph, reps) ->
           logger.info 'Wrote hash list'
           value = {data: hash_list}
           unless config.dev and not debug_memcache
-            logger.info "setting #{key} for postWrite"
-            mc.set key, JSON.stringify(value), cb, api_expires
+            setKey key, JSON.stringify(value), api_expires
           res.send 201, value
 
       data_list = []
