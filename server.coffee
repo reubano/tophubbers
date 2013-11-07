@@ -120,10 +120,6 @@ configPush = (req, res, next) ->
   newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
   res.redirect newUrl
 
-# utility functions
-cb = (err, success, type='create') ->
-  logger.error "for #{type} cache key #{err.message}" if err
-  logger.info "successfully #{type}d cache key!" if success
 setKey = (key, value, expires) ->
   logger.info "setting #{key}..."
   cb = (err, success) ->
@@ -283,8 +279,7 @@ getUploads = (req, res) ->
   sendfile = (filepath, res) ->
     res.setHeader 'Content-Type', 'image/png'
     do (res) -> fs.createReadStream(filepath)
-      .on('error', (err) -> handleError err, res, 'sendfile', 404)
-      .pipe(new pngquant [4, '--ordered']).pipe(res)
+      .on('error', (err) -> handleError err, res, 'sendfile', 404).pipe(res)
 
   hash = req.params.hash
   filename = "#{hash}.png"
@@ -344,27 +339,35 @@ processPage = (page, ph, reps) ->
         setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires
 
     send2s3 = (opts) ->
-      callback = (err, opts) ->
-        if err then handleError err, res, 'send2s3'
-        else
-          unless config.dev and not debug_memcache
-            logger.info "setting #{opts.prefix}:#{opts.filename}"
-            mc.set "#{opts.prefix}:#{opts.filename}", true, cb, s3_expires
-            do (opts) -> getS3List()
-              .on('error', (err) -> logger.error 'getS3List ' + err.message)
-              .pipe es.mapSync (s3List) ->
-                s3List.push opts.filename
-                mc.set 's3List', JSON.stringify(s3List), cb, s3List_expires
+      putCB = (resp, opts) ->
+        logger.info "successfully uploaded #{opts.filename}!"
+        resp.resume()
+        return if config.dev and not debug_memcache
+        setKey "#{opts.prefix}:#{opts.filename}", true, s3_expires
+        onerr = (err) -> logger.error 'getS3List ' + err.message
+        pipe = do (opts) -> es.mapSync (s3List) ->
+          s3List = JSON.parse s3List
+          s3List.push opts.filename
+          setKey 's3List', JSON.stringify(s3List), s3List_expires
 
-      logger.info "Sending #{opts.filename} to s3..."
-      hdr = {'x-amz-acl': 'public-read'}
+        getS3List onerr, pipe
 
-      do (opts) ->
-        quantizer = new pngquant [4, '--ordered']
-        stream = fs.createReadStream(opts.filepath).pipe(quantizer)
-        s3.putStream stream, "/#{opts.filename}", hdr, (err, resp) ->
-          callback err, opts
-          resp.resume() if not err
+      do (opts) -> fs.stat opts.filepath, (err, stat) ->
+        return handleError err, opts.res, 'send2s3' if err
+
+        hdr =
+          'x-amz-acl': 'public-read'
+          'Content-Length': stat.size
+          'Content-Type': 'image/png'
+
+        req = s3.put "/#{opts.filename}", hdr
+
+        do (opts) -> fs.createReadStream(opts.filepath)
+          .on('error', (err) -> handleError err, opts.res, 'read')
+          .pipe(req).on('error', (err) -> handleError err, opts.res, 'req')
+
+        logger.info "uploading #{opts.filename} to s3..."
+        do (opts) -> req.on 'response', (resp) -> putCB resp, opts
 
     renderPage = ->
       active = true
@@ -376,14 +379,24 @@ processPage = (page, ph, reps) ->
     addGraph = (opts) ->
       logger.info "starting addGraph for #{opts.filename}"
       func = (opts) ->
+        tmpFilepath = path.join 'public', 'uploads', "#{opts.hash}_tmp.png"
+
         renderCB = (opts) ->
-          opts.sendFunc opts
+          do (opts) -> fs.createReadStream(tmpFilepath)
+            .on('error', (err) -> handleError err, opts.res, 'read')
+            .pipe(new pngquant [4, '--ordered'])
+            .on('error', (err) -> handleError err, opts.res, 'quantizer')
+            .pipe(fs.createWriteStream opts.filepath)
+            .on('error', (err) -> handleError err, opts.res, 'write')
+            .on('finish', ->
+              opts.sendFunc opts)
+
           if queue.length then renderPage() else active = false
 
         evalCB = do (opts) -> (result) ->
           logger.info "rendering #{opts.filename}"
           setKey "#{opts.hash}:start_ph", (new Date()).getTime(), ph_start_expires
-          do (opts) -> opts.page.render opts.filepath, -> renderCB opts
+          do (opts) -> opts.page.render tmpFilepath, -> renderCB opts
 
         opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
