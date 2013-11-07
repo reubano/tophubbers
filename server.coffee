@@ -23,7 +23,6 @@ toobusy = require 'toobusy'
 toobusy.maxLag(100)
 request = require 'request'
 streamifier = require 'streamifier'
-s3Lister = require 's3-lister'
 JSONStream = require 'JSONStream'
 pngquant = require 'pngquant'
 md5 = require('blueimp-md5').md5
@@ -61,7 +60,6 @@ else
 logger = new winston.Logger {transports: transports}
 
 # Set variables
-lister = new s3Lister s3
 encoding = {encoding: 'utf-8'}
 debug_s3 = false
 debug_mongo = true
@@ -149,19 +147,23 @@ handleSuccess = (res, message, code=200) ->
   logger.info message
   res.send code, message
 
-getS3List = es.map (tmp, callback) ->
+getS3List = (onerr, pipe) ->
   mc.get 's3List', (err, buffer) ->
-    logger.error "getS3List get s3list #{err.message}" if err
+    return onerr err if err
+
     if (config.dev and not debug_memcache) or not buffer
-      stringify = JSONStream.stringify()
-      setMC = es.mapSync (string) -> mc.set 's3List', string, cb, s3List_expires
-      lister.pipe(stringify).pipe(setMC)
-      callback null, lister
+      logger.info "s3List not found in cache"
+      s3.list (err, data) ->
+        return onerr err if err
+        s3List = JSON.stringify(file.Key for file in data.Contents)
+        setKey 's3List', s3List, s3List_expires
+        streamifier.createReadStream(s3List, encoding)
+          .on('error', onerr).pipe(pipe)
     else
       logger.info "s3List found in cache"
       stream = streamifier.createReadStream buffer
       convert = es.map (buffer, callback) -> callback null, buffer.toString()
-      callback null, stream.pipe(convert)
+      stream.pipe(convert).on('error', onerr).pipe(pipe)
 
 fileExists = (filename, callback) ->
   filepath = path.join 'public', 'uploads', filename
@@ -180,13 +182,15 @@ s3Exists = (filename, callback) ->
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
 
-      do (callback) -> getS3List()
-        .on('error', (err) ->
-          logger.error 'getS3List ' + err.message
-          callback false, false)
-        .pipe es.mapSync (s3List) ->
-          if filename in s3List then callback true, false
-          else callback false, false
+      onerr = (err) ->
+        logger.error 'getS3List ' + err.message
+        callback false, false
+      pipe = es.mapSync (s3List) ->
+        s3List = JSON.parse s3List
+        if filename in s3List then callback true, false
+        else callback false, false
+
+      getS3List onerr, pipe
     else
       logger.info "#{filename} found in cache"
       callback true, true
@@ -294,32 +298,25 @@ getUploads = (req, res) ->
 
 handleFlush = (req, res) ->
   id = req.body.id
-  flushCB = (err, success, res) ->
+  flushCB = do (res) -> (err, success) ->
     if err then handleError err, res, 'Flush'
     if success then handleSuccess res, 'Flush complete!' # why 204 doesn't work?
 
-  flushQueues = ->
-    queue = []
-    queued_hashes = []
+  # won't work for multi-server environments
+  flushQueues = -> queue = [] && queued_hashes = []
 
-  if id is 'cache'
-    # won't work for multi-server environments
-    do (res) -> mc.flush (err, success) -> flushCB err, success, res
-    flushQueues()
+  if id is 'cache' then mc.flush(flushCB) && flushQueues()
   else if id is 's3'
-    deleteCB = (err, resp, res) ->
-      if err then handleError err, res, 's3.deleteMultiple'
-      else
-        logger.info 'Successfully deleted s3 files!'
-        delKey 's3List'
-        flushQueues()
-        do (res) -> mc.flush (err, success) -> flushCB err, success, res
-        resp.resume() if not err
+    deleteCB = (err, resp) ->
+      return handleError err, res, 's3.deleteMultiple' if err
+      logger.info 'Successfully deleted s3 files!'
+      mc.flush(flushCB) && flushQueues() && resp.resume()
 
-    do (res) -> getS3List()
-      .on('error', (err) -> handleError err, res, 'getS3List')
-      .pipe es.mapSync (s3List) -> do (res) ->
-        s3.deleteMultiple s3List, (err, resp) -> deleteCB err, resp, res
+    onerr = do (res) -> (err) -> handleError err, res, 'getS3List'
+    pipe = es.mapSync (s3List) ->
+      s3List = JSON.parse s3List
+      s3.deleteMultiple s3List, deleteCB
+    getS3List onerr, pipe
   else res.send 404, 'command not supported'
 
 getStatus = (req, res) -> mc.stats (err, server, status) ->
@@ -329,9 +326,8 @@ getStatus = (req, res) -> mc.stats (err, server, status) ->
   else handleError {message: "#{server} status is #{status}"}, res, 'Status'
 
 handleList = (req, res) ->
-  do (res) -> getS3List()
-    .on('error', (err) -> handleError err, res, 'getS3List')
-    .pipe(res)
+  onerr = (err) -> handleError err, res, 'getS3List'
+  getS3List onerr, res
 
 # phantomjs
 processPage = (page, ph, reps) ->
