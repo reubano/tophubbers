@@ -127,8 +127,8 @@ cb = (err, success, type='create') ->
 setKey = (key, value, expires) ->
   logger.info "setting #{key}..."
   cb = (err, success) ->
-    logger.error "#{err.message} creating #{key}" if err
-    logger.info "successfully created #{key}!" if success
+    logger.error "#{err.message} setting #{key}" if err
+    logger.info "successfully set #{key}!" if success
 
   mc.set key, value, cb, expires
 
@@ -152,7 +152,7 @@ getS3List = (onerr, pipe) ->
     return onerr err if err
 
     if (config.dev and not debug_memcache) or not buffer
-      logger.info "s3List not found in cache"
+      logger.info "s3List doesn't exist in cache"
       s3.list (err, data) ->
         return onerr err if err
         s3List = JSON.stringify(file.Key for file in data.Contents)
@@ -203,7 +203,7 @@ getProgress = (req, res) ->
         if err
           handleError err, opts.res, 'handleTimeout', 504
         else if not buffer
-          err = {message: "#{opts.hash}:#{opts.id}:#{opts.attr} not found in memcache"}
+          err = {message: "#{opts.hash}:#{opts.id}:#{opts.attr} doesn't exist in memcache"}
           handleError err, opts.res, 'handleTimeout', 404
         else
           opts.res.location buffer.toString()
@@ -425,6 +425,7 @@ processPage = (page, ph, reps) ->
       logger.error "handleRender get #{opts.hash} #{err.message}" if err
 
       if (config.dev and not debug_memcache) or not buffer
+        logger.info "#{hash}:#{id}:#{attr} doesn't exist in cache"
         opts.page.set 'viewportSize', {width: opts.w, height: opts.h}
 
         mergeData = through (chart_data) ->
@@ -464,6 +465,7 @@ processPage = (page, ph, reps) ->
                 .on('error', (err) -> handleError err, opts.res, 'handleRender: parse')
                 .pipe(mergeData)
       else
+        logger.info "#{hash}:#{id}:#{attr} found in cache"
         opts.res.location opts.progress
         handleSuccess opts.res, opts.progress
 
