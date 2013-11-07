@@ -322,8 +322,8 @@ handleFlush = (req, res) ->
 
 getStatus = (req, res) -> mc.stats (err, server, status) ->
   if err then handleError err, res, 'Status'
-  else if server and status then handleSuccess res,
-    {server: server, status: status}
+  else if server and status
+    handleSuccess res, {server: server, status: status}
   else handleError {message: "#{server} status is #{status}"}, res, 'Status'
 
 handleList = (req, res) ->
@@ -436,10 +436,10 @@ processPage = (page, ph, reps) ->
 
           do (opts) -> opts.existsFunc opts.filename, (exists, cached) ->
             if exists
-              logger.info "File #{opts.filename} exists."
+              logger.info "#{opts.prefix}:#{opts.filename} exists."
               setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires if not cached
             else
-              logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
+              logger.info "#{opts.prefix}:#{opts.filename} doesn't exist in cache."
               addGraph opts
 
             sendRes opts
