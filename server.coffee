@@ -121,7 +121,7 @@ configPush = (req, res, next) ->
   res.redirect newUrl
 
 setKey = (key, value, expires) ->
-  logger.info "setting #{key}..."
+  # logger.info "setting #{key}..."
   cb = (err, success) ->
     logger.error "#{err.message} setting #{key}" if err
     logger.info "successfully set #{key}!" if success
@@ -129,9 +129,9 @@ setKey = (key, value, expires) ->
   mc.set key, value, cb, expires
 
 delKey = (key) ->
-  logger.info "deleting #{key}..."
+  # logger.info "deleting #{key}..."
   mc.delete key, (err, success) ->
-    logger.error "#{err.message} creating #{key}" if err
+    logger.error "#{err.message} deleting #{key}" if err
     logger.info "successfully deleted #{key}!" if success
 
 handleError = (err, res, src, code=500, error=true) ->
@@ -209,8 +209,8 @@ getProgress = (req, res) ->
           err = {message: "still rendering #{opts.hash}, try again later"}
           handleError err, opts.res, 'handleTimeout', 503, false
     else
-      logger.info "wait time: #{wait_time}"
-      logger.info "render time: #{render_time}"
+      logger.info "wait time: #{wait_time}ms"
+      logger.info "render time: #{render_time}ms"
       err = {message: "Phantomjs render timed out on #{opts.filename}"}
       handleError err, opts.res, 'handleTimeout', 504
 
@@ -235,8 +235,8 @@ getProgress = (req, res) ->
       value = {hash: opts.hash, id: opts.id, attr: opts.attr}
       handleSuccess opts.res, value
     else if (opts.hash not in queued_hashes)
-      err = {message: "#{opts.filename} doesn't exist in #{opts.src} and #{opts.hash} not enqueued"}
-      handleError err, opts.res, 'handleExists', 404
+      m = "#{opts.filename} doesn't exist in #{opts.src} and not enqueued"
+      handleError {message: m}, opts.res, 'handleExists', 503
     else if (config.dev and not debug_memcache)
       err = {message: "#{opts.filename} doesn't exist in #{opts.src} and memcache not enabled"}
       handleError err, opts.res, 'handleExists', 404
@@ -332,7 +332,7 @@ processPage = (page, ph, reps) ->
       unless config.dev and not debug_memcache
         setKey "#{opts.hash}:#{opts.id}:#{opts.attr}", opts.progress, rep_expires
       opts.res.location opts.progress
-      handleSuccess opts.res, opts.progress
+      handleSuccess opts.res, "Check #{opts.progress}"
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
@@ -388,8 +388,7 @@ processPage = (page, ph, reps) ->
             .on('error', (err) -> handleError err, opts.res, 'quantizer')
             .pipe(fs.createWriteStream opts.filepath)
             .on('error', (err) -> handleError err, opts.res, 'write')
-            .on('finish', ->
-              opts.sendFunc opts)
+            .on('finish', -> opts.sendFunc opts)
 
           if queue.length then renderPage() else active = false
 
@@ -402,11 +401,11 @@ processPage = (page, ph, reps) ->
 
       # look into nodejs.org/api/timers.html#timers_setimmediate_callback_arg
       if opts.hash in queued_hashes
-        logger.info "#{opts.hash} already in queue. Not adding."
+        logger.info "#{opts.hash} already queued. Not adding."
       else
         queue.push {generate: func, opts: opts}
         queued_hashes.push opts.hash
-        logger.info "adding hash: #{opts.hash} to queue: #{queue.length}"
+        logger.info "adding hash #{opts.hash} to queue: #{queue.length}"
         renderPage() if not active
 
     hash = req.body.hash
@@ -430,8 +429,12 @@ processPage = (page, ph, reps) ->
 
     progress = "/api/progress/#{hash}/#{id}/#{attr}"
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
-    keys = ['hash', 'filename', 'filepath', 'attr', 'id', 'progress', 'res', 'page', 'w', 'h', 'prefix','existsFunc', 'sendFunc']
-    values = [hash, filename, filepath, attr, id, progress, res, page, w, h, prefix, existsFunc, sendFunc]
+    keys = [
+      'hash', 'filename', 'filepath', 'attr', 'id', 'progress', 'res', 'page',
+      'w', 'h', 'prefix','existsFunc', 'sendFunc']
+    values = [
+      hash, filename, filepath, attr, id, progress, res, page, w, h, prefix,
+      existsFunc, sendFunc]
     opts = _.object(keys, values)
 
     do (opts) -> mc.get "#{hash}:#{id}:#{attr}", (err, buffer) ->
@@ -447,10 +450,11 @@ processPage = (page, ph, reps) ->
 
           do (opts) -> opts.existsFunc opts.filename, (exists, cached) ->
             if exists
-              logger.info "#{opts.prefix}:#{opts.filename} exists."
-              setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires if not cached
+              logger.info "#{opts.prefix}:#{opts.filename} exists!"
+              key = "#{opts.prefix}:#{opts.filename}"
+              setKey key, true, fs_expires if not cached
             else
-              logger.info "#{opts.prefix}:#{opts.filename} doesn't exist in cache."
+              logger.info "#{opts.prefix}:#{opts.filename} doesn't exist."
               addGraph opts
 
             sendRes opts
@@ -480,7 +484,7 @@ processPage = (page, ph, reps) ->
       else
         logger.info "#{hash}:#{id}:#{attr} found in cache"
         opts.res.location opts.progress
-        handleSuccess opts.res, opts.progress
+        handleSuccess opts.res, "Check #{opts.progress}"
 
   handleFetch = (req, res) ->
     return logger.warn 'handleFetch headers already sent' if res.headerSent
