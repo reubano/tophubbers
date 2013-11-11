@@ -258,11 +258,14 @@ getProgress = (req, res) ->
     s3Exists opts.filename, (exists, cached) -> handleExists exists, cached, opts
 
 getUploads = (req, res) ->
-  return logger.warn 'getUploads headers already sent' if res.headerSent
+  return logger.warn 'getUploads headers already sent' if res.headersSent
   res.set 'Cache-Control', 'public, max-age=60'
 
   handleResp = (err, resp, hash, res) ->
-    if err then handleError err, res, 'handleResp'
+    resp.resume() if (err or resp.statusCode isnt 200 or res.headersSent) and resp
+
+    if res.headersSent then logger.error 'handleResp headers already sent'
+    else if err then handleError err, res, 'handleResp'
     else if resp.statusCode isnt 200
       err = {message: "statusCode is #{resp.statusCode}"}
       handleError err, res, 'handleResp', 404
@@ -329,6 +332,7 @@ processPage = (page, ph, reps) ->
 
   handleRender = (req, res) ->
     sendRes = (opts) ->
+      return logger.error 'sendRes headers already sent' if opts.res.headersSent
       unless config.dev and not debug_memcache
         setKey "#{opts.hash}:#{opts.id}:#{opts.attr}", opts.progress, rep_expires
       opts.res.location opts.progress
@@ -487,7 +491,7 @@ processPage = (page, ph, reps) ->
         handleSuccess opts.res, "Check #{opts.progress}"
 
   handleFetch = (req, res) ->
-    return logger.warn 'handleFetch headers already sent' if res.headerSent
+    return logger.warn 'handleFetch headers already sent' if res.headersSent
     key = 'fetch'
 
     handleJSONSuccess = (json, res, key) ->
