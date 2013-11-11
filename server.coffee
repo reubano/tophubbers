@@ -300,14 +300,21 @@ handleFlush = (req, res) ->
     if success then handleSuccess res, 'Flush complete!' # why 204 doesn't work?
 
   # won't work for multi-server environments
-  flushQueues = -> queue = [] && queued_hashes = []
+  flushQueues = ->
+    queue = []
+    queued_hashes = []
+    logger.info 'Successfully deleted queues'
 
-  if id is 'cache' then mc.flush(flushCB) && flushQueues()
+  if id is 'cache'
+    mc.flush(flushCB)
+    flushQueues()
   else if id is 's3'
     deleteCB = (err, resp) ->
       return handleError err, res, 's3.deleteMultiple' if err
       logger.info 'Successfully deleted s3 files!'
-      mc.flush(flushCB) && flushQueues() && resp.resume()
+      mc.flush(flushCB)
+      flushQueues()
+      resp.resume()
 
     onerr = do (res) -> (err) -> handleError err, res, 'getS3List'
     pipe = es.mapSync (s3List) ->
