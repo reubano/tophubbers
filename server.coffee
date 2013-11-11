@@ -141,6 +141,7 @@ handleError = (err, res, src, code=500, error=true) ->
 
 handleSuccess = (res, message, code=200) ->
   logger.info message
+  return logger.error 'handleSuccess headers already sent' if res.headersSent
   res.send code, message
 
 getS3List = (onerr, pipe) ->
