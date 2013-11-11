@@ -145,9 +145,15 @@ module.exports = class GraphView extends View
         @pubRender data.attr
       else utils.log "selection #{parent} doesn't exist", 'error'
     else
-      progress = res.getResponseHeader 'Location'
-      console.log "trying to get progress: #{progress}"
-      $.get(progress).done(@gvSuccess).fail(@gvFailWhale)
+      loc = res.getResponseHeader 'Location'
+      splits = loc.split('/')
+
+      if 'progress' in splits
+        utils.log "trying to get progress: #{loc}", false
+        $.get(loc).done(@gvSuccess).fail(@gvFailWhale)
+      else
+        utils.log "trying to post render: #{splits[1]}", false
+        $.post(config.api_render, splits[1]).done(@gvSuccess).fail(@gvFailWhale)
 
   gvFailWhale: (res, textStatus, err) =>
     if res.status is 503
