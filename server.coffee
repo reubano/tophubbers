@@ -61,25 +61,25 @@ logger = new winston.Logger {transports: transports}
 
 # Set variables
 encoding = {encoding: 'utf-8'}
-debug_s3 = false
+debug_s3 = true
 debug_mongo = true
 debug_memcache = true
-debug_toobusy = false
+debug_toobusy = true
 days = 2
 maxCacheAge = days * 24 * 60 * 60 * 1000
 api_expires = 15 * 60 # 15 min (in seconds) work_data
 rep_expires = 60 * 60  # 1 hour (in seconds)
 s3_expires = 15 * 24 * 60 * 60 # 15 days (in seconds)
-s3List_expires = 5 * 60  # 5 minutes (in seconds)
+s3List_expires = 30 * 60  # 30 minutes (in seconds)
 fs_expires = 24 * 60 * 60  # 1 day (in seconds)
 ph_start_expires = 10 * 60  # 10 minutes (in seconds)
 wait_expires = 10 * 60  # 10 minutes (in seconds)
 rq_timeout = 20 * 1000 # request timeout (in milliseconds)
 sv_timeout = 25 * 1000 # server timeout (in milliseconds)
-ph_timeout = 4 * 1000 # phantomjs rendering timeout (in milliseconds)
-wait_timeout = ph_timeout * 12 # timeout to start rendering from queue (in milliseconds)
-retry_after = 3 * 1000 # phantomjs wait time between checking progress (in milliseconds)
+ph_timeout = 120 * 1000 # phantomjs rendering timeout (in milliseconds)
+wait_timeout = 5 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
 ph_retry_after = 45 * 1000 # phantomjs wait time between requests (in milliseconds)
+sv_retry_after = 10 * 1000 # toobusy wait time between requests (in milliseconds)
 selector = Common.getSelection()
 datafile = path.join 'public', 'uploads', 'data.json'
 port = process.env.PORT or 3333
@@ -87,6 +87,12 @@ active = false
 graph = false
 queue = []
 queued_hashes = []
+
+handleError = (err, res, src, code=500, error=true) ->
+  logFun = if error then logger.error else logger.warn
+  logFun "#{src} #{err.message}"
+  return logger.error "#{src} headers already sent" if res.headersSent
+  res.send code, {error: err.message}
 
 # middleware
 # pipe web server logs through winston
@@ -97,13 +103,12 @@ app.use express.compress()
 app.use express.timeout sv_timeout
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
 app.use (req, res, next) ->
-  if not toobusy() then next()
-  else
-    logger.warn 'server too busy'
-    return next() if config.dev and not debug_toobusy
-    res.set 'Retry-After', retry_after
-    res.location req.url
-    res.send 503, "I'm busy right now. Try again later." # find right response code
+  return next() if not toobusy() or (config.dev and not debug_toobusy)
+  res.setHeader 'Retry-After', sv_retry_after
+  if 'progress' in req.url.split('/') then res.location req.url
+  else res.location "attr=#{req.body.attr}&hash=#{req.body.hash}&id=#{req.body.id}"
+  err = {message: "server too busy. try again later."}
+  handleError err, res, 'app', 503, false
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -134,11 +139,6 @@ delKey = (key) ->
   mc.delete key, (err, success) ->
     logger.error "#{err.message} deleting #{key}" if err
     logger.info "successfully deleted #{key}!" if success
-
-handleError = (err, res, src, code=500, error=true) ->
-  logFun = if error then logger.error else logger.warn
-  logFun "#{src} #{err.message}"
-  res.send code, {error: err.message}
 
 handleSuccess = (res, message, code=200) ->
   logger.info message
@@ -233,17 +233,29 @@ getProgress = (req, res) ->
 
   handleExists = (exists, cached, opts) ->
   # http://big-elephants.com/2012-12/pdf-rendering-with-phantomjs
+    setRes = (opts) ->
+      delKey "#{opts.hash}:#{opts.id}:#{opts.attr}"
+      opts.res.location "hash=#{opts.hash}&id=#{opts.id}&attr=#{opts.attr}"
+      opts.res.setHeader 'Retry-After', sv_retry_after
+
     if exists
       value = {hash: opts.hash, id: opts.id, attr: opts.attr}
       handleSuccess opts.res, value
     else if (opts.hash not in queued_hashes)
+      setRes opts
       m = "#{opts.filename} doesn't exist in #{opts.src} and not enqueued"
       handleError {message: m}, opts.res, 'handleExists', 503
     else if (config.dev and not debug_memcache)
-      err = {message: "#{opts.filename} doesn't exist in #{opts.src} and memcache not enabled"}
-      handleError err, opts.res, 'handleExists', 404
-    else do (opts) -> mc.get "#{opts.hash}:start_ph", (err, buffer) ->
-      handleStart err, buffer, opts
+      m = "#{opts.filename} doesn't exist in #{opts.src} and memcache not enabled"
+      handleError {message: m}, opts.res, 'handleExists', 404
+    else if queue.length or active
+      do (opts) -> mc.get "#{opts.hash}:start_ph", (err, buffer) ->
+        handleStart err, buffer, opts
+    else
+      setRes opts
+      m = "#{opts.filename} enqueued but wasn't uploaded"
+      queued_hashes = []
+      handleError {message: m}, opts.res, 'handleExists', 503
 
   opts =
     res: res
@@ -269,6 +281,7 @@ getUploads = (req, res) ->
     if res.headersSent then logger.error 'handleResp headers already sent'
     else if err then handleError err, res, 'handleResp'
     else if resp.statusCode isnt 200
+      # delKey 's3List' if resp.statusCode is 404
       err = {message: "statusCode is #{resp.statusCode}"}
       handleError err, res, 'handleResp', 404
     else
@@ -485,9 +498,11 @@ processPage = (page, ph, reps) ->
 
           do (opts) -> reps.findOne {hash: opts.hash}, {raw: false}, (err, raw) ->
             # figure out how to parse raw buffer
-            if err or not raw
-              err = err ? {message: "#{opts.hash} has null entry"}
-              handleError err, opts.res, 'handleRender: mongodb'
+            if err then handleError err, opts.res, 'handleRender: mongodb'
+            else if not raw
+              err = {message: "#{opts.hash} has null db entry. Try again later"}
+              opts.res.location "hash=#{opts.hash}&id=#{opts.id}&attr=#{opts.attr}"
+              handleError err, opts.res, 'handleRender: mongodb', 503, false
             else
               data = JSON.stringify raw
               streamifier.createReadStream(data, encoding)
