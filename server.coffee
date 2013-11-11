@@ -107,10 +107,10 @@ app.use (req, res, next) ->
 # CORS support
 configCORS = (req, res, next) ->
   # logger.info "Configuring CORS"
-  if not req.get('Origin') then return next()
-  res.set 'Access-Control-Allow-Origin', '*'
-  res.set 'Access-Control-Allow-Methods', 'GET, POST'
-  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
+  if not req.get 'Origin' then return next()
+  res.setHeader 'Access-Control-Allow-Origin', '*'
+  res.setHeader 'Access-Control-Allow-Methods', 'GET, POST'
+  res.setHeader 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
   if 'OPTIONS' is req.method then return res.send 200
   next()
 
@@ -260,7 +260,7 @@ getProgress = (req, res) ->
 
 getUploads = (req, res) ->
   return logger.warn 'getUploads headers already sent' if res.headersSent
-  res.set 'Cache-Control', 'public, max-age=60'
+  res.setHeader 'Cache-Control', 'public, max-age=60'
 
   handleResp = (err, resp, hash, res) ->
     resp.resume() if (err or resp.statusCode isnt 200 or res.headersSent) and resp
@@ -273,8 +273,8 @@ getUploads = (req, res) ->
     else
       res.set 'Content-Length', resp.headers['content-length']
       res.set 'Content-Type', resp.headers['content-type']
-      # res.set 'Last-Modified', ...
-      res.set 'ETag', hash
+      # res.setHeader 'Last-Modified', ...
+      res.setHeader 'ETag', hash
       return res.send 304 if req.fresh
       return res.send 200 if req.method is 'HEAD'
       logger.info "#{filename} exists on s3! Streaming to page."
