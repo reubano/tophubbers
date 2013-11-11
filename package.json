@@ -2,7 +2,7 @@
   "author": "Reuben Cummings",
   "name": "ongeza",
   "description": "Ongeza Reporting App",
-  "version": "1.1.0",
+  "version": "1.5.0",
   "homepage": "",
   "engines": {
     "node": "0.10.x",
@@ -37,6 +37,14 @@
     "knox": "0.8.x",
     "nodetime": "0.8.x",
     "winston-papertrail": "0.1.x",
+    "toobusy": "0.2.x",
+    "through": "2.x",
+    "pngquant": "0.0.x",
+    "concat-stream": "1.x",
+    "streamifier": "0.0.x",
+    "s3-lister": "0.1.x",
+    "JSONStream": "0.7.x",
+    "event-stream": "3.x",
     "memjs": "0.7.x",
     "blueimp-md5": "1.x"
   },

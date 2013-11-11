@@ -3,10 +3,10 @@ Model = require 'models/user'
 utils = require 'lib/utils'
 
 module.exports = class Users extends Collection
-	model: Model
-	url: 'users'
-	local: true
+  model: Model
+  url: 'users'
+  local: true
 
-	initialize: =>
-		super
-		utils.log 'initialize users collection'
+  initialize: =>
+    super
+    utils.log 'initialize users collection'

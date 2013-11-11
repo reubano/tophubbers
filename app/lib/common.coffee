@@ -1,41 +1,43 @@
 _ = _ ? require 'underscore'
 
 Common =
-	getParent: (options) ->
-		attr = options?.attr ? 'attr'
-		id = options?.id ? 'id'
-		chart_class = 'chart-' + attr[..2]
-		"##{id}.view .#{chart_class}"
+  getParent: (options) ->
+    attr = options?.attr ? 'attr'
+    id = options?.id ? 'id'
+    chart_class = 'chart-' + attr[..2]
+    "##{id}.view .#{chart_class}"
 
-	getSelection: (options) -> @getParent(options) + ' svg'
-	getChartData: (attr, d, id) ->
-		if not d then return console.log "no #{attr} found for #{id}"
-		console.log "#{id}: generating #{attr} chart data..."
+  getSelection: (options) -> @getParent(options) + ' svg'
+  getChartData: (attr, d, id) ->
+    if not d then return console.log "no #{attr} found for #{id}"
+    console.log "#{id}: generating #{attr} chart data..."
 
-		if d.rows
-			endRows = (label: obj.date, value: obj.start for obj in d.rows)
-			durRows = (label: obj.date, value: obj.duration for obj in d.rows)
-		else
-			endRows = []
-			durRows = []
+    endRows = []
+    durRows = []
 
-		if d.missing
-			endMiss = (label: obj, value: 0 for obj in d.missing)
-			durMiss = (label: obj, value: 0 for obj in d.missing)
-		else
-			endMiss = []
-			durMiss = []
+    for obj in d.rows
+      end_val = parseFloat obj.start.toFixed(3)
+      dur_val = parseFloat obj.duration.toFixed(3)
+      endRows.push {label: obj.date, value: end_val}
+      durRows.push {label: obj.date, value: dur_val}
 
-		endValues = endRows.concat endMiss
-		durValues = durRows.concat durMiss
+    if d.missing
+      endMiss = (label: obj, value: 0 for obj in d.missing)
+      durMiss = (label: obj, value: 0 for obj in d.missing)
+    else
+      endMiss = []
+      durMiss = []
 
-		endValues = _.sortBy endValues, 'label'
-		durValues = _.sortBy durValues, 'label'
+    endValues = endRows.concat endMiss
+    durValues = durRows.concat durMiss
 
-		data = [
-			{key: 'End', values: endValues},
-			{key: 'Duration', values: durValues}]
+    endValues = _.sortBy endValues, 'label'
+    durValues = _.sortBy durValues, 'label'
 
-		JSON.stringify data
+    data = [
+      {key: 'End', values: endValues},
+      {key: 'Duration', values: durValues}]
+
+    JSON.stringify data
 
 module.exports = Common

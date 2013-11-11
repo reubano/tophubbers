@@ -1,7 +1,4 @@
 # Usage: coffee server.coffee
-# TODO: implement toobusy
-# TODO: minify pngs (PNGCrush/OptiPNG -> PNGOUT/pngquant)
-# TODO: implement s3 and request timeouts
 # TODO: add node cluster
 # TODO: migrate to EU region
 # TODO: setup nodetime
@@ -17,12 +14,19 @@ if process.env.NODETIME_ACCOUNT_KEY
 express = require 'express'
 phantom = require 'phantom'
 winston = require 'winston'
+through = require 'through'
 knox = require 'knox'
 mongo = require('mongodb').MongoClient
 memjs = require 'memjs'
 papertrail = require('winston-papertrail').Papertrail
+toobusy = require 'toobusy'
+toobusy.maxLag(100)
 request = require 'request'
+streamifier = require 'streamifier'
+JSONStream = require 'JSONStream'
+pngquant = require 'pngquant'
 md5 = require('blueimp-md5').md5
+es = require 'event-stream'
 _ = require 'underscore'
 
 # Internal dependencies
@@ -35,6 +39,7 @@ makeChart = require './app/lib/makechart.coffee'
 config = require './app/config.coffee'
 
 # Set clients
+transports = []
 app = express()
 mc = memjs.Client.create()
 s3 = knox.createClient
@@ -43,33 +48,51 @@ s3 = knox.createClient
   bucket: process.env.S3_BUCKET_NAME or 'ongeza'
   region: 'eu-west-1'
 
-if config.dev then logger = new winston.Logger
-  transports: [
-    new winston.transports.Console {colorize: true},
-    new winston.transports.File {filename: 'server.log', maxsize: 2097152}]
+if config.dev
+  transports.push new winston.transports.Console {colorize: true}
+  options = {filename: 'server.log', maxsize: 2097152}
+  transports.push new winston.transports.File options
 else
-  pt = new papertrail
-    handleExceptions: true, host: 'logs.papertrailapp.com', port: 55976,
-    colorize: true
-  logger = new winston.Logger {transports: [pt]}
+  host = 'logs.papertrailapp.com'
+  options = {handleExceptions: true, host: host, port: 55976, colorize: true}
+  transports.push new papertrail options
+
+logger = new winston.Logger {transports: transports}
 
 # Set variables
-debug_s3 = false
+encoding = {encoding: 'utf-8'}
+debug_s3 = true
 debug_mongo = true
 debug_memcache = true
-uploads = 'uploads'
+debug_toobusy = true
 days = 2
 maxCacheAge = days * 24 * 60 * 60 * 1000
-api_expires = 60 * 15  # 15 min (in seconds)
+api_expires = 15 * 60 # 15 min (in seconds) work_data
 rep_expires = 60 * 60  # 1 hour (in seconds)
-s3_expires = 60 * 60 * 24 * 15  # 15 days (in seconds)
-fs_expires = 60 * 60 * 24  # 1 day (in seconds)
+s3_expires = 15 * 24 * 60 * 60 # 15 days (in seconds)
+s3List_expires = 30 * 60  # 30 minutes (in seconds)
+fs_expires = 24 * 60 * 60  # 1 day (in seconds)
+ph_start_expires = 10 * 60  # 10 minutes (in seconds)
+wait_expires = 10 * 60  # 10 minutes (in seconds)
+rq_timeout = 20 * 1000 # request timeout (in milliseconds)
+sv_timeout = 25 * 1000 # server timeout (in milliseconds)
+ph_timeout = 120 * 1000 # phantomjs rendering timeout (in milliseconds)
+wait_timeout = 5 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
+ph_retry_after = 45 * 1000 # phantomjs wait time between requests (in milliseconds)
+sv_retry_after = 10 * 1000 # toobusy wait time between requests (in milliseconds)
 selector = Common.getSelection()
-port = process.env.PORT or config.port
-datafile = path.join 'public', uploads, 'data.json'
+datafile = path.join 'public', 'uploads', 'data.json'
+port = process.env.PORT or 3333
 active = false
+graph = false
 queue = []
-queued_files = []
+queued_hashes = []
+
+handleError = (err, res, src, code=500, error=true) ->
+  logFun = if error then logger.error else logger.warn
+  logFun "#{src} #{err.message}"
+  return logger.error "#{src} headers already sent" if res.headersSent
+  res.send code, {error: err.message}
 
 # middleware
 # pipe web server logs through winston
@@ -77,46 +100,71 @@ winstonStream = {write: (message, encoding) -> logger.info message}
 app.use express.logger {stream: winstonStream}
 app.use express.bodyParser()
 app.use express.compress()
+app.use express.timeout sv_timeout
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
+app.use (req, res, next) ->
+  return next() if not toobusy() or (config.dev and not debug_toobusy)
+  res.setHeader 'Retry-After', sv_retry_after
+  if 'progress' in req.url.split('/') then res.location req.url
+  else res.location "attr=#{req.body.attr}&hash=#{req.body.hash}&id=#{req.body.id}"
+  err = {message: "server too busy. try again later."}
+  handleError err, res, 'app', 503, false
 
 # CORS support
 configCORS = (req, res, next) ->
-  logger.info "Configuring CORS"
-  if not req.get('Origin') then return next()
-  res.set 'Access-Control-Allow-Origin', '*'
-  res.set 'Access-Control-Allow-Methods', 'GET, POST'
-  res.set 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
+  # logger.info "Configuring CORS"
+  if not req.get 'Origin' then return next()
+  res.setHeader 'Access-Control-Allow-Origin', '*'
+  res.setHeader 'Access-Control-Allow-Methods', 'GET, POST'
+  res.setHeader 'Access-Control-Allow-Headers', 'X-Requested-With, Content-Type'
   if 'OPTIONS' is req.method then return res.send 200
   next()
 
 # pushState hack
 configPush = (req, res, next) ->
-  if uploads in req.url.split('/') then return next()
+  if 'api' in req.url.split('/') then return next()
   newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
   res.redirect newUrl
 
-# utility functions
-cb = (err, success, type='create') ->
-  logger.error "for #{type} cache key #{err.message}" if err
-  logger.info "successfully #{type}d cache key!" if success
+setKey = (key, value, expires) ->
+  # logger.info "setting #{key}..."
+  cb = (err, success) ->
+    logger.error "#{err.message} setting #{key}" if err
+    logger.info "successfully set #{key}!" if success
 
-getS3List = (callback) ->
+  mc.set key, value, cb, expires
+
+delKey = (key) ->
+  # logger.info "deleting #{key}..."
+  mc.delete key, (err, success) ->
+    logger.error "#{err.message} deleting #{key}" if err
+    logger.info "successfully deleted #{key}!" if success
+
+handleSuccess = (res, message, code=200) ->
+  logger.info message
+  return logger.error 'handleSuccess headers already sent' if res.headersSent
+  res.send code, message
+
+getS3List = (onerr, pipe) ->
   mc.get 's3List', (err, buffer) ->
-    logger.error "getS3List get s3list #{err.message}" if err
+    return onerr err if err
+
     if (config.dev and not debug_memcache) or not buffer
-      s3.list {}, (err, data) ->
-        if err then callback err, false
-        else
-          s3List = _.pluck data.Contents, 'Key'
-          callback false, s3List
-          logger.info "setting s3List for getS3List"
-          mc.set 's3List', JSON.stringify(s3List), cb, 60
+      logger.info "s3List doesn't exist in cache"
+      s3.list (err, data) ->
+        return onerr err if err
+        s3List = JSON.stringify(file.Key for file in data.Contents)
+        setKey 's3List', s3List, s3List_expires
+        streamifier.createReadStream(s3List, encoding)
+          .on('error', onerr).pipe(pipe)
     else
       logger.info "s3List found in cache"
-      callback false, JSON.parse buffer.toString()
+      stream = streamifier.createReadStream buffer
+      convert = es.map (buffer, callback) -> callback null, buffer.toString()
+      stream.pipe(convert).on('error', onerr).pipe(pipe)
 
 fileExists = (filename, callback) ->
-  filepath = path.join 'public', uploads, filename
+  filepath = path.join 'public', 'uploads', filename
   mc.get "local:#{filename}", (err, cached) ->
     logger.error "fileExists get local:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
@@ -131,337 +179,434 @@ s3Exists = (filename, callback) ->
     logger.error "s3Exists get s3:#{filename} #{err.message}" if err
     if (config.dev and not debug_memcache) or not cached
       logger.info "Checking s3 for #{filename}..."
-      do (callback) -> getS3List (err, s3Files) ->
-        if err
-          logger.error 'getS3List ' + err.message
-          callback false, false
-        else if filename in s3Files then callback true, false
+
+      onerr = (err) ->
+        logger.error 'getS3List ' + err.message
+        callback false, false
+      pipe = es.mapSync (s3List) ->
+        s3List = JSON.parse s3List
+        if filename in s3List then callback true, false
         else callback false, false
+
+      getS3List onerr, pipe
     else
       logger.info "#{filename} found in cache"
       callback true, true
 
 # routing functions
-handleGet = (req, res) ->
-  return logger.warn 'handleGet headers already sent' if res.headerSent
-  res.set 'Cache-Control', 'public, max-age=60'
+getProgress = (req, res) ->
+  handleTimeout = (timeout, opts, wait_time, render_time) ->
+    if not timeout then do (opts, wait_time, render_time) ->
+      mc.get "#{opts.hash}:#{opts.id}:#{opts.attr}", (err, buffer) ->
+        if err
+          handleError err, opts.res, 'handleTimeout', 504
+        else if not buffer
+          err = {message: "#{opts.hash}:#{opts.id}:#{opts.attr} doesn't exist in memcache"}
+          handleError err, opts.res, 'handleTimeout', 404
+        else
+          opts.res.location buffer.toString()
+          opts.res.setHeader 'Retry-After', ph_retry_after
+          if wait_time then m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
+          else if render_time then m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
+          else m = "#{opts.hash} render just started, try again later"
+          handleError {message: m}, opts.res, 'handleTimeout', 503, false
+    else
+      logger.info "wait time: #{wait_time}ms"
+      logger.info "render time: #{render_time}ms"
+      err = {message: "Phantomjs render timed out on #{opts.filename}"}
+      handleError err, opts.res, 'handleTimeout', 504
 
-  handleResp = (err, resp, id, res) ->
-    if err
-      logger.error 'handleResp ' + err.message
-      res.send 500, {error: err.message}
+  handleStart = (err, buffer, opts) ->
+    logger.error "handleStart get start_ph #{err.message}" if err
+    now = (new Date()).getTime()
+
+    if not buffer then do (opts) ->
+      mc.get "#{opts.hash}:wait_ph", (err, buffer) ->
+        logger.error "getProgress get wait_ph #{err.message}" if err
+        if not buffer then setKey "#{opts.hash}:wait_ph", now, wait_expires
+        else waiting = now - parseInt buffer.toString()
+        wait_time = waiting ? 0
+        handleTimeout wait_time > wait_timeout, opts, wait_time, 0
+    else
+      render_time = now - parseInt buffer.toString()
+      handleTimeout render_time > ph_timeout, opts, 0, render_time
+
+  handleExists = (exists, cached, opts) ->
+  # http://big-elephants.com/2012-12/pdf-rendering-with-phantomjs
+    setRes = (opts) ->
+      delKey "#{opts.hash}:#{opts.id}:#{opts.attr}"
+      opts.res.location "hash=#{opts.hash}&id=#{opts.id}&attr=#{opts.attr}"
+      opts.res.setHeader 'Retry-After', sv_retry_after
+
+    if exists
+      value = {hash: opts.hash, id: opts.id, attr: opts.attr}
+      handleSuccess opts.res, value
+    else if (opts.hash not in queued_hashes)
+      setRes opts
+      m = "#{opts.filename} doesn't exist in #{opts.src} and not enqueued"
+      handleError {message: m}, opts.res, 'handleExists', 503
+    else if (config.dev and not debug_memcache)
+      m = "#{opts.filename} doesn't exist in #{opts.src} and memcache not enabled"
+      handleError {message: m}, opts.res, 'handleExists', 404
+    else if queue.length or active
+      do (opts) -> mc.get "#{opts.hash}:start_ph", (err, buffer) ->
+        handleStart err, buffer, opts
+    else
+      setRes opts
+      m = "#{opts.filename} enqueued but wasn't uploaded"
+      queued_hashes = []
+      handleError {message: m}, opts.res, 'handleExists', 503
+
+  opts =
+    res: res
+    hash: req.params.hash
+    filename: "#{req.params.hash}.png"
+    attr: req.params.attr
+    id: req.params.id
+
+  do (opts) -> if config.dev and not debug_s3
+    opts.src = 'filesystem'
+    fileExists opts.filename, (exists, cached) -> handleExists exists, cached, opts
+  else
+    opts.src = 's3'
+    s3Exists opts.filename, (exists, cached) -> handleExists exists, cached, opts
+
+getUploads = (req, res) ->
+  return logger.warn 'getUploads headers already sent' if res.headersSent
+  res.setHeader 'Cache-Control', 'public, max-age=60'
+
+  handleResp = (err, resp, hash, res) ->
+    resp.resume() if (err or resp.statusCode isnt 200 or res.headersSent) and resp
+
+    if res.headersSent then logger.error 'handleResp headers already sent'
+    else if err then handleError err, res, 'handleResp'
     else if resp.statusCode isnt 200
-      logger.error "Image #{id}.png doesn't exist at s3."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist at s3."
+      # delKey 's3List' if resp.statusCode is 404
+      err = {message: "statusCode is #{resp.statusCode}"}
+      handleError err, res, 'handleResp', 404
     else
       res.set 'Content-Length', resp.headers['content-length']
       res.set 'Content-Type', resp.headers['content-type']
-      # res.set 'Last-Modified', ...
-      res.set 'ETag', id
+      # res.setHeader 'Last-Modified', ...
+      res.setHeader 'ETag', hash
       return res.send 304 if req.fresh
       return res.send 200 if req.method is 'HEAD'
-      logger.info "Image #{id}.png exists on s3! Streaming to page."
+      logger.info "#{filename} exists on s3! Streaming to page."
       resp.pipe(res)
 
-  sendfile = (exists, filepath, id, res) ->
-    if exists
-      logger.info "Image #{id}.png exists on file! Serving to page."
-      res.sendfile filepath
-    else
-      logger.error "Image #{id}.png doesn't exist on file."
-      res.send 404, "Sorry! Image #{id}.png doesn't exist on file."
+  sendfile = (filepath, res) ->
+    res.setHeader 'Content-Type', 'image/png'
+    do (res) -> fs.createReadStream(filepath)
+      .on('error', (err) -> handleError err, res, 'sendfile', 404).pipe(res)
 
-  id = req.params.id
-  filename = "#{id}.png"
+  hash = req.params.hash
+  filename = "#{hash}.png"
 
   if config.dev and not debug_s3
-    filepath = path.join 'public', uploads, filename
-    do (filepath, id, res) ->
-      fs.exists filepath, (exists) -> sendfile exists, filepath, id, res
-  else
-    do (id, res) ->
-      s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, id, res
+    filepath = path.join 'public', 'uploads', filename
+    sendfile filepath, res
+  else do (hash, res) ->
+    s3.getFile "/#{filename}", (err, resp) -> handleResp err, resp, hash, res
 
 handleFlush = (req, res) ->
   id = req.body.id
-  flushCB = (err, success, res) ->
-    if err
-      logger.error "Flush #{err.message}"
-      res.send 500, {error: err.message}
-    if success
-      logger.info 'Flush complete!'
-      res.send 200, 'Flush complete!' # not sure why 204 doesn't work
+  flushCB = do (res) -> (err, success) ->
+    if err then handleError err, res, 'Flush'
+    if success then handleSuccess res, 'Flush complete!' # why 204 doesn't work?
 
-  deleteCB = (err, resp, res) ->
-    if err
-      logger.error "s3.deleteMultiple #{err.message}"
-      res.send 500, {error: err.message}
-    else
-      logger.info 'Successfully deleted s3 files!'
-      queued_files = []
-      mc.delete 's3List', (err, success) -> cb err, success, 'delete'
-      do (res) -> mc.flush (err, success) -> flushCB err, success, res
-      resp.resume() if not err
-
-  getCB = (err, files, res) ->
-    if err
-      logger.error 'getCB ' + err.message
-      res.send 500, {error: err.message}
-    else do (res) ->
-      s3.deleteMultiple files, (err, resp) -> deleteCB err, resp, res
+  # won't work for multi-server environments
+  flushQueues = ->
+    queue = []
+    queued_hashes = []
+    logger.info 'Successfully deleted queues'
 
   if id is 'cache'
-    # won't work for multi-server environments
-    do (res) -> mc.flush (err, success) -> flushCB err, success, res
+    mc.flush(flushCB)
+    flushQueues()
   else if id is 's3'
-    do (res) -> s3.list {}, (err, data) ->
-      if err
-        logger.error "s3.list #{err.message}"
-        res.send 500, {error: err.message}
-      else do (res) -> getS3List (err, s3Files) -> getCB err, s3Files, res
+    deleteCB = (err, resp) ->
+      return handleError err, res, 's3.deleteMultiple' if err
+      logger.info 'Successfully deleted s3 files!'
+      mc.flush(flushCB)
+      flushQueues()
+      resp.resume()
+
+    onerr = do (res) -> (err) -> handleError err, res, 'getS3List'
+    pipe = es.mapSync (s3List) ->
+      s3List = JSON.parse s3List
+      s3.deleteMultiple s3List, deleteCB
+    getS3List onerr, pipe
   else res.send 404, 'command not supported'
 
-getStatus = (req, res) ->
-  mc.stats (err, server, status) ->
-    if err
-      logger.error "Status #{err.message}"
-      res.send 500, {error: err.message}
-    else if server and status
-      logger.info 'Got memcache status!'
-      res.send 200, {server: server, status: status}
+getStatus = (req, res) -> mc.stats (err, server, status) ->
+  if err then handleError err, res, 'Status'
+  else if server and status
+    handleSuccess res, {server: server, status: status}
+  else handleError {message: "#{server} status is #{status}"}, res, 'Status'
 
-getList = (req, res) ->
-  getS3List (err, s3Files) ->
-    if err
-      logger.error 'getS3List ' + err.message
-      res.send 500, {error: err.message}
-    else
-      logger.info 'Got memcache status!'
-      res.send 200, {files: s3Files}
+handleList = (req, res) ->
+  onerr = (err) -> handleError err, res, 'getS3List'
+  getS3List onerr, res
 
 # phantomjs
 processPage = (page, ph, reps) ->
   logger.info 'Processing phantom page'
 
-  handleUpload = (req, res) ->
-    # return logger.warn 'handleUpload headers already sent' if res.headerSent
-
-    sendRes = (opts, type='cached') ->
-      logger.info "Sending image hash for #{opts.id} #{opts.attr}: #{opts.hash}."
-      value = {hash: opts.hash, type: type, id: opts.id, attr: opts.attr}
+  handleRender = (req, res) ->
+    sendRes = (opts) ->
+      return logger.error 'sendRes headers already sent' if opts.res.headersSent
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.key} for sendRes"
-        mc.set opts.key, JSON.stringify(value), cb, rep_expires  # individual rep data
-      opts.res.send 200, value
+        setKey "#{opts.hash}:#{opts.id}:#{opts.attr}", opts.progress, rep_expires
+      opts.res.location opts.progress
+      handleSuccess opts.res, "Check #{opts.progress}"
 
     send2fs = (opts) ->
       unless config.dev and not debug_memcache
-        logger.info "setting #{opts.prefix}:#{opts.filename}"
-        mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires
-      sendRes opts, 'new'
+        setKey "#{opts.prefix}:#{opts.filename}", true, fs_expires
 
     send2s3 = (opts) ->
-      callback = (err, opts) ->
-        if err
-          logger.error 'send2s3 ' + err.message
-          opts.res.send 500, {error: err.message}
-        else
-          unless config.dev and not debug_memcache
-            logger.info "setting #{opts.prefix}:#{opts.filename}"
-            mc.set "#{opts.prefix}:#{opts.filename}", true, cb, s3_expires
-          sendRes opts, 'new'
+      putCB = (resp, opts) ->
+        logger.info "successfully uploaded #{opts.filename}!"
+        resp.resume()
+        return if config.dev and not debug_memcache
+        setKey "#{opts.prefix}:#{opts.filename}", true, s3_expires
+        onerr = (err) -> logger.error 'getS3List ' + err.message
+        pipe = do (opts) -> es.mapSync (s3List) ->
+          s3List = JSON.parse s3List
+          s3List.push opts.filename
+          setKey 's3List', JSON.stringify(s3List), s3List_expires
 
-      logger.info "Sending #{opts.filename} to s3..."
-      hdr = {'x-amz-acl': 'public-read'}
+        getS3List onerr, pipe
 
-      do (opts) ->
-        s3.putFile opts.filepath, "/#{opts.filename}", hdr, (err, resp) ->
-          callback err, opts
-          resp.resume() if not err
+      do (opts) -> fs.stat opts.filepath, (err, stat) ->
+        return handleError err, opts.res, 'send2s3' if err
+
+        hdr =
+          'x-amz-acl': 'public-read'
+          'Content-Length': stat.size
+          'Content-Type': 'image/png'
+
+        req = s3.put "/#{opts.filename}", hdr
+
+        do (opts) -> fs.createReadStream(opts.filepath)
+          .on('error', (err) -> handleError err, opts.res, 'read')
+          .pipe(req).on('error', (err) -> handleError err, opts.res, 'req')
+
+        logger.info "uploading #{opts.filename} to s3..."
+        do (opts) -> req.on 'response', (resp) -> putCB resp, opts
 
     renderPage = ->
       active = true
       graph = queue[0]
       queue.splice(0, 1)
+      logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
+      graph.generate graph.opts
 
-      _render = (graph) ->
-        logger.info "pulling #{graph.opts.filename} from queue: #{queue.length}"
-        graph.generate graph.callback, graph.opts, queue.length
+    addGraph = (opts) ->
+      logger.info "starting addGraph for #{opts.filename}"
+      func = (opts) ->
+        tmpFilepath = path.join 'public', 'uploads', "#{opts.hash}_tmp.png"
 
-      if graph.isDupe
-        opts = graph.opts
-        logger.info "Repeating search for #{opts.filename} before rendering..."
-        do (graph) -> opts.existsFunc opts.filename, (exists, cached) ->
-          sendRes(graph.opts) and active = queue.length if exists
-          renderPage() if exists and queue.length
-          _render graph if not exists
-      else _render graph
+        renderCB = (opts) ->
+          do (opts) -> fs.createReadStream(tmpFilepath)
+            .on('error', (err) -> handleError err, opts.res, 'read')
+            .pipe(new pngquant [4, '--ordered'])
+            .on('error', (err) -> handleError err, opts.res, 'quantizer')
+            .pipe(fs.createWriteStream opts.filepath)
+            .on('error', (err) -> handleError err, opts.res, 'write')
+            .on('finish', -> opts.sendFunc opts)
 
-    addGraph = (callback, opts) ->
-      func = (callback, opts, repeat=false) ->
-        do (opts) ->
-          evalCB = (result) ->
-            logger.info "pre rendering #{opts.filename}"
-            opts.page.render opts.filepath, ->
-              # logger.info "post rendering #{opts.filename}"
-              callback opts
-              if repeat then renderPage() else active = false
-          opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
+          if queue.length then renderPage() else active = false
 
-      dupe = opts.filename in queued_files
-      queue.push {generate: func, callback: callback, opts: opts, isDupe: dupe}
-      queued_files.push opts.filename
-      logger.info "adding #{opts.filename} to queue: #{queue.length}"
-      renderPage() if not active
+        evalCB = do (opts) -> (result) ->
+          logger.info "rendering #{opts.filename}"
+          setKey "#{opts.hash}:start_ph", (new Date()).getTime(), ph_start_expires
+          do (opts) -> opts.page.render tmpFilepath, -> renderCB opts
 
-    readJSON = (err, raw, opts) ->
-      if err
-        logger.error 'readJSON ' + err.message
-        return opts.res.send 500, {error: err.message}
-      else if not raw
-        logger.error 'raw data is blank'
-        return opts.res.send 417, {error: 'raw data is blank'}
+        opts.page.evaluate makeChart, evalCB, opts.chart_data, selector
 
-      logger.info "parsing #{opts.id} #{opts.attr}'s json"
-
-      try
-        chart_data = JSON.parse(raw)[opts.id][opts.attr]
-      catch error
-        chart_data = raw[opts.attr]
-
-      hash = md5 JSON.stringify chart_data
-      filename = "#{hash}.png"
-      filepath = path.join 'public', uploads, filename
-
-      if config.dev and not debug_s3
-        existsFunc = fileExists
-        sendFunc = send2fs
-        prefix = 'local'
+      # look into nodejs.org/api/timers.html#timers_setimmediate_callback_arg
+      if opts.hash in queued_hashes
+        logger.info "#{opts.hash} already queued. Not adding."
       else
-        existsFunc = s3Exists
-        sendFunc = send2s3
-        prefix = 's3'
+        queue.push {generate: func, opts: opts}
+        queued_hashes.push opts.hash
+        logger.info "adding hash #{opts.hash} to queue: #{queue.length}"
+        renderPage() if not active
 
-      keys = ['chart_data', 'hash', 'filename', 'filepath', 'prefix', 'existsFunc']
-      values = [chart_data, hash, filename, filepath, prefix, existsFunc]
-      extra = _.object(keys, values)
-      _.extend opts, extra
+    hash = req.body.hash
+    id = req.body.id
+    attr = req.body.attr
+    filename = "#{hash}.png"
+    filepath = path.join 'public', 'uploads', filename
 
-      do (opts) -> existsFunc filename, (exists, cached) ->
-        if exists
-          logger.info "File #{opts.filename} exists."
-          sendRes opts
-          logger.info "setting #{opts.prefix}:#{opts.filename} for readJSON"
-          mc.set "#{opts.prefix}:#{opts.filename}", true, cb, fs_expires if not cached
-        else
-          logger.info "File #{opts.prefix}:#{opts.filename} doesn't exist in cache."
-          addGraph sendFunc, opts
+    if config.dev and not debug_s3
+      existsFunc = fileExists
+      sendFunc = send2fs
+      prefix = 'local'
+    else
+      existsFunc = s3Exists
+      sendFunc = send2s3
+      prefix = 's3'
 
-    id = req.body?.id or 'E0008'
-    attr = req.body?.attr or 'cur_work_hash'
+    if not (hash and attr and id)
+      err = {message: 'post data is missing an entry'}
+      return handleError err, res, 'handleRender'
+
+    progress = "/api/progress/#{hash}/#{id}/#{attr}"
     [w, h] = req.body?.size?.split('x').map((v) -> parseInt v) or [950, 550]
-    key = "#{id}:#{attr}"
-    keys = ['id', 'attr', 'key', 'res', 'page']
-    values = [id, attr, key, res, page]
+    keys = [
+      'hash', 'filename', 'filepath', 'attr', 'id', 'progress', 'res', 'page',
+      'w', 'h', 'prefix','existsFunc', 'sendFunc']
+    values = [
+      hash, filename, filepath, attr, id, progress, res, page, w, h, prefix,
+      existsFunc, sendFunc]
     opts = _.object(keys, values)
 
-    mc.get key, (err, buffer) ->
-      logger.error "handleUpload get #{key} #{err.message}" if err
+    do (opts) -> mc.get "#{hash}:#{id}:#{attr}", (err, buffer) ->
+      logger.error "handleRender get #{opts.hash} #{err.message}" if err
+
       if (config.dev and not debug_memcache) or not buffer
-        page.set 'viewportSize', {width: w, height: h}
+        logger.info "#{hash}:#{id}:#{attr} doesn't exist in cache"
+        opts.page.set 'viewportSize', {width: opts.w, height: opts.h}
+
+        mergeData = through (chart_data) ->
+          # logger.info 'mergeData'
+          _.extend opts, {chart_data: chart_data}
+
+          do (opts) -> opts.existsFunc opts.filename, (exists, cached) ->
+            if exists
+              logger.info "#{opts.prefix}:#{opts.filename} exists!"
+              key = "#{opts.prefix}:#{opts.filename}"
+              setKey key, true, fs_expires if not cached
+            else
+              logger.info "#{opts.prefix}:#{opts.filename} doesn't exist."
+              addGraph opts
+
+            sendRes opts
+
         if config.dev and not debug_mongo
-          logger.info "reading #{id} #{attr} data from json file"
-          do (opts) -> fs.readFile datafile, 'utf8', (err, raw) ->
-              readJSON err, raw, opts
+          logger.info "streaming #{opts.hash} data from json file"
+
+          do (opts) -> fs.createReadStream(datafile, {encoding: 'utf8'})
+            .on('error', (err) -> handleError err, opts.res, 'handleRender: fs')
+            .pipe(JSONStream.parse opts.hash)
+            .on('error', (err) -> handleError err, opts.res, 'handleRender: parse')
+            .pipe(mergeData)
         else
-          logger.info "reading #{id} #{attr} data from mongodb"
-          do (opts) -> reps.findOne {id: id}, (err, raw) ->
-              readJSON err, raw, opts
+          logger.info "streaming #{opts.hash} data from mongodb"
+
+          do (opts) -> reps.findOne {hash: opts.hash}, {raw: false}, (err, raw) ->
+            # figure out how to parse raw buffer
+            if err then handleError err, opts.res, 'handleRender: mongodb'
+            else if not raw
+              err = {message: "#{opts.hash} has null db entry. Try again later"}
+              opts.res.location "hash=#{opts.hash}&id=#{opts.id}&attr=#{opts.attr}"
+              handleError err, opts.res, 'handleRender: mongodb', 503, false
+            else
+              data = JSON.stringify raw
+              streamifier.createReadStream(data, encoding)
+                .pipe(JSONStream.parse 'data')
+                .on('error', (err) -> handleError err, opts.res, 'handleRender: parse')
+                .pipe(mergeData)
       else
-        value = JSON.parse buffer.toString()
-        logger.info "#{id} #{attr} hash found on memcache: #{value.hash}."
-        opts.res.send 201, value
+        logger.info "#{hash}:#{id}:#{attr} found in cache"
+        opts.res.location opts.progress
+        handleSuccess opts.res, "Check #{opts.progress}"
 
   handleFetch = (req, res) ->
-    return logger.warn 'handleFetch headers already sent' if res.headerSent
+    return logger.warn 'handleFetch headers already sent' if res.headersSent
     key = 'fetch'
 
-    handleSuccess = (json, res) ->
-      logger.info 'handleSuccess'
-      postWrite = (err, result=false) ->
-        if err
-          logger.error 'postWrite ' + err.message
-          res.send 500, {error: err.message}
+    handleJSONSuccess = (json, res, key) ->
+      logger.info 'handleJSONSuccess'
+      postWrite = (err, hash_list, key, result=false) ->
+        if err then handleError err, res, 'postWrite'
         else
-          logger.info 'Wrote data'
-          value = JSON.stringify hash_list
+          logger.info 'Wrote hash list'
+          value = {data: hash_list}
           unless config.dev and not debug_memcache
-            logger.info "setting #{key} for postWrite"
-            mc.set key, value, cb, api_expires  # api work_data
-          res.send 201, {data: hash_list}
+            setKey key, JSON.stringify(value), api_expires
+          res.send 201, value
 
       data_list = []
       hash_list = []
+      data_obj = {}
 
       for rep in json.data
         raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
         hashes = (md5 JSON.stringify r for r in raw)
-        data_obj = _.object config.hash_attrs, raw
         hash_obj = _.object config.hash_attrs, hashes
-        data_obj.id = hash_obj.id = rep.id
-        data_list.push data_obj
+        hash_obj.id = rep.id
         hash_list.push hash_obj
+        _.extend data_obj, _.object hashes, raw
 
-      if not data_list
-        logger.error 'data_list is blank'
-        res.send 500, {error: 'data_list is blank'}
+      keys = _.uniq _.keys data_obj
+      (data_list.push {hash: k, data: data_obj[k]} for k in keys)
+
+      do (hash_list) -> if not data_list
+        handleError {message: 'chart data is blank'}, res, 'handleJSONSuccess'
       else if config.dev and not debug_mongo
         logger.info 'writing data to json file'
-        data = JSON.stringify _.object _.pluck(data_list, 'id'), data_list
-        fs.writeFile datafile, data, postWrite
+        fs.writeFile datafile, JSON.stringify(data_obj), (err, result) ->
+          postWrite err, hash_list, key, result
       else
         logger.info 'writing data to mongodb'
         reps.remove {}, {w:1}, (err, num_removed) ->
-          if err
-            logger.error 'handleSuccess remove reps ' + err.message
-            res.send 500, {error: err.message}
-          else reps.insert data_list, {w:1}, postWrite
+          if err then handleError err, res, 'handleJSONSuccess remove reps'
+          else do (hash_list) -> reps.insert data_list, {w:1}, (err, result) ->
+            postWrite err, hash_list, key, result
 
-    mc.get key, (err, buffer) ->
+    do (key) -> mc.get key, (err, buffer) ->
       logger.error "handleFetch get #{key} #{err.message}" if err
 
       if (config.dev and not debug_memcache) or not buffer
-        do (res) -> request {url: req.body.url, json: true}, (err, resp, json) ->
-          if err
-            logger.error 'handleFetch ' + err.message
-            res.send 500, {error: err.message}
-          else if resp.statusCode is 200 then handleSuccess json, res
-          else logger.error('handleFetch') and res.send 417
+        options = {timeout: rq_timeout, url: req.body.url, json: true}
+        do (res) -> request options, (err, resp, json) ->
+          if err then handleError err, res, 'handleFetch'
+          else if resp.statusCode is 200 then handleJSONSuccess json, res, key
+          else
+            err = {message: "#{options.url} returned #{resp.statusCode}"}
+            handleError err, res, 'handleFetch', 417
       else
-        logger.info 'Hash list found! Fetching value from memcache.'
-        value = JSON.parse buffer.toString()
-        res.send 201, {data: value}
+        logger.info 'Hash list found! Streaming value from memcache.'
+        res.type 'application/json'
+        stream = streamifier.createReadStream buffer
+        convert = es.map (buffer, callback) -> callback null, buffer.toString()
+        stream.pipe(convert).pipe(res)
 
   # create server routes
   app.all '*', configCORS
   app.get '*', configPush
-  app.get "/#{uploads}/:id", handleGet
+  app.get "/api/uploads/:hash", getUploads
+  app.get "/api/progress/:hash/:id/:attr", getProgress
+  app.get "/api/stats", getStatus
   app.post "/api/flush", handleFlush
-  app.post "/api/stats", getStatus
-  app.post "/api/list", getList
+  app.post "/api/list", handleList
   app.post '/api/fetch', handleFetch
-  app.post '/api/upload', handleUpload
+  app.post '/api/render', handleRender
+
+  # timeout err handler
+  app.use (err, req, res, next) -> handleError err, res, 'app', 504
 
   # start server
-  app.listen port, ->
+  server = app.listen port, ->
+    suffix = if config.dev then "localhost:#{port}" else 'ongeza.herokuapp.com'
+    home = "http://#{suffix}"
+
     logger.info "Listening on port #{port}"
-    logger.info """
-      debug s3: #{debug_s3}
-      debug mongodb: #{debug_mongo}
-      debug memcache: #{debug_memcache}
-      Try curl #{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'
-      Then curl #{config.api_upload} -H 'Accept: */*' --data 'id=E0018&attr=cur_work_hash'
-      Then go to #{config.api_fetch[..-10]}#{uploads}/<hash>"""
+    logger.info "debug s3: #{debug_s3}"
+    logger.info "debug mongodb: #{debug_mongo}"
+    logger.info "debug memcache: #{debug_memcache}"
+    logger.info "Try curl #{home}#{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'"
+    logger.info "Then curl #{home}#{config.api_render} -H 'Accept: */*' --data 'hash=<hash>&id=E0018&attr=cur_work_hash'"
+    logger.info "Then curl #{home}/api/progress/<hash>/E0018/cur_work_hash"
+    logger.info "Then curl #{home}#{config.api_uploads}/<hash>"
+
+  process.on 'SIGINT', ->
+    server.close()
+    toobusy.shutdown()
+    process.exit()
 
 phantom.create (ph) ->
   logger.info 'Creating phantom page'
@@ -513,10 +658,14 @@ phantom.create (ph) ->
       </html>"""
 
     mongo.connect process.env.MONGOHQ_URL, (err, db) ->
-      if err
+      if err and (not config.dev or debug_mongo)
         logger.error 'mongodb ' + err.message
+        process.exit()
+      else if err and config.dev and not debug_mongo then reps = {}
       else
         logger.info 'Connected to mongodb'
-        page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
-          page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
-            processPage page, ph, db.collection 'reps'
+        reps = db.collection 'reps'
+
+      page.injectJs 'vendor/scripts/nvd3/d3.v3.js', ->
+        page.injectJs 'vendor/scripts/nvd3/nv.d3.js', ->
+          processPage page, ph, reps
