@@ -71,7 +71,7 @@ module.exports = class Google extends ServiceProvider
   loginHandler: (authResponse) =>
     utils.log 'google loginHandler'
     utils.log 'authResponse below'
-    utils.log authResponse
+    utils.log authResponse, false
 
     if authResponse and not authResponse.error
       utils.log 'google login successful!'
