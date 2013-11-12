@@ -131,7 +131,8 @@ module.exports = class SessionController extends Controller
   # ------
 
   # Handler for the global !logout event
-  triggerLogout: ->
+  triggerLogout: =>
+    utils.log 'session-controller heard !logout event'
     @publishEvent 'logout'
 
   # Handler for the global logout event
