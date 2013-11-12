@@ -1,0 +1,14 @@
+{{#if first_name}}
+<div class="row-fluid" id="{{id}}">
+	<div class="span3">
+		<a href="rep/{{id}}"><label>{{first_name}} {{last_name}} ({{id}})</label></a>
+	</div>
+
+	<div class="span9">
+		<table class="table table-striped">
+			<thead><tr>{{#each visits}}<th>{{get_day this.date}}</th>{{/each}}</tr></thead>
+			<tbody><tr>{{#each visits}}<td>{{this.count}}</td>{{/each}}</tr></tbody>
+		</table>
+	</div>
+</div>
+{{/if}}
