@@ -422,7 +422,6 @@ not found"
         user: if mediator.user? then mediator.user.get 'email' else null
 
       minilog[level] data
-    else
-      console.log message
+    else console.log message
 
 module.exports = utils

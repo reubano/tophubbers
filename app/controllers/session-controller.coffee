@@ -11,7 +11,6 @@ module.exports = class SessionController extends Controller
   collection: mediator.users
   user: mediator.user
 
-
   # Service provider instances as static properties
   # This just hardcoded here to avoid async loading of service providers.
   # In the end you might want to do this.
@@ -46,8 +45,7 @@ module.exports = class SessionController extends Controller
       utils.log 'no user in SessionController'
 
       # login unless params.login is false
-      if not params?.login? or not params.login
-        @getSession()
+      @getSession() if not params?.login? or not params.login
 
   # Load the libraries of all service providers
   loadServiceProviders: ->
@@ -81,6 +79,7 @@ module.exports = class SessionController extends Controller
   # Handler for the global !login event
   # Delegate the login to the selected service provider
   triggerLogin: (serviceProviderName) =>
+    utils.log 'session-controller heard !login event'
     utils.log 'session-controller triggerLogin'
     serviceProvider = SessionController.serviceProviders[serviceProviderName]
 
@@ -131,11 +130,13 @@ module.exports = class SessionController extends Controller
   # ------
 
   # Handler for the global !logout event
-  triggerLogout: ->
+  triggerLogout: =>
+    utils.log 'session-controller heard !logout event'
     @publishEvent 'logout'
 
   # Handler for the global logout event
   logout: =>
+    utils.log 'session-controller heard logout event'
     utils.log 'session-controller logging out'
     @loginStatusDetermined = true
     @disposeUser()
