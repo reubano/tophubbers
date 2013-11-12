@@ -121,9 +121,10 @@ module.exports = class GraphView extends View
   setSVG: (options) =>
     parent = Common.getParent options
     html = @$(parent).html()
-    bad = 'opacity: 0.000001;'
+    bad1 = 'opacity: 0.0'
+    bad2 = 'opacity: 0.1'
 
-    if html and html.indexOf(bad) < 0 and html.length > 40
+    if html and html.indexOf(bad1) < 0 and html.indexOf(bad2) < 0 and html.length > 40
       svg = html.replace(/\"/g, '\'')
       attr = options.attr + config.svg_suffix
       utils.log "setting #{options.id} #{attr}"

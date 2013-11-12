@@ -61,6 +61,7 @@ module.exports = class Controller extends Chaplin.Controller
         @getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
       else
         utils.log 'using cached ' + r.item + ' data'
+        @displayCollection()
         @setCharts 'HTTP 200', 'success', url: r.url
 
   failWhale: (res, textStatus, err) =>

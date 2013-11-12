@@ -1,7 +1,7 @@
 View = require 'views/base/view'
 template = require 'views/templates/progress'
 
-module.exports = class ProgresView extends View
+module.exports = class ProgressView extends View
   template: template
   tagName: 'li'
 

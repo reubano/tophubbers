@@ -11,7 +11,7 @@ module.exports = class GraphsController extends Controller
   collection: Chaplin.mediator.reps
 
   initialize: => utils.log 'initialize graphs-controller'
-  comparator: (model) -> model.get('id')
+  comparator: (model) -> model.get 'id'
 
   index: (params) =>
     @ignore_cache = params?.ignore_cache ? false
