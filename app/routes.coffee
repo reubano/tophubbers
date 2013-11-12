@@ -19,6 +19,10 @@ module.exports = (match) ->
   match 'progresses', 'progresses#index'
   match 'progresses/:refresh', 'progresses#index'
 
+  # Data table of reps ordered by employee num summarizing house visits
+  match 'visits', 'visits#index'
+  match 'visits/:refresh', 'visits#index'
+
   # Cumulative working month graph
   # Customer feedback score
   # Data table of progress

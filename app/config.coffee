@@ -51,7 +51,7 @@ config =
   to_chart: 'work_data'
   data_attrs: ['cur_work_data', 'prev_work_data']
   hash_attrs: ['cur_work_hash', 'prev_work_hash']
-  res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data']
+  res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data', 'visits']
   parsed_suffix: '_c'
   svg_suffix: '_svg'
   img_suffix: '_img'

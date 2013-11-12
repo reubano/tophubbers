@@ -7,6 +7,7 @@ module.exports = class Navbar extends Model
       {href: '/tocalls', title: 'Calls', desc: 'View Call List'},
       {href: '/graphs', title: 'Graphs', desc: 'View Graphs'},
       {href: '/progresses', title: 'Progress', desc: 'View Progress'},
+      {href: '/visits', title: 'Visits', desc: 'View Visits'},
     ]
 
     main:

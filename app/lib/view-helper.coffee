@@ -122,6 +122,11 @@ Handlebars.registerHelper 'fb_img_url', (fbId, type) ->
 # Other helpers
 # -----------
 
+# Convert date to day
+Handlebars.registerHelper 'get_day', (date) ->
+  day = if date[-2..-2] is '0' then date[-1..] else date[-2..]
+  new Handlebars.SafeString day
+
 # Loop n times
 Handlebars.registerHelper 'times', (n, block) ->
   accum = ''
