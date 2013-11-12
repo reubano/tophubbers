@@ -16,13 +16,9 @@ module.exports = class TocallView extends View
     # utils.log 'rendering tocall view'
     @$el.removeClass 'text-error text-success muted'
 
-    if @model.get 'called'
-      className = 'muted'
-    else if  @model.get('score') >= 100
-      className = 'text-error'
-    else
-      className = 'text-success'
-
+    if @model.get 'called' then className = 'muted'
+    else if  @model.get('score') >= 100 then className = 'text-error'
+    else className = 'text-success'
     @$el.addClass className
 
   toggle: =>

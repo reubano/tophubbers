@@ -18,7 +18,6 @@ module.exports = class ProgressesView extends CollectionView
     @subscribeEvent 'userUpdated', @render
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'visits-view caught dispatcher event'
-    # @listenTo @model,'all', @renderCheckbox
 
   render: =>
     super
