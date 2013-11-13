@@ -76,10 +76,9 @@ ph_start_expires = 10 * 60  # 10 minutes (in seconds)
 wait_expires = 10 * 60  # 10 minutes (in seconds)
 rq_timeout = 20 * 1000 # request timeout (in milliseconds)
 sv_timeout = 25 * 1000 # server timeout (in milliseconds)
-ph_timeout = 120 * 1000 # phantomjs rendering timeout (in milliseconds)
+ph_timeout = 2 * 60 * 1000 # phantomjs rendering timeout (in milliseconds)
 wait_timeout = 5 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
-ph_retry_after = 45 * 1000 # phantomjs wait time between requests (in milliseconds)
-sv_retry_after = 10 * 1000 # toobusy wait time between requests (in milliseconds)
+sv_retry_after = 5 * 1000 # toobusy wait time between requests (in milliseconds)
 selector = Common.getSelection()
 datafile = path.join 'public', 'uploads', 'data.json'
 port = process.env.PORT or 3333
@@ -205,6 +204,8 @@ getProgress = (req, res) ->
           handleError err, opts.res, 'handleTimeout', 404
         else
           opts.res.location buffer.toString()
+          # phantomjs wait time between requests (in milliseconds)
+          ph_retry_after = 10 * 1000 * if queue.length then queue.length else 1
           opts.res.setHeader 'Retry-After', ph_retry_after
           if wait_time then m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
           else if render_time then m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
