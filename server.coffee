@@ -197,8 +197,7 @@ getProgress = (req, res) ->
   handleTimeout = (timeout, opts, wait_time, render_time) ->
     if not timeout then do (opts, wait_time, render_time) ->
       mc.get "#{opts.hash}:#{opts.id}:#{opts.attr}", (err, buffer) ->
-        if err
-          handleError err, opts.res, 'handleTimeout', 504
+        if err then handleError err, opts.res, 'handleTimeout', 504
         else if not buffer
           err = {message: "#{opts.hash}:#{opts.id}:#{opts.attr} doesn't exist in memcache"}
           handleError err, opts.res, 'handleTimeout', 404
