@@ -20,7 +20,6 @@ module.exports = class Google extends ServiceProvider
   scopes = 'https://www.googleapis.com/auth/userinfo.profile ' +
     'https://www.googleapis.com/auth/userinfo.email'
   # scopes = 'https://www.googleapis.com/auth/plus.me'
-  # scopes = 'https://www.googleapis.com/auth/userinfo.email'
 
   name: 'google'
   failed: false
@@ -88,7 +87,7 @@ module.exports = class Google extends ServiceProvider
   getUserData: (callback) ->
     utils.log 'fetching google user data'
     # returns name and id (among other things) if they have google+ and
-    # scope includes 'https://www.googleapis.com/auth/plus.me'
+    # if scope includes 'https://www.googleapis.com/auth/plus.me'
 #      gapi.client.load 'plus', 'v1', ->
 #        request = gapi.client.plus.people.get {'userId': 'me'}
 #        request.execute callback
