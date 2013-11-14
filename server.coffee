@@ -76,6 +76,7 @@ ph_start_expires = 10 * 60  # 10 minutes (in seconds)
 wait_expires = 10 * 60  # 10 minutes (in seconds)
 rq_timeout = 20 * 1000 # request timeout (in milliseconds)
 sv_timeout = 25 * 1000 # server timeout (in milliseconds)
+ave_render_time = 20 # phantomjs average rendering time (in seconds)
 ph_timeout = 2 * 60 * 1000 # phantomjs rendering timeout (in milliseconds)
 wait_timeout = 5 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
 sv_retry_after = 5 * 1000 # toobusy wait time between requests (in milliseconds)
@@ -204,11 +205,21 @@ getProgress = (req, res) ->
         else
           opts.res.location buffer.toString()
           # phantomjs wait time between requests (in milliseconds)
-          ph_retry_after = 10 * 1000 * if queue.length then queue.length else 1
-          opts.res.setHeader 'Retry-After', ph_retry_after
-          if wait_time then m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
-          else if render_time then m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
-          else m = "#{opts.hash} render just started, try again later"
+          if render_time
+            m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
+            ph_retry_after = ave_render_time / 4
+          else if wait_time
+            m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
+            hash_queue = _.pluck _.pluck(queue, 'opts'), 'hash'
+            index = hash_queue.indexOf opts.hash
+            length = if queue.length then queue.length else 1
+            pos = if index < 0 then length else index + 1
+            ph_retry_after = ave_render_time * pos
+          else
+            m = "#{opts.hash} render just started, try again later"
+            ph_retry_after = ave_render_time
+
+          opts.res.setHeader 'Retry-After', ph_retry_after * 1000
           handleError {message: m}, opts.res, 'handleTimeout', 503, false
     else
       logger.info "wait time: #{wait_time}ms"
