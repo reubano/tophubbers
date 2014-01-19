@@ -76,10 +76,10 @@ ph_start_expires = 10 * 60  # 10 minutes (in seconds)
 wait_expires = 10 * 60  # 10 minutes (in seconds)
 rq_timeout = 20 * 1000 # request timeout (in milliseconds)
 sv_timeout = 25 * 1000 # server timeout (in milliseconds)
-ph_timeout = 120 * 1000 # phantomjs rendering timeout (in milliseconds)
+ave_render_time = 20 # phantomjs average rendering time (in seconds)
+ph_timeout = 2 * 60 * 1000 # phantomjs rendering timeout (in milliseconds)
 wait_timeout = 5 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
-ph_retry_after = 45 * 1000 # phantomjs wait time between requests (in milliseconds)
-sv_retry_after = 10 * 1000 # toobusy wait time between requests (in milliseconds)
+sv_retry_after = 5 * 1000 # toobusy wait time between requests (in milliseconds)
 selector = Common.getSelection()
 datafile = path.join 'public', 'uploads', 'data.json'
 port = process.env.PORT or 3333
@@ -198,17 +198,28 @@ getProgress = (req, res) ->
   handleTimeout = (timeout, opts, wait_time, render_time) ->
     if not timeout then do (opts, wait_time, render_time) ->
       mc.get "#{opts.hash}:#{opts.id}:#{opts.attr}", (err, buffer) ->
-        if err
-          handleError err, opts.res, 'handleTimeout', 504
+        if err then handleError err, opts.res, 'handleTimeout', 504
         else if not buffer
           err = {message: "#{opts.hash}:#{opts.id}:#{opts.attr} doesn't exist in memcache"}
           handleError err, opts.res, 'handleTimeout', 404
         else
           opts.res.location buffer.toString()
-          opts.res.setHeader 'Retry-After', ph_retry_after
-          if wait_time then m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
-          else if render_time then m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
-          else m = "#{opts.hash} render just started, try again later"
+          # phantomjs wait time between requests (in milliseconds)
+          if render_time
+            m = "still rendering #{opts.hash}: #{render_time}ms, try again later"
+            ph_retry_after = ave_render_time / 4
+          else if wait_time
+            m = "waiting to render #{opts.hash}: #{wait_time}ms, try again later"
+            hash_queue = _.pluck _.pluck(queue, 'opts'), 'hash'
+            index = hash_queue.indexOf opts.hash
+            length = if queue.length then queue.length else 1
+            pos = if index < 0 then length else index + 1
+            ph_retry_after = ave_render_time * pos
+          else
+            m = "#{opts.hash} render just started, try again later"
+            ph_retry_after = ave_render_time
+
+          opts.res.setHeader 'Retry-After', ph_retry_after * 1000
           handleError {message: m}, opts.res, 'handleTimeout', 503, false
     else
       logger.info "wait time: #{wait_time}ms"

@@ -48,6 +48,7 @@ module.exports = class Controller extends Chaplin.Controller
     list = list or config.res
 
     for r in @getResList(list)
+      utils.log "getting data from #{r.url}"
       @getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
   fetchExpiredData: (list=false, id=false, attrs=false) =>
@@ -57,7 +58,7 @@ module.exports = class Controller extends Chaplin.Controller
 
     for r in @getResList(list)
       if (@cacheExpired r.tstamp)
-        utils.log r.item + ' cache not found or expired'
+        utils.log "#{r.item} cache not found or expired"
         @getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
       else
         utils.log 'using cached ' + r.item + ' data'
@@ -66,8 +67,9 @@ module.exports = class Controller extends Chaplin.Controller
 
   failWhale: (res, textStatus, err) =>
     @parser.href = res.url
-    utils.log 'failed to fetch ' + res.url
-    utils.log "error: #{err}", 'error' if err
+    utils.log "failed to fetch #{res.url}"
+    utils.log "error: #{err} with #{res.url}", 'error' if err
+    @displayCollection()
     $.get config.api_get + 'reset'
 
   saveCollection: =>
@@ -116,7 +118,7 @@ module.exports = class Controller extends Chaplin.Controller
 
           # if (not model.get(chart_attr) or model.hasChanged(attr))
           if model.get(attr)
-            utils.log id + ': fetching missing chart data'
+            utils.log "#{id}: fetching missing chart data"
             data = model.getChartData attr
             utils.log JSON.parse(data), false
             model.set chart_attr, data

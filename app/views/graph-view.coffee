@@ -147,14 +147,19 @@ module.exports = class GraphView extends View
       else utils.log "selection #{parent} doesn't exist", 'error'
     else
       loc = res.getResponseHeader 'Location'
-      splits = loc.split('/')
+
+      try
+        splits = loc.split('/') if loc else false
+      catch TypeError
+        splits = false
 
       if 'progress' in splits
         utils.log "trying to get progress: #{loc}", false
         $.get(loc).done(@gvSuccess).fail(@gvFailWhale)
-      else
+      else if splits
         utils.log "trying to post render: #{splits[1]}", false
         $.post(config.api_render, splits[1]).done(@gvSuccess).fail(@gvFailWhale)
+      else utils.log "Location header not found", 'error'
 
   gvFailWhale: (res, textStatus, err) =>
     if res.status is 503
