@@ -13,9 +13,6 @@ module.exports = class ProgressesView extends CollectionView
 
   initialize: (options) =>
     super
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'loggingIn', @render
-    @subscribeEvent 'userUpdated', @render
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'visits-view caught dispatcher event'
 

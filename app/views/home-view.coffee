@@ -14,9 +14,6 @@ module.exports = class HomePageView extends View
   reps: mediator.reps
 
   initialize: ->
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'loggingIn', @render
-    @subscribeEvent 'userUpdated', @render
     @subscribeEvent 'dispatcher:dispatch', @render
     @setFormData()
     @setRepData()

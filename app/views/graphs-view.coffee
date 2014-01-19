@@ -31,12 +31,7 @@ module.exports = class GraphsView extends CollectionView
     super
     utils.log 'initialize graphs-view'
     @options = options
-    @subscribeEvent 'loginStatus', ->
-      utils.log 'graphs-view caught loginStatus event'
-      @render()
 
-    @subscribeEvent 'loggingIn', @render
-    @subscribeEvent 'userUpdated', @render
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'graphs-view caught dispatcher event'
       @render()

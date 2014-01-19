@@ -1,5 +1,3 @@
-{{#if_logged_in}}
-{{#if_sales}}
 {{#if first_name}}
 	<div class="control-group">
 		<div class="controls">
@@ -252,7 +250,7 @@
 			<script>$(function() {$('#feedback_tab a:first').tab('show');})</script>
 			<hr>
 		</div>
-		{{#if_manager}}
+
 		<div id="forms">
 			<h3>Forms<br></h3>
 			<legend>Review Form for {{first_name}} {{last_name}}</legend>
@@ -333,7 +331,7 @@
 			</form>
 			<hr>
 		</div>
-		{{/if_manager}}
+
 		<div id="rep-info">
 			<ul class="inline">
 				<li>Name: {{first_name}} {{last_name}}</li>
@@ -346,9 +344,3 @@
 	<span id="draw-chart-cur"></span>
 	<span id="draw-chart-pre"></span>
 {{/if}}
-{{else}}
-	<h2 class="text-error">You are not authorized to see this page.</h2>
-{{/if_sales}}
-{{else}}{{#if_not_logging_in}}
-	<h2 class="text-error">You must log in to see this page.</h2>
-{{/if_not_logging_in}}{{/if_logged_in}}

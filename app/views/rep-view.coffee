@@ -12,14 +12,12 @@ module.exports = class RepView extends View
   region: 'content'
   className: 'span12'
   template: template
-  user: mediator.users.get(1)
   forms: mediator.forms
 
   initialize: (options) =>
     super
     @attrs = options.attrs
     @id = @model.get 'id'
-    @name = if @user then @user.get 'name' else 'N/A'
     mediator.rep_id = @id
 
     utils.log 'initialize rep-view for ' + @id
@@ -29,10 +27,7 @@ module.exports = class RepView extends View
     @checkOnline().done(@sendForms).done(@fetchForms)
     @delegate 'click', '#network-form-submit', @networkFormSubmit
     @delegate 'click', '#review-form-submit', @reviewFormSubmit
-    @subscribeEvent 'userUpdated', @setUserName
     @subscribeEvent 'rendered:' + @attrs[1], @removeActive
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'loggingIn', @render
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
@@ -47,10 +42,6 @@ module.exports = class RepView extends View
     @listenTo @forms, 'sync', @success
     @listenTo @forms, 'error', @failWhale
     @listenTo @forms, 'invalid', @failWhale
-
-  setUserName: (user) =>
-    @name = user.get 'name'
-    utils.log 'User name is ' + @name
 
   render: =>
     super
@@ -75,7 +66,7 @@ module.exports = class RepView extends View
     keys = ((y for x,y of z)[0] for z in data)
     values = ((y for x,y of z)[1] for z in data)
     obj = _.object(keys, values)
-    _.extend obj, {rep: @id, manager: @name, form: form[1..]}
+    _.extend obj, {rep: @id, manager: 'name', form: form[1..]}
 
   checkOnline: -> $.ajax config.api_forms
 

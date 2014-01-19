@@ -46,11 +46,6 @@ Handlebars.registerHelper 'with_config', (options) ->
   context = config
   Handlebars.helpers.with.call(this, context, options)
 
-# Evaluate block with context being current user
-Handlebars.registerHelper 'with_user', (options) ->
-  context = mediator.user or {}
-  Handlebars.helpers.with.call(this, context, options)
-
 # Evaluate block with context being forms
 Handlebars.registerHelper 'with_forms', (options) ->
   context = mediator.forms or {}
@@ -63,40 +58,6 @@ Handlebars.registerHelper 'with_download', (options) ->
 
 # Conditional evaluation
 # ----------------------
-
-# Choose block by user login status
-Handlebars.registerHelper 'if_logged_in', (options) ->
-  if mediator.user then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_login_failed', (options) ->
-  if mediator.loginFailed then options.fn(this) else options.inverse(this)
-
-
-Handlebars.registerHelper 'if_not_logging_in', (options) ->
-  if mediator.loggingIn then options.inverse(this) else options.fn(this)
-
-# Choose block by user role (returns true if role is at least that level
-Handlebars.registerHelper 'if_admin', (options) ->
-  allowed = mediator.user.get('role') is 'admin'
-  if allowed then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_manager', (options) ->
-  allowed = mediator.user.get('role') in ['admin', 'manager']
-  if allowed then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_support', (options) ->
-  allowed = mediator.user.get('role') in ['admin', 'manager', 'support']
-  if allowed then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_sales', (options) ->
-  allowed = mediator.user.get('role') in [
-    'admin', 'manager', 'support', 'sales']
-  if allowed then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_guest', (options) ->
-  allowed = mediator.user.get('role') is 'guest'
-  if allowed then options.fn(this) else options.inverse(this)
-
 Handlebars.registerHelper 'if_cur_month', (date, options) ->
   fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
   momented = moment date, fmt
@@ -111,13 +72,6 @@ Handlebars.registerHelper 'if_prev_month', (date, options) ->
 
 Handlebars.registerHelper 'if_cur_rep', (id, options) ->
   if id == mediator.rep_id then options.fn(this) else options.inverse(this)
-
-# URL helpers
-# -----------
-
-# Facebook image URLs
-Handlebars.registerHelper 'fb_img_url', (fbId, type) ->
-  new Handlebars.SafeString utils.facebookImageURL(fbId, type)
 
 # Other helpers
 # -----------
