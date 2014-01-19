@@ -27,7 +27,6 @@ module.exports = class RepView extends View
     @checkOnline().done(@sendForms).done(@fetchForms)
     @delegate 'click', '#network-form-submit', @networkFormSubmit
     @delegate 'click', '#review-form-submit', @reviewFormSubmit
-    @subscribeEvent 'rendered:' + @attrs[1], @removeActive
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
@@ -48,13 +47,6 @@ module.exports = class RepView extends View
     utils.log 'rendering rep view for ' + @id
     @renderDatepicker '#review-datepicker'
     @renderDatepicker '#network-datepicker'
-
-  removeActive: =>
-    # Hack to get the chart to render in the inactive tab
-    # http://stackoverflow.com/a/11816438
-    chart_class = 'chart-' + @attrs[1][0..2]
-    tab = '#' + chart_class + '-cont'
-    @$(tab).removeClass 'active'
 
   renderDatepicker: (selection) =>
     momentous = new Momentous @.$ selection
