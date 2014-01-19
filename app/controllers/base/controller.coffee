@@ -69,6 +69,7 @@ module.exports = class Controller extends Chaplin.Controller
     @parser.href = res.url
     utils.log "failed to fetch #{res.url}"
     utils.log "error: #{err} with #{res.url}", 'error' if err
+    @displayCollection()
     $.get config.api_get + 'reset'
 
   saveCollection: =>
