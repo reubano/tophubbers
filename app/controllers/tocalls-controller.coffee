@@ -4,7 +4,7 @@ View = require 'views/tocalls-view'
 utils = require 'lib/utils'
 
 module.exports = class TocallsController extends Controller
-  adjustTitle: 'Ongeza Call List'
+  adjustTitle: 'Github Call List'
   res: ['rep_info', 'score']
   collection: Chaplin.mediator.reps
 

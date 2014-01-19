@@ -5,7 +5,7 @@ View = require 'views/rep-view'
 utils = require 'lib/utils'
 
 module.exports = class RepController extends Controller
-  adjustTitle: 'Ongeza Rep View'
+  adjustTitle: 'Github User View'
   res: ['rep_info', 'work_data', 'feedback_data', 'progress_data']
   collection: Chaplin.mediator.reps
 

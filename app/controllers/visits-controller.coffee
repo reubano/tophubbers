@@ -4,7 +4,7 @@ View = require 'views/visits-view'
 utils = require 'lib/utils'
 
 module.exports = class VisitsController extends Controller
-  adjustTitle: 'Ongeza Rep Progress'
+  adjustTitle: 'Github User Progress'
   res: ['rep_info', 'visits']
   collection: Chaplin.mediator.reps
 

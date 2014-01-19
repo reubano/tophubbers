@@ -11,7 +11,7 @@ Minilog
   .enable()
   .pipe new Minilog.backends.jQuery {url: config.api_logs, interval: 5000}
 
-minilog = Minilog 'ongeza'
+minilog = Minilog 'tophubbers'
 
 _(utils).extend
   # String helpers

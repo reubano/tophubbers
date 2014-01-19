@@ -5,7 +5,7 @@ View = require 'views/graphs-view'
 utils = require 'lib/utils'
 
 module.exports = class GraphsController extends Controller
-  adjustTitle: 'Ongeza Work Graph'
+  adjustTitle: 'Github Commit Graph'
   res: ['rep_info', 'work_data']
   attrs: if config.mobile then [config.hash_attrs[0]] else [config.data_attrs[0]]
   collection: Chaplin.mediator.reps
