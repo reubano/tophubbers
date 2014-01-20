@@ -16,7 +16,7 @@ module.exports = class RepView extends View
 
   initialize: (options) =>
     super
-    @attrs = options.attrs
+    @attr = options.attr
     @id = @model.get 'id'
     mediator.rep_id = @id
 
@@ -30,10 +30,8 @@ module.exports = class RepView extends View
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
-    for prefix in ['change:cur_', 'change:prev_']
-      @listenTo @model, prefix + 'work_data_c', @render
-      @listenTo @model, prefix + 'feedback_data', @render
-      @listenTo @model, prefix + 'progress', @render
+    for suffix in ['work_data_c', 'feedback_data', 'progress']
+      @listenTo @model, "change:cur_#{suffix}", @render
 
     @listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
     @listenTo @forms, 'request', @viewRequest

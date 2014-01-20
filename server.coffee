@@ -545,12 +545,14 @@ processPage = (page, ph, reps) ->
       data_obj = {}
 
       for rep in json.data
-        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
-        hashes = (md5 JSON.stringify r for r in raw)
-        hash_obj = _.object config.hash_attrs, hashes
+        attr = config.data_attr
+        raw = JSON.parse Common.getChartData attr, rep[attr], rep.id
+        hash = md5 JSON.stringify raw
+        hash_obj = {}
+        hash_obj[config.hash_attr] = hash
         hash_obj.id = rep.id
         hash_list.push hash_obj
-        _.extend data_obj, _.object hashes, raw
+        data_obj[hash] = raw
 
       keys = _.uniq _.keys data_obj
       (data_list.push {hash: k, data: data_obj[k]} for k in keys)

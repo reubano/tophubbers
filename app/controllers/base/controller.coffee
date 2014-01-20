@@ -37,18 +37,18 @@ module.exports = class Controller extends Chaplin.Controller
         dataType: 'json'
         beforeSend: (res, settings) -> res.url = settings.url
 
-  fetchData: (list=false, id=false, attrs=false) =>
+  fetchData: (list=false, id=false, attr=false) =>
     @id = id
-    @attrs = attrs
+    @attr = attr
     list = list or config.res
 
     for r in @getResList(list)
       utils.log "getting data from #{r.url}"
       @getData(r.url).done(@setReps, @setCharts).fail(@failWhale)
 
-  fetchExpiredData: (list=false, id=false, attrs=false) =>
+  fetchExpiredData: (list=false, id=false, attr=false) =>
     @id = id
-    @attrs = attrs
+    @attr = attr
     list = list or config.res
 
     for r in @getResList(list)
@@ -104,24 +104,23 @@ module.exports = class Controller extends Chaplin.Controller
       utils.log 'setting chart data for ' + source
 
       models = if @id then [@collection.get(@id)] else @collection.models
-      attrs = @attrs or config.data_attrs
+      attr = @attr or config.data_attr
 
       for model in models
-        for attr in attrs
-          chart_attr = attr + config.parsed_suffix
-          id = model.get 'id'
+        chart_attr = attr + config.parsed_suffix
+        id = model.get 'id'
 
-          # if (not model.get(chart_attr) or model.hasChanged(attr))
-          if model.get(attr)
-            utils.log "#{id}: fetching missing chart data"
-            data = model.getChartData attr
-            utils.log JSON.parse(data), false
-            model.set chart_attr, data
-            model.save {patch: true}
-          else
-            utils.log attr + ' not present'
-            # text = id + ': ' + chart_attr + ' present and '
-            # utils.log text + attr + ' unchanged'
+        # if (not model.get(chart_attr) or model.hasChanged(attr))
+        if model.get(attr)
+          utils.log "#{id}: fetching missing chart data"
+          data = model.getChartData attr
+          utils.log JSON.parse(data), false
+          model.set chart_attr, data
+          model.save {patch: true}
+        else
+          utils.log attr + ' not present'
+          # text = id + ': ' + chart_attr + ' present and '
+          # utils.log text + attr + ' unchanged'
     else if chartable and config.mobile
       utils.log "#{source} svg rendering disabled on mobile"
     else utils.log source + ' not chartable'

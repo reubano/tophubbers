@@ -50,9 +50,7 @@ module.exports = class HomePageView extends View
     keys1 = [
       'first_name', 'last_name', 'id', 'score', 'airtel', 'called',
       'created', 'ward']
-    keys2 = [
-      'cur_feedback_data', 'cur_progress', 'prev_feedback_data',
-      'prev_progress',]
+    keys2 = ['cur_feedback_data', 'cur_progress']
 
     collection = []
     for model in @reps.toJSON()

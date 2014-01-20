@@ -36,5 +36,5 @@ module.exports = class RepController extends Controller
     utils.log 'ignore_cache is ' + @ignore_cache
     @view = new View
       model: model
-      attrs: if config.mobile then config.hash_attrs else config.data_attrs
+      attr: if config.mobile then config.hash_attr else config.data_attr
       ignore_cache: @ignore_cache

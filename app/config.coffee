@@ -49,8 +49,8 @@ config =
   rpp: 100 # form results per page
   max_age: age
   to_chart: 'work_data'
-  data_attrs: ['cur_work_data', 'prev_work_data']
-  hash_attrs: ['cur_work_hash', 'prev_work_hash']
+  data_attr: 'cur_work_data'
+  hash_attr: 'cur_work_hash'
   res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data', 'visits']
   parsed_suffix: '_c'
   svg_suffix: '_svg'

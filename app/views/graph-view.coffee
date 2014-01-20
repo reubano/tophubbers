@@ -14,7 +14,7 @@ module.exports = class GraphView extends View
 
   initialize: (options) =>
     super
-    @attrs = options.attrs
+    @attr = options.attr
     @listen_suffix = if @mobile then '' else config.parsed_suffix
     @ignore_cache = options.ignore_cache
     @id = @model.get 'id'
@@ -23,20 +23,20 @@ module.exports = class GraphView extends View
     utils.log 'initialize graph-view for ' + @id
     utils.log options, false
 
-    @listen_attrs = if @mobile then config.hash_attrs else config.data_attrs
-    changes = ('change:' + attr + @listen_suffix for attr in @listen_attrs)
+    @listen_attr = if @mobile then config.hash_attr else config.data_attr
+    changes = ('change:' + attr + @listen_suffix for attr in @listen_attr)
 
     @listenTo @model, changes[0], =>
       utils.log 'graph-view heard ' + changes[0]
-      @changed = @listen_attrs[0]
+      @changed = @listen_attr[0]
       @unsetCache @changed
-      @render() if @changed in @attrs
+      @render() if @changed in @attr
 
     @listenTo @model, changes[1], =>
       utils.log 'graph-view heard ' + changes[1]
-      @changed = @listen_attrs[1]
+      @changed = @listen_attr[1]
       @unsetCache @changed
-      @render() if @changed in @attrs
+      @render() if @changed in @attr
 
   render: =>
     super
@@ -52,47 +52,44 @@ module.exports = class GraphView extends View
 
   getChartScript: (ignore_cache) =>
     utils.log 'getting chart for ' + @id
-    (@unsetCache attr for attr in @listen_attrs) if ignore_cache
+    @unsetCache @listen_attr if ignore_cache
+    utils.log 'setting variables for ' + @attr
+    @options = {attr: @attr, id: @id}
+    @parent = Common.getParent @options
+    @svg_attr = @attr + config.svg_suffix
+    @img_attr = @attr + config.img_suffix
+    @text = if @mobile then "#{@id} #{@img_attr}" else "#{@id} #{@svg_attr}"
+    chart_attr = @attr + @listen_suffix
+    chart_json = @model.has chart_attr
+    name = @model.get 'first_name'
+    svg = if @model.has @svg_attr then @model.get @svg_attr else null
+    img = if @model.has @img_attr then @model.get @img_attr else null
 
-    for @attr in @attrs
-      utils.log 'setting variables for ' + @attr
-      @options = {attr: @attr, id: @id}
-      @parent = Common.getParent @options
-      @svg_attr = @attr + config.svg_suffix
-      @img_attr = @attr + config.img_suffix
-      @text = if @mobile then "#{@id} #{@img_attr}" else "#{@id} #{@svg_attr}"
-      chart_attr = @attr + @listen_suffix
-      chart_json = @model.has chart_attr
-      name = @model.get 'first_name'
-      svg = if @model.has @svg_attr then @model.get @svg_attr else null
-      img = if @model.has @img_attr then @model.get @img_attr else null
-
-      if @mobile and img and not @changed and not ignore_cache
-        utils.log "fetching #{@text} from cache"
-        utils.log img
-        @$(@parent).html img
-        @pubRender @attr
-      else if @mobile and name
-        utils.log "fetching #{@text} from server"
-        data = {hash: @model.get @attr}
-        _.extend data, @options
-        $.post(config.api_render, data).done(@gvSuccess).fail(@gvFailWhale)
-      else if svg and not @changed and not ignore_cache
-        utils.log "drawing #{@text} from cache"
-        @$(@parent).html svg
-        @pubRender @attr
-      else if chart_json and name
-        selection = Common.getSelection @options
-        utils.log "#{@id} #{@attr} has svg: #{svg?}"
-        utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
-        utils.log "fetching script for #{selection}"
-        chart_data = JSON.parse @model.get chart_attr
-        do (@options, @attr) =>
-          nv.addGraph makeChart(chart_data, selection, @changed), =>
-            @setSVG @options
-            @pubRender @attr
-      else
-        utils.log "#{@id} has no #{chart_attr} or no name"
+    if @mobile and img and not @changed and not ignore_cache
+      utils.log "fetching #{@text} from cache"
+      utils.log img
+      @$(@parent).html img
+      @pubRender @attr
+    else if @mobile and name
+      utils.log "fetching #{@text} from server"
+      data = {hash: @model.get @attr}
+      _.extend data, @options
+      $.post(config.api_render, data).done(@gvSuccess).fail(@gvFailWhale)
+    else if svg and not @changed and not ignore_cache
+      utils.log "drawing #{@text} from cache"
+      @$(@parent).html svg
+      @pubRender @attr
+    else if chart_json and name
+      selection = Common.getSelection @options
+      utils.log "#{@id} #{@attr} has svg: #{svg?}"
+      utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
+      utils.log "fetching script for #{selection}"
+      chart_data = JSON.parse @model.get chart_attr
+      do (@options, @attr) =>
+        nv.addGraph makeChart(chart_data, selection, @changed), =>
+          @setSVG @options
+          @pubRender @attr
+    else utils.log "#{@id} has no #{chart_attr} or no name"
 
   pubRender: (attr) =>
     @publishEvent 'rendered:' + attr

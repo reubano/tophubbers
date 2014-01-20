@@ -45,7 +45,7 @@ module.exports = class GraphsView extends CollectionView
       model: model
       autoRender: false
       autoAttach: false
-      attrs: @options.attrs
+      attr: @options.attr
       ignore_cache: @options.ignore_cache
 
   render: =>

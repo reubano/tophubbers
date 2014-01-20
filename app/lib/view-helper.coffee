@@ -8,8 +8,6 @@ month = today.month()
 year = today.year()
 currStart = moment([year, month, 1])
 currEnd = moment(currStart).endOf('month')
-prevStart = moment(currStart).subtract('months', 1)
-prevEnd = moment(prevStart).endOf('month')
 
 isBetween = (date, start, ended) ->
   (date.isBefore(ended) && date.isAfter(start)) or
@@ -62,12 +60,6 @@ Handlebars.registerHelper 'if_cur_month', (date, options) ->
   fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
   momented = moment date, fmt
   between = isBetween(momented, currStart, currEnd)
-  if between then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_prev_month', (date, options) ->
-  fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
-  momented = moment date, fmt
-  between = isBetween(momented, prevStart, prevEnd)
   if between then options.fn(this) else options.inverse(this)
 
 Handlebars.registerHelper 'if_cur_rep', (id, options) ->
