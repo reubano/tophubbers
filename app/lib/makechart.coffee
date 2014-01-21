@@ -5,18 +5,11 @@ makeChart = (data, selection, changed=false, resize=false) ->
     time = d3.time.format("%I:%M %p")(new Date 2013, 0, 1, 0, d)
     if time.substr(0,1) is '0' then time.substr(1) else time
 
-  i = 0
-  minTime = 7.5
-  maxTime = 18.5
+  minTime = 0
+  maxTime = 24
   chartRange = [minTime * 60, maxTime * 60]
-  tickInterval = []
   color = if changed then '#FFD658' else 'steelblue'
-
   console.log 'making ' + selection
-
-  while i < maxTime - 1
-    tickInterval[i] = (minTime + i + 1) * 60
-    i++
 
   chart = nv.models.multiBarHorizontalChart()
     .x(retLab)
@@ -33,7 +26,7 @@ makeChart = (data, selection, changed=false, resize=false) ->
     .showControls(false)
 
   chart.yAxis
-    .tickValues(tickInterval)
+    .scale(chart.y)
     .tickFormat(formatMinutes)
 
   chart.multibar.yScale().clamp true
