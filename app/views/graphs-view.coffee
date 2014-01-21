@@ -7,25 +7,14 @@ module.exports = class GraphsView extends CollectionView
   itemView: View
   autoRender: true
   listSelector: '#graph-list'
-  fallbackSelector: '.fallback'
-  loadingSelector: '.loading'
   region: 'content'
   className: 'span12'
   template: template
 
   listen:
-    addedToParent: 'addedToParentAlert'
-    addedToDOM: 'addedToDOMAlert'
-    # visibilityChange: 'visibilityChangeAlert'
-
-  addedToParentAlert: ->
-    utils.log 'graphs-view heard addedToParent'
-
-  addedToDOMAlert: ->
-    utils.log 'graphs-view heard addedToDOM'
-
-  visibilityChangeAlert: ->
-    utils.log 'graphs-view heard visibilityChange'
+    addedToParent: -> utils.log 'graphs-view heard addedToParent'
+    addedToDOM: -> utils.log 'graphs-view heard addedToDOM'
+    # visibilityChange: -> utils.log 'graphs-view heard visibilityChange'
 
   initialize: (options) ->
     super
@@ -46,6 +35,7 @@ module.exports = class GraphsView extends CollectionView
       autoRender: false
       autoAttach: false
       attr: @options.attr
+      refresh: @options.refresh
       ignore_cache: @options.ignore_cache
 
   render: =>

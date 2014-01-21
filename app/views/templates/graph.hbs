@@ -1,9 +1,7 @@
-{{#if first_name}}
-<div class="view" id="{{id}}">
-	<a href="/rep/{{id}}">
-		<label>{{first_name}} {{last_name}} ({{id}})</label>
+<div class="view" id="{{login}}">
+	<a href="/rep/{{login}}">
+		<label>{{name}} ({{login}})</label>
 	</a>
-	<div class="chart chart-cur"><svg id="svg"></svg></div>
-	<span id="draw-chart-cur"></span>
+	<div class="chart"><svg id="svg"></svg></div>
+	<span id="draw-chart"></span>
 </div>
-{{/if}}

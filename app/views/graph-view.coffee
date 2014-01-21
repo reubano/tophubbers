@@ -15,32 +15,38 @@ module.exports = class GraphView extends View
   initialize: (options) =>
     super
     @attr = options.attr
+    @refresh = options.refresh
     @listen_suffix = if @mobile then '' else config.parsed_suffix
     @ignore_cache = options.ignore_cache
-    @id = @model.get 'id'
+    @id = @model.get('id')
+    @location = @model.get('location')
+    @login = @model.get('login')
     @changed = false
     @mobile = config.mobile
-    utils.log 'initialize graph-view for ' + @id
+
+    utils.log "initialize graph-view for #{@login}"
     utils.log options, false
 
     @listen_attr = if @mobile then config.hash_attr else config.data_attr
-    changes = ('change:' + attr + @listen_suffix for attr in @listen_attr)
+    @chart_attr = @attr + @listen_suffix
+    changes = 'change:' + @listen_attr + @listen_suffix
 
-    @listenTo @model, changes[0], =>
-      utils.log 'graph-view heard ' + changes[0]
-      @changed = @listen_attr[0]
+    @listenTo @model, changes, =>
+      utils.log 'graph-view heard ' + changes
+      @changed = @listen_attr
       @unsetCache @changed
-      @render() if @changed in @attr
+      @render() if @changed is @attr
 
-    @listenTo @model, changes[1], =>
-      utils.log 'graph-view heard ' + changes[1]
-      @changed = @listen_attr[1]
-      @unsetCache @changed
-      @render() if @changed in @attr
+    if @refresh or not @location
+      utils.log "#fetching {@login}'s data"
+      @model.fetch success: (model) -> model.fetchData true
+
+#     if not @model.get @chart_attr
+#       utils.log "#{@login} has no #{@chart_attr}"
 
   render: =>
     super
-    utils.log 'rendering graph-view for ' + @id
+    utils.log "rendering graph-view for #{@login}"
     @attach()
     _.defer @getChartScript, @ignore_cache
 
@@ -51,17 +57,16 @@ module.exports = class GraphView extends View
     utils.log 'graph-view heard addedToParent'
 
   getChartScript: (ignore_cache) =>
-    utils.log 'getting chart for ' + @id
+    utils.log "getting chart for #{@login}"
     @unsetCache @listen_attr if ignore_cache
     utils.log 'setting variables for ' + @attr
     @options = {attr: @attr, id: @id}
-    @parent = Common.getParent @options
+    @parent = Common.getParent @login
     @svg_attr = @attr + config.svg_suffix
     @img_attr = @attr + config.img_suffix
-    @text = if @mobile then "#{@id} #{@img_attr}" else "#{@id} #{@svg_attr}"
-    chart_attr = @attr + @listen_suffix
-    chart_json = @model.has chart_attr
-    name = @model.get 'first_name'
+    @text = if @mobile then "#{@login} #{@img_attr}" else "#{@id} #{@svg_attr}"
+    chart_json = @model.has @chart_attr
+    name = @model.get 'name'
     svg = if @model.has @svg_attr then @model.get @svg_attr else null
     img = if @model.has @img_attr then @model.get @img_attr else null
 
@@ -80,16 +85,16 @@ module.exports = class GraphView extends View
       @$(@parent).html svg
       @pubRender @attr
     else if chart_json and name
-      selection = Common.getSelection @options
-      utils.log "#{@id} #{@attr} has svg: #{svg?}"
-      utils.log "#{@id} #{@attr} ignore svg: #{ignore_cache}"
+      selection = Common.getSelection @login
+      utils.log "#{@login} #{@attr} has svg: #{svg?}"
+      utils.log "#{@login} #{@attr} ignore svg: #{ignore_cache}"
       utils.log "fetching script for #{selection}"
-      chart_data = JSON.parse @model.get chart_attr
-      do (@options, @attr) =>
+      chart_data = JSON.parse @model.get @chart_attr
+      do (@login, @attr) =>
         nv.addGraph makeChart(chart_data, selection, @changed), =>
-          @setSVG @options
+          @setSVG @login
           @pubRender @attr
-    else utils.log "#{@id} has no #{chart_attr} or no name"
+    else utils.log "#{@login} has no #{@chart_attr} or no name"
 
   pubRender: (attr) =>
     @publishEvent 'rendered:' + attr
@@ -102,44 +107,45 @@ module.exports = class GraphView extends View
     @model.unset attr
     @model.save()
 
-  setImg: (options) =>
-    parent = Common.getParent options
+  setImg: (login) =>
+    parent = Common.getParent login
     html = $(parent).html()
 
     if html and html.length is 57
       img = html.replace(/\"/g, '\'')
-      attr = options.attr + config.img_suffix
-      utils.log "setting #{options.id} #{attr}"
+      attr = "chart#{config.img_suffix}"
+      utils.log "setting #{login} #{attr}"
       @model.set attr, img
       @model.save()
     else
       utils.log 'html blank or malformed for ' + parent
 
-  setSVG: (options) =>
-    parent = Common.getParent options
+  setSVG: (login) =>
+    parent = Common.getParent login
     html = @$(parent).html()
     bad = ['opacity: 0.0', 'opacity: 0.1', 'opacity: 0.2', 'opacity: 0.3',
       'opacity: 0.4', 'opacity: 0.5', 'opacity: 0.6']
 
     if html and (html.indexOf(b) < 0 for b in bad) and html.length > 40
       svg = html.replace(/\"/g, '\'')
-      attr = options.attr + config.svg_suffix
-      utils.log "setting #{options.id} #{attr}"
+      attr = "chart#{config.svg_suffix}"
+      utils.log "setting #{login} #{attr}"
       @model.set attr, svg
       @model.save()
     else
       utils.log 'html blank or malformed for ' + parent
 
   gvSuccess: (data, textStatus, res) =>
-    if data?.id?
-      parent = Common.getParent data
-      utils.log "successfully fetched png for #{data.id}!"
+    if data?.login?
+      login = data.login
+      parent = Common.getParent login
+      utils.log "successfully fetched png for #{login}!"
 
       if $(parent)
         url = "#{config.api_uploads}/#{data.hash}"
         utils.log "setting html for #{parent} to #{url}"
         $(parent).html "<img src=#{url}>"
-        @setImg data
+        @setImg login
         @pubRender data.attr
       else utils.log "selection #{parent} doesn't exist", 'error'
     else

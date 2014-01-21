@@ -15,3 +15,4 @@ module.exports = class Navbar extends Model
 
   initialize: ->
     super
+    utils.log 'initialize navbar model'
