@@ -37,12 +37,15 @@ module.exports = class GraphView extends View
       @unsetCache @changed
       @render() if @changed is @attr
 
-    if @refresh or not @location
-      utils.log "#fetching {@login}'s data"
-      @model.fetch success: (model) -> model.fetchData true
+    if @refresh or not @model.has @chart_attr
+      utils.log "fetching #{@login}'s info"
 
-#     if not @model.get @chart_attr
-#       utils.log "#{@login} has no #{@chart_attr}"
+      fetchFunc = do (@refresh) -> (model) ->
+        model.saveTstamp 'info'
+        model.fetchData @refresh
+
+#       @model.fetch().done(fetchFunc)
+      @model.fetch success: fetchFunc
 
   render: =>
     super

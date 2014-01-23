@@ -13,12 +13,9 @@ module.exports = class GraphsController extends Controller
   comparator: (model) -> model.get 'id'
 
   index: (params) =>
-    @ignore_cache = params?.ignore_cache ? false
-    refresh = params?.refresh ? false
-
     @collection.comparator = @comparator
     @view = new View
       collection: @collection
       attr: @attr
-      refresh: refresh
-      ignore_cache: @ignore_cache
+      refresh: params?.refresh ? false
+      ignore_cache: params?.ignore_cache ? false

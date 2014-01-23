@@ -11,7 +11,6 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize rep #{@login} model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
-    @saveTstamp 'info'
     if @has('score_sort') or @has('score')
       ss = if @has 'score_sort' then @get 'score_sort' else @get 'score'
       @set score_sort: ss
@@ -24,9 +23,8 @@ module.exports = class Rep extends Model
     utils.log 'score sort: ' + @get 'score_sort'
 
   failWhale: (res, textStatus, err) =>
-    @parser.href = res.url
-    utils.log "failed to fetch #{res.url}"
-    utils.log "error: #{err} with #{res.url}", 'error' if err
+    utils.log "failed to fetch #{@login}'s event data"
+    utils.log "error: #{err} with #{@login}", 'error' if err
 
   setActivity: (data, textStatus, res) =>
     @set config.data_attr, data
@@ -50,20 +48,24 @@ module.exports = class Rep extends Model
     data = [{key: 'End', values: endRows}, {key: 'Duration', values: durRows}]
 
   getActivity: =>
-    loc = "https://api.github.com/users/#{@login}/events"
+    url = "https://api.github.com/users/#{@login}/events"
     data = {access_token: "#{config.api_token}"}
-    $.get(loc, data).done(@setActivity).fail(@failWhale)
+    # post url to 'api/fetch' to fetch rep data serverside
+    if config.mobile
+      utils.log "fetching #{url} server side"
+      $.post(config.api_fetch, url: url).done(@setActivity).fail(@failWhale)
+    else $.get(url, data).done(@setActivity).fail(@failWhale)
 
-  fetchData: (onlyIfExpired=false) =>
-    utils.log "fetching #{@login}'s data"
+  fetchData: (force=false) =>
+    utils.log "fetching #{@login}'s #{config.data_attr}"
     if @cacheExpired "#{config.data_attr}_tstamp"
       utils.log "#{config.data_attr} cache not found or expired"
       @getActivity()
-    else if not onlyIfExpired
+    else if force
       utils.log "refresh forced"
       @getActivity()
     else
-      utils.log "using cached #{config.data_attr} data"
+      utils.log "using cached #{config.data_attr}"
       utils.log @, false
       @setChart()
 
