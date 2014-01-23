@@ -106,7 +106,7 @@ module.exports = class GraphView extends View
   unsetCache: (prefix) =>
     suffix = if @mobile then 'img_suffix' else 'svg_suffix'
     attr = prefix + config[suffix]
-    utils.log "unsetting #{@id} #{attr}"
+    utils.log "unsetting #{@login} #{attr}"
     @model.unset attr
     @model.save()
 

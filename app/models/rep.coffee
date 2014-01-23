@@ -9,7 +9,7 @@ module.exports = class Rep extends Model
   initialize: =>
     super
     @login = @get 'login'
-    utils.log "initialize rep #{@login} model"
+    utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
     if @has('score_sort') or @has('score')
       ss = if @has 'score_sort' then @get 'score_sort' else @get 'score'
