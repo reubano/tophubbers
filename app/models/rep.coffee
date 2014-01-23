@@ -31,22 +31,6 @@ module.exports = class Rep extends Model
     @saveTstamp config.data_attr
     @setChart()
 
-  convertData: (raw) ->
-    endRows = []
-    durRows = []
-    dur_val = 5
-
-    _.each raw, (model) ->
-      created = model['created_at']
-      date = moment(created).format('MM-DD-YYYY')
-      time = moment(created).format('HH:mm:ss').split(':')
-      start = (time[0] * 60) + (time[1] * 1) + (time[2] / 60)
-      end_val = parseFloat start.toFixed(3)
-      endRows.push {label: date, value: end_val}
-      durRows.push {label: date, value: dur_val}
-
-    data = [{key: 'End', values: endRows}, {key: 'Duration', values: durRows}]
-
   getActivity: =>
     url = "https://api.github.com/users/#{@login}/events"
     data = {access_token: "#{config.api_token}"}
@@ -75,7 +59,7 @@ module.exports = class Rep extends Model
     chart_attr = config.data_attr + config.parsed_suffix
     if @get config.data_attr
       utils.log "fetching #{@login}'s missing chart data"
-      data = @convertData @get config.data_attr
+      data = Common.convertData @get(config.data_attr), @login
       utils.log data, false
       @set chart_attr, JSON.stringify data
       @save {patch: true}

@@ -545,8 +545,7 @@ processPage = (page, ph, reps) ->
       data_obj = {}
 
       for rep in json.data
-        attr = config.data_attr
-        raw = JSON.parse Common.getChartData attr, rep[attr], rep.id
+        raw = JSON.parse Common.convertData rep[config.data_attr], rep.login
         hash = md5 JSON.stringify raw
         hash_obj = {}
         hash_obj[config.hash_attr] = hash
