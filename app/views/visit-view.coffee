@@ -3,7 +3,7 @@ template = require 'views/templates/visit'
 
 module.exports = class VisitView extends View
   template: template
-  tagName: 'li'
+  tagName: 'tr'
 
   initialize: ->
     super
