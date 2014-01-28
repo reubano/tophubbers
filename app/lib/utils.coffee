@@ -346,5 +346,4 @@ found on host #{host}"
 
       minilog[level] data
     else console.log message
-
 module.exports = utils

@@ -10,12 +10,12 @@ module.exports = class HomePageView extends View
   template: template
   region: 'content'
   className: 'span12'
-  forms: mediator.forms
+#   forms: mediator.forms
   reps: mediator.reps
 
   initialize: ->
     @subscribeEvent 'dispatcher:dispatch', @render
-    @setFormData()
+#     @setFormData()
     @setRepData()
 
   json2CSV: (json) ->

@@ -1,12 +1,10 @@
 Controller = require 'controllers/base/controller'
-Chaplin = require 'chaplin'
 View = require 'views/visits-view'
 utils = require 'lib/utils'
 
 module.exports = class VisitsController extends Controller
   adjustTitle: 'Github User Progress'
   res: ['rep_info', 'visits']
-  collection: Chaplin.mediator.reps
 
   initialize: => utils.log 'initialize visits-controller'
   comparator: (model) -> model.get 'id'

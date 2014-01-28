@@ -12,7 +12,7 @@ module.exports = class RepView extends View
   region: 'content'
   className: 'span12'
   template: template
-  forms: mediator.forms
+#   forms: mediator.forms
 
   initialize: (options) =>
     super
@@ -21,24 +21,24 @@ module.exports = class RepView extends View
     mediator.rep_id = @id
 
     utils.log 'initialize rep-view for ' + @id
-    console.log @forms
+#     console.log @forms
     console.log options
 
-    @checkOnline().done(@sendForms).done(@fetchForms)
-    @delegate 'click', '#network-form-submit', @networkFormSubmit
-    @delegate 'click', '#review-form-submit', @reviewFormSubmit
+#     @checkOnline().done(@sendForms).done(@fetchForms)
+#     @delegate 'click', '#network-form-submit', @networkFormSubmit
+#     @delegate 'click', '#review-form-submit', @reviewFormSubmit
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
     for suffix in ['work_data_c', 'feedback_data', 'progress']
       @listenTo @model, "change:cur_#{suffix}", @render
 
-    @listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
-    @listenTo @forms, 'request', @viewRequest
-    @listenTo @forms, 'change', @render
-    @listenTo @forms, 'sync', @success
-    @listenTo @forms, 'error', @failWhale
-    @listenTo @forms, 'invalid', @failWhale
+#     @listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
+#     @listenTo @forms, 'request', @viewRequest
+#     @listenTo @forms, 'change', @render
+#     @listenTo @forms, 'sync', @success
+#     @listenTo @forms, 'error', @failWhale
+#     @listenTo @forms, 'invalid', @failWhale
 
   render: =>
     super

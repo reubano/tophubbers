@@ -8,9 +8,7 @@ module.exports = class HomeController extends Controller
   mediator = Chaplin.mediator
 
   adjustTitle: 'Top Githubbers'
-  collection: mediator.reps
-  model: mediator.navbar
-  forms: mediator.forms
+#   forms: mediator.forms
 
   initialize: =>
     utils.log 'initialize home-controller'

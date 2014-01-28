@@ -1,12 +1,10 @@
 Controller = require 'controllers/base/controller'
-Chaplin = require 'chaplin'
 View = require 'views/tocalls-view'
 utils = require 'lib/utils'
 
 module.exports = class TocallsController extends Controller
   adjustTitle: 'Github Call List'
   res: ['rep_info', 'score']
-  collection: Chaplin.mediator.reps
 
   initialize: => utils.log 'initialize tocalls-controller'
   comparator: (model) -> - model.get 'score_sort'
