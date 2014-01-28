@@ -90,7 +90,7 @@ module.exports = class GraphView extends View
       utils.log "fetching script for #{selection}"
       chart_data = JSON.parse @model.get @chart_attr
       do (@login, @attr) =>
-        nv.addGraph makeChart(chart_data, selection, @changed), =>
+        nv.addGraph makeChart(chart_data, selection, @changed, true), =>
           @setSVG @login
           @pubRender @attr
     else utils.log "#{@login} has no #{@chart_attr} or no name"
