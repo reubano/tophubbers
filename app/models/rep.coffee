@@ -7,9 +7,9 @@ module.exports = class Rep extends Model
   url: => "#{config.rep_url}#{@get 'login'}?access_token=#{config.api_token}"
 
   sync: (method, model, options) =>
-    @server = method is 'read'
+    @local = method isnt 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
-    utils.log "sync #{model.get 'login'} to server: #{@server}"
+    utils.log "sync #{model.get 'login'} to local: #{@local}"
     Backbone.sync(method, model, options)
 
   initialize: =>
@@ -58,21 +58,23 @@ module.exports = class Rep extends Model
         .done(model.setActivity).fail(model.failWhale)
 
   fetchFunc: (force, type) =>
-    if @cacheExpired(config.data_attr) or force
-      utils.log "fetching new data"
+    if not @has 'name'
+      console.log 'No name!'
+      localStorage.setItem 'synced', false
+    else if force and type is 'score' then @setScoreSort()
+    else if force or @cacheExpired(config.data_attr)
+      utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
-      else if type is 'progress' then @setProgress()
-      else if type is 'score' then @setScoreSort()
-    else
-      utils.log "using cached data"
-      if type is 'chart' and @cacheExpired config.chart_attr then @setChart()
-      else if type is 'progress' and @cacheExpired config.prgrs_attr
-        @setProgress()
-      else if type is 'score' and @cacheExpired config.info_attr
-        @setScoreSort()
+      else if type is 'progress' then @getActivity().done(@setProgress)
+    else if type is 'score' and @cacheExpired(config.info_attr)
+      @setScoreSort()
+    else if type is 'chart' and @cacheExpired(config.chart_attr)
+      @setChart()
+    else if type is 'progress' and @cacheExpired config.prgrs_attr
+      @setProgress()
 
   fetchData: (force=false, type=false) =>
-    if force or not @has('login') or @cacheExpired config.info_attr
+    if force or not @has('name') or @cacheExpired config.info_attr
       utils.log "fetching #{@login}'s #{config.info_attr} data"
       do (force, type) => @promize()
         .done((model) -> model.saveTstamp config.info_attr)
@@ -80,6 +82,7 @@ module.exports = class Rep extends Model
         .fail(@failWhale)
     else
       utils.log "using cached #{config.info_attr} data"
+      if not localStorage.getItem 'synced' then localStorage.setItem 'synced', true
       @fetchFunc false, type
 
     utils.log @, false
