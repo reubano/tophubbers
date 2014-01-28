@@ -6,6 +6,8 @@ template = require 'views/templates/graph'
 utils = require 'lib/utils'
 
 module.exports = class GraphView extends View
+  autoRender: false
+  autoAttach: false
   template: template
 #   listen:
 #     addedToParent: 'getChartScript'
@@ -13,16 +15,17 @@ module.exports = class GraphView extends View
 #     visibilityChange: 'visibilityChangeAlert'
 
   initialize: (options) =>
+#     console.log options
     super
     @attr = options.attr
     @refresh = options.refresh
-    @listen_suffix = if @mobile then '' else config.parsed_suffix
     @ignore_cache = options.ignore_cache
     @id = @model.get('id')
     @location = @model.get('location')
     @login = @model.get('login')
-    @changed = false
     @mobile = config.mobile
+    @listen_suffix = if @mobile then '' else config.parsed_suffix
+    @changed = false
 
     utils.log "initialize graph-view for #{@login}"
     utils.log options, false
@@ -37,15 +40,7 @@ module.exports = class GraphView extends View
       @unsetCache @changed
       @render() if @changed is @attr
 
-    if @refresh or not @model.has @chart_attr
-      utils.log "fetching #{@login}'s info"
-
-      fetchFunc = do (@refresh) -> (model) ->
-        model.saveTstamp 'info'
-        model.fetchData @refresh
-
-#       @model.fetch().done(fetchFunc)
-      @model.fetch success: fetchFunc
+    @model.fetchData @refresh, 'chart'
 
   render: =>
     super
@@ -65,9 +60,10 @@ module.exports = class GraphView extends View
     utils.log 'setting variables for ' + @attr
     @options = {attr: @attr, id: @id}
     @parent = Common.getParent @login
+    console.log "parent is #{@parent}"
     @svg_attr = @attr + config.svg_suffix
     @img_attr = @attr + config.img_suffix
-    @text = if @mobile then "#{@login} #{@img_attr}" else "#{@id} #{@svg_attr}"
+    @text = if @mobile then "#{@login} #{@img_attr}" else "#{@login} #{@svg_attr}"
     chart_json = @model.has @chart_attr
     name = @model.get 'name'
     svg = if @model.has @svg_attr then @model.get @svg_attr else null
@@ -131,7 +127,7 @@ module.exports = class GraphView extends View
 
     if html and (html.indexOf(b) < 0 for b in bad) and html.length > 40
       svg = html.replace(/\"/g, '\'')
-      attr = "chart#{config.svg_suffix}"
+      attr = @attr + config.svg_suffix
       utils.log "setting #{login} #{attr}"
       @model.set attr, svg
       @model.save()

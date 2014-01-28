@@ -25,6 +25,6 @@ module.exports = (match) ->
   # Customer feedback score
   # Data table of progress
   # Mint like progress bars
-  match 'rep/:id', 'rep#show'
-  match 'rep/:id/:ignore_cache', 'rep#show'
-  match 'rep/:id/:ignore_cache/:refresh', 'rep#show'
+  match 'rep/:login', 'rep#show'
+  match 'rep/:login/:ignore_cache', 'rep#show'
+  match 'rep/:login/:ignore_cache/:refresh', 'rep#show'

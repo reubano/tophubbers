@@ -8,18 +8,16 @@ module.exports = class Reps extends Collection
 
   model: Model
   url: "https://api.github.com/search/users?q=#{query}"
-  local: @isSynced
-  sync: (method, model, options) ->
-    utils.log "sync method is #{method}"
-    if method isnt 'read'
-      return utils.log "not syncing collection on #{method}"
-    else
-      utils.log "syncing collection"
-      Backbone.sync 'read', model, options
+  local: => localStorage.getItem @url
+  sync: (method, model, options) =>
+    utils.log "collection's sync method is #{method}"
+    utils.log "sync collection locally: #{@local}"
+    Backbone.sync(method, model, options)
 
   initialize: (options) =>
     super
     utils.log 'initialize reps collection'
+    utils.log "local: #{@local}"
 
   parseBeforeLocalSave: (response) ->
     utils.log 'parsing reps response for localStorage'

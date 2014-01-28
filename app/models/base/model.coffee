@@ -7,6 +7,19 @@ module.exports = class Model extends Chaplin.Model
   saveTstamp: (attr) =>
     tstamp = "#{attr}_tstamp"
     utils.log "saving #{@get 'login'}'s #{tstamp}"
-    date = new Date().toString()
-    @set tstamp, date
+    @set tstamp, new Date().toString()
+    @save patch: true
+
+  # Promise helper
+  # ---------------------
+  promize: =>
+#     file bug with dualstorage to return promise after local fetch
+    if @fetch.promise
+      utils.log "fetch has promise"
+      @fetch()
+    else
+      utils.log "fetch doesn't have promise"
+      $.Deferred((deferred) => @fetch
+        success: deferred.resolve
+        error: deferred.reject).promise()
 

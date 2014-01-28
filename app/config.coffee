@@ -49,9 +49,12 @@ config =
   mobile: mobile
   rpp: 100 # form results per page
   max_age: age
+  info_attr: 'info'
+  prgrs_attr: 'progress'
   data_attr: 'work_data'
   hash_attr: 'work_hash'
   parsed_suffix: '_c'
+  chart_attr: 'work_data_c'
   svg_suffix: '_svg'
   img_suffix: '_img'
 

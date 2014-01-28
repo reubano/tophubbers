@@ -49,7 +49,6 @@ module.exports = class Application extends Chaplin.Application
   # Create additional mediator properties.
   initMediator: ->
     # Add additional application-specific properties and methods
-    Chaplin.mediator.synced = false
     Chaplin.mediator.download = {}
     Chaplin.mediator.rep_id = null
     Chaplin.mediator.forms = new Forms()

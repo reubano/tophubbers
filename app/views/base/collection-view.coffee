@@ -5,3 +5,10 @@ module.exports = class CollectionView extends Chaplin.CollectionView
   # This class doesn’t inherit from the application-specific View class,
   # so we need to borrow the method from the View prototype:
   getTemplateFunction: View::getTemplateFunction
+
+  initItemView: (model) ->
+    new @itemView
+      model: model
+      attr: @options.attr
+      refresh: @options.refresh
+      ignore_cache: @options.ignore_cache

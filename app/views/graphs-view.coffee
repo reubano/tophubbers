@@ -29,15 +29,6 @@ module.exports = class GraphsView extends CollectionView
       utils.log 'graphs-view heard collection reset'
       @render()
 
-  initItemView: (model) ->
-    new @itemView
-      model: model
-      autoRender: false
-      autoAttach: false
-      attr: @options.attr
-      refresh: @options.refresh
-      ignore_cache: @options.ignore_cache
-
   render: =>
     super
     utils.log 'rendering graphs view'
