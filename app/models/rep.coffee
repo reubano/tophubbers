@@ -48,13 +48,13 @@ module.exports = class Rep extends Model
     data = {access_token: "#{config.api_token}"}
 
     # post url to 'api/fetch' to fetch rep data serverside
-    if config.mobile
-      utils.log "fetching #{url} server side"
-      do (model = @) -> $.post(config.api_fetch, url: url)
-        .done(model.setActivity).fail(model.failWhale)
-    else
+    if config.svg
       utils.log "fetching #{url} client side"
       do (model = @) -> $.get(url, data)
+        .done(model.setActivity).fail(model.failWhale)
+    else
+      utils.log "fetching #{url} server side"
+      do (model = @) -> $.post(config.api_fetch, url: url)
         .done(model.setActivity).fail(model.failWhale)
 
   fetchFunc: (force, type) =>
@@ -107,7 +107,7 @@ module.exports = class Rep extends Model
     else utils.log "#{config.data_attr} not present"
 
   setChart: =>
-    return utils.log "#mobile svg rendering disabled" if config.mobile
+    return utils.log "#svg rendering not detected" if config.canvas
     utils.log 'setting chart data'
     if @get config.data_attr
       utils.log "calculating #{@login}'s missing chart data"

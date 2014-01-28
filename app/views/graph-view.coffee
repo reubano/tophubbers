@@ -23,14 +23,15 @@ module.exports = class GraphView extends View
     @id = @model.get('id')
     @location = @model.get('location')
     @login = @model.get('login')
-    @mobile = config.mobile
-    @listen_suffix = if @mobile then '' else config.parsed_suffix
+    @has_svg = config.svg
+    @canvas = config.canvas
+    @listen_suffix = if @has_svg then config.parsed_suffix else ''
     @changed = false
 
     utils.log "initialize graph-view for #{@login}"
     utils.log options, false
 
-    @listen_attr = if @mobile then config.hash_attr else config.data_attr
+    @listen_attr = if @has_svg then config.data_attr else config.hash_attr
     @chart_attr = @attr + @listen_suffix
     changes = 'change:' + @listen_attr + @listen_suffix
 
@@ -63,18 +64,18 @@ module.exports = class GraphView extends View
     console.log "parent is #{@parent}"
     @svg_attr = @attr + config.svg_suffix
     @img_attr = @attr + config.img_suffix
-    @text = if @mobile then "#{@login} #{@img_attr}" else "#{@login} #{@svg_attr}"
+    @text = if @has_svg then "#{@login} #{@svg_attr}" else "#{@login} #{@img_attr}"
     chart_json = @model.has @chart_attr
     name = @model.get 'name'
     svg = if @model.has @svg_attr then @model.get @svg_attr else null
     img = if @model.has @img_attr then @model.get @img_attr else null
 
-    if @mobile and img and not @changed and not ignore_cache
+    if @canvas and img and not @changed and not ignore_cache
       utils.log "fetching #{@text} from cache"
       utils.log img
       @$(@parent).html img
       @pubRender @attr
-    else if @mobile and name
+    else if @canvas and name
       utils.log "fetching #{@text} from server"
       data = {hash: @model.get @attr}
       _.extend data, @options
@@ -100,7 +101,7 @@ module.exports = class GraphView extends View
     utils.log 'published rendered:' + attr
 
   unsetCache: (prefix) =>
-    suffix = if @mobile then 'img_suffix' else 'svg_suffix'
+    suffix = if @has_svg then 'svg_suffix' else 'img_suffix'
     attr = prefix + config[suffix]
     utils.log "unsetting #{@login} #{attr}"
     @model.unset attr

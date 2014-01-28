@@ -1,4 +1,5 @@
 debug_mobile = false
+debug_canvas = false
 debug_prod = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
@@ -29,9 +30,13 @@ ua = navigator?.userAgent?.toLowerCase()
 mobile_device = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
 force_mobile = (dev and debug_mobile)
 mobile = mobile_device or force_mobile
+svg_support = Modernizr.svg
+force_canvas = (dev and debug_canvas)
+svg = svg_support and not force_canvas
 
 console.log "host: #{host}"
 console.log "mobile device: #{mobile}"
+console.log "svg on: #{svg}"
 console.log "debug production: #{debug_prod}"
 
 config =
@@ -47,6 +52,8 @@ config =
   api_logs: api_logs
   api_token: gh_api_token
   mobile: mobile
+  svg: svg
+  canvas: not svg
   rpp: 100 # form results per page
   max_age: age
   info_attr: 'info'
