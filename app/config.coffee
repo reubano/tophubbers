@@ -5,6 +5,9 @@ host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
 gh_api_token = 'cdac348c97dbdf5252d530103e0bfb2b9275d126'
+query = "followers:%3E5000&access_token=#{gh_api_token}"
+reps_url = "https://api.github.com/search/users?q=#{query}"
+rep_url = "https://api.github.com/users/"
 
 if dev and not debug_prod
   console.log 'development envrionment set'
@@ -49,6 +52,8 @@ config =
   api_forms: api_forms
   api_logs: api_logs
   api_token: gh_api_token
+  reps_url: reps_url
+  rep_url: rep_url
   mobile: mobile
   svg: svg
   canvas: not svg

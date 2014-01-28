@@ -4,7 +4,7 @@ config = require 'config'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
-  url: => "https://api.github.com/users/#{@get 'login'}?access_token=#{config.api_token}"
+  url: => "#{config.rep_url}#{@get 'login'}?access_token=#{config.api_token}"
 
   sync: (method, model, options) =>
     @server = method is 'read'
