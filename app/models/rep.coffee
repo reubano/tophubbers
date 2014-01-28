@@ -8,6 +8,7 @@ module.exports = class Rep extends Model
 
   sync: (method, model, options) =>
     @local = method isnt 'read'
+    console.log model.get 'name'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to local: #{@local}"
     Backbone.sync(method, model, options)
@@ -17,7 +18,7 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
-    ss = if @has 'score_sort' then @get 'score_sort' else @get 'followers'
+    ss = @get('score_sort') ? @get 'followers'
     @set score_sort: ss
 
   toggle: ->
@@ -32,7 +33,7 @@ module.exports = class Rep extends Model
     utils.log "error: #{err} with #{@login}", 'error' if err
 
   setScoreSort: =>
-    utils.log 'setting score sort'
+    utils.log 'setting score data'
     @set score_sort: @get 'followers'
     @set called: false
     @save patch: true
