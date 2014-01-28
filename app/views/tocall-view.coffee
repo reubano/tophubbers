@@ -11,7 +11,6 @@ module.exports = class TocallView extends View
     @refresh = options.refresh
     @listenTo @model, 'change', @render
     @delegate 'click', '.toggle', @toggle
-    console.log "refresh: #{@refresh}"
     @model.fetchData @refresh, 'score'
 
   render: =>

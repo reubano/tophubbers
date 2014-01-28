@@ -610,7 +610,7 @@ processPage = (page, ph, reps) ->
     logger.info "debug s3: #{debug_s3}"
     logger.info "debug mongodb: #{debug_mongo}"
     logger.info "debug memcache: #{debug_memcache}"
-    logger.info "Try curl #{home}#{config.api_fetch} -H 'Accept: */*' --data 'url=#{config.api_get}work_data'"
+    logger.info "Try curl #{home}#{config.api_fetch} -H 'Accept: */*' --data 'url=fixme'"
     logger.info "Then curl #{home}#{config.api_render} -H 'Accept: */*' --data 'hash=<hash>&id=E0018&attr=cur_work_hash'"
     logger.info "Then curl #{home}/api/progress/<hash>/E0018/cur_work_hash"
     logger.info "Then curl #{home}#{config.api_uploads}/<hash>"

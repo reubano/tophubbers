@@ -12,7 +12,6 @@ if dev and not debug_prod
   api_fetch = "/api/fetch"
   api_render = "/api/render"
   api_uploads = "/api/uploads"
-  api_get = "http://localhost:5001/"
   api_forms = "http://localhost:5002/api/forms"
   api_logs = "http://localhost:8888/api/logs"
   age = 72 # in hours
@@ -30,7 +29,7 @@ ua = navigator?.userAgent?.toLowerCase()
 mobile_device = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
 force_mobile = (dev and debug_mobile)
 mobile = mobile_device or force_mobile
-svg_support = Modernizr.svg
+svg_support = Modernizr?.svg ? not mobile_device
 force_canvas = (dev and debug_canvas)
 svg = svg_support and not force_canvas
 
@@ -47,7 +46,6 @@ config =
   api_fetch: api_fetch
   api_render: api_render
   api_uploads: api_uploads
-  api_get: api_get
   api_forms: api_forms
   api_logs: api_logs
   api_token: gh_api_token
