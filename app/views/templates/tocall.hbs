@@ -1,13 +1,11 @@
-{{#if first_name}}
-	<div class="view">
-		<label class="checkbox">
-			<input class="toggle" type="checkbox"{{#if called}} checked{{/if}}>
-			<p>
-				{{first_name}} {{last_name}} ({{score}})
-				<a class="btn btn-mini" href="/rep/{{id}}">
-					<i class="icon-chevron-right"></i> Go
-				</a>
-			</p>
-		</label>
-	</div>
-{{/if}}
+<div class="view">
+	<label class="checkbox">
+		<input class="toggle" type="checkbox"{{#if called}} checked{{/if}}>
+		<p>
+			{{name}} ({{followers}})
+			<a class="btn btn-mini" href="/rep/{{login}}">
+				<i class="icon-chevron-right"></i> Go
+			</a>
+		</p>
+	</label>
+</div>

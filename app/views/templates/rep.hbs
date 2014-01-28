@@ -1,13 +1,14 @@
 <div class="control-group">
 	<div class="controls">
-		<a class="btn" href="/rep/{{id}}/false/true">
+		<a class="btn" href="/rep/{{login}}/false/true">
 			<i class="icon-refresh"></i> Refresh Data
 		</a>
-		<a class="btn" href="/rep/{{id}}/true">
+		<a class="btn" href="/rep/{{login}}/true">
 			<i class="icon-refresh"></i> Redraw Graph
 		</a>
 	</div>
 </div>
+<!--
 <div id="fail-modal" class="modal hide fade">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -32,15 +33,15 @@
 		<a href="#" class="btn btn-primary" data-dismiss="modal">Ok</a>
 	</div>
 </div>
-<div class="view" id="{{id}}">
-	<h2>{{first_name}} {{last_name}}</h2>
+ -->
+<div class="view" id="{{login}}">
+	<h2>{{name}}</h2>
 	<div id="work-graph">
-		<h3>Work Graph<br></h3>
-		<div class="chart chart-cur" id="chart-cur-cont">
-			<svg id="svg-cur"></svg>
-		</div>
+		<h3>Activity Graph<br></h3>
+		<div class="chart"><svg id="svg"></svg></div>
 		<hr>
 	</div>
+<!--
 	<div id="work-issues">
 		<h3>Work Issues<br></h3>
 		<div id="issues-cur-cont">
@@ -59,33 +60,32 @@
 		</div>
 		<hr>
 	</div>
+ -->
 	<div id="feedback">
-		<h3>Customer Feedback & Progress<br></h3>
+		<h3>Scores & Progress<br></h3>
 		<div class="tab-pane active" id="cur_feedback">
 			<ul class="unstyled">
 				<li>
 					<div class="row-fluid">
 						<div class="span2">
-							<label>Feedback Summary</label>
+							<label>Score Summary</label>
 						</div>
 						<div class="span10">
 							<div>
 								<table class="table table-striped">
 									<thead><tr>
-										<th>Cat 1</th><th>Cat 2</th>
-										<th>Cat 3</th><th>Cat 4</th>
+										<th>Score 1</th><th>Score 2</th>
+										<th>Score 3</th><th>Score 4</th>
 									</tr></thead>
 									<tbody><tr>
-									{{#with cur_feedback_data}}
 										<td><a class="btn btn-large btn-warning disabled">
-										{{#times x_survey_cat_1}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_1}}<i class="icon-star"></i>{{/untimes}}</a></td>
+										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
 										<td><a class="btn btn-large btn-warning disabled">
-										{{#times x_survey_cat_2}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_2}}<i class="icon-star"></i>{{/untimes}}</a></td>
+										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
 										<td><a class="btn btn-large btn-warning disabled">
-										{{#times x_survey_cat_3}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_3}}<i class="icon-star"></i>{{/untimes}}</a></td>
+										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
 										<td><a class="btn btn-large btn-warning disabled">
-										{{#times x_survey_cat_4}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes x_survey_cat_4}}<i class="icon-star"></i>{{/untimes}}</a></td>
-									{{/with}}
+										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
 									</tr></tbody>
 								</table>
 							</div>
@@ -95,21 +95,21 @@
 				<li>
 					<div class="row-fluid">
 						<div class="span2">
-							<label>Progress Table</label>
+							<label>Stats Summary</label>
 						</div>
 						<div class="span10">
 							<table class="table table-striped">
 								<thead><tr>
-									<th>Sales (TZS)</th>
-									<th>Visits (#)</th>
-									<th>Commission (TZS)</th>
-									<th>Points (#)</th>
+									<th>Repos</th>
+									<th>Gists</th>
+									<th>Followers</th>
+									<th>Following</th>
 								</tr></thead>
 								<tbody><tr>
-								{{#with cur_progress}}
-									<td>{{price}}</td><td>{{visits}}</td>
-									<td>{{commission}}</td><td>{{pts}}</td>
-								{{/with}}
+									<td>{{public_repos}}</td>
+									<td>{{public_gists}}</td>
+									<td>{{followers}}</td>
+									<td>{{following}}</td>
 								</tr></tbody>
 							</table>
 						</div>
@@ -118,16 +118,14 @@
 				<li>
 					<div class="row-fluid">
 						<div class="span2">
-							<label>Progress Graph</label>
+							<label>Followers Progress</label>
 						</div>
 						<div class="progress span10">
-						{{#with cur_progress}}
 							<div class="bar" style="width: {{pre}}%;"></div>
 							<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
 							<div class="bar" style="width: {{post}}%;"></div>
 							<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
 							<div class="bar bar-success" style="width: {{end}}%;"></div>
-						{{/with}}
 						</div>
 					</div>
 				</li>
@@ -171,11 +169,10 @@
 
 	<div id="rep-info">
 		<ul class="inline">
-			<li>Name: {{first_name}} {{last_name}}</li>
-			<li>Phone #: {{airtel}}</li>
-			<li>ID #: {{id}}</li>
-			<li>Ward: {{ward}}</li>
+			<li>Name: {{name}}</li>
+			<li>Email: {{email}}</li>
+			<li>Login: {{login}}</li>
+			<li>Location: {{location}}</li>
 		</ul>
 	</div>
 </div>
-<span id="draw-chart-cur"></span>

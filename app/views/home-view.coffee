@@ -13,7 +13,7 @@ module.exports = class HomePageView extends View
 #   forms: mediator.forms
   reps: mediator.reps
 
-  initialize: ->
+  initialize: (options) =>
     @subscribeEvent 'dispatcher:dispatch', @render
 #     @setFormData()
     @setRepData()
@@ -47,20 +47,12 @@ module.exports = class HomePageView extends View
     mediator.download.form_href = "data:text/csv;charset=utf-8," + escape csv
 
   setRepData: =>
-    keys1 = [
-      'first_name', 'last_name', 'id', 'score', 'airtel', 'called',
-      'created', 'ward']
-    keys2 = ['cur_feedback_data', 'cur_progress']
+    keys = ['name', 'id', 'score', 'email', 'called', 'created', 'location']
 
     collection = []
     for model in @reps.toJSON()
       obj = {}
-      res = _.pick model, keys1
-
-      for key, value of _.pick model, keys2
-        for k, v of value
-          obj[key + '_' + k] = v
-
+      res = _.pick model, keys
       collection.push _.extend res, obj
       collection
 

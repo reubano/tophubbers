@@ -18,9 +18,10 @@ module.exports = class RepView extends View
     super
     @attr = options.attr
     @id = @model.get 'id'
+    @login = @model.get 'login'
     mediator.rep_id = @id
 
-    utils.log 'initialize rep-view for ' + @id
+    utils.log 'initialize rep-view for ' + @login
 #     console.log @forms
     console.log options
 
@@ -42,12 +43,12 @@ module.exports = class RepView extends View
 
   render: =>
     super
-    utils.log 'rendering rep view for ' + @id
+    utils.log 'rendering rep view for ' + @login
     @renderDatepicker '#review-datepicker'
     @renderDatepicker '#network-datepicker'
 
   renderDatepicker: (selection) =>
-    momentous = new Momentous @.$ selection
+    momentous = new Momentous @$ selection
     momentous.init()
     # utils.log momentous
 
@@ -96,7 +97,7 @@ module.exports = class RepView extends View
   success: (model, textStatus, res) =>
     utils.log 'rep-view caught sync event'
     if model.get('id')
-      utils.log 'successfully posted form #' + model.get('id') + '!'
+      utils.log 'successfully posted form #' + model.get('login') + '!'
       @render()
       @$('#success-modal').modal()
     else
@@ -108,7 +109,7 @@ module.exports = class RepView extends View
 
   failWhale: (model, textStatus, res) =>
     if model.get('id')
-      utils.log 'failed to post form for ' + model.get('id')
+      utils.log 'failed to post form for ' + model.get('login')
       @$('#fail-modal').modal()
     else
       utils.log 'failed to fetch forms'
