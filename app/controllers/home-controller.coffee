@@ -5,7 +5,7 @@ View = require 'views/home-view'
 utils = require 'lib/utils'
 
 module.exports = class HomeController extends Controller
-  mediator = Chaplin.mediator
+#   mediator = Chaplin.mediator
 
 #   forms: mediator.forms
 
