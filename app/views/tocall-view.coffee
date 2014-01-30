@@ -6,10 +6,13 @@ module.exports = class TocallView extends View
   template: template
   tagName: 'li'
 
-  initialize: ->
+  initialize: (options) =>
     super
+    @refresh = options.refresh
     @listenTo @model, 'change', @render
     @delegate 'click', '.toggle', @toggle
+    console.log "refresh: #{@refresh}"
+    @model.fetchData @refresh, 'score'
 
   render: =>
     super
@@ -17,11 +20,11 @@ module.exports = class TocallView extends View
     @$el.removeClass 'text-error text-success muted'
 
     if @model.get 'called' then className = 'muted'
-    else if  @model.get('score') >= 100 then className = 'text-error'
+    else if  @model.get('followers') <= 7000 then className = 'text-error'
     else className = 'text-success'
     @$el.addClass className
 
   toggle: =>
     @model.toggle()
-    @model.save()
+    @model.save patch: true
     @publishEvent 'resort'

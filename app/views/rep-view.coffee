@@ -12,61 +12,43 @@ module.exports = class RepView extends View
   region: 'content'
   className: 'span12'
   template: template
-  user: mediator.users.get(1)
-  forms: mediator.forms
+#   forms: mediator.forms
 
   initialize: (options) =>
     super
-    @attrs = options.attrs
+    @attr = options.attr
     @id = @model.get 'id'
-    @name = if @user then @user.get 'name' else 'N/A'
+    @login = @model.get 'login'
     mediator.rep_id = @id
 
-    utils.log 'initialize rep-view for ' + @id
-    console.log @forms
+    utils.log 'initialize rep-view for ' + @login
+#     console.log @forms
     console.log options
 
-    @checkOnline().done(@sendForms).done(@fetchForms)
-    @delegate 'click', '#network-form-submit', @networkFormSubmit
-    @delegate 'click', '#review-form-submit', @reviewFormSubmit
-    @subscribeEvent 'userUpdated', @setUserName
-    @subscribeEvent 'rendered:' + @attrs[1], @removeActive
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'loggingIn', @render
+#     @checkOnline().done(@sendForms).done(@fetchForms)
+#     @delegate 'click', '#network-form-submit', @networkFormSubmit
+#     @delegate 'click', '#review-form-submit', @reviewFormSubmit
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
-    for prefix in ['change:cur_', 'change:prev_']
-      @listenTo @model, prefix + 'work_data_c', @render
-      @listenTo @model, prefix + 'feedback_data', @render
-      @listenTo @model, prefix + 'progress', @render
+    for suffix in ['work_data_c', 'feedback_data', 'progress']
+      @listenTo @model, "change:cur_#{suffix}", @render
 
-    @listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
-    @listenTo @forms, 'request', @viewRequest
-    @listenTo @forms, 'change', @render
-    @listenTo @forms, 'sync', @success
-    @listenTo @forms, 'error', @failWhale
-    @listenTo @forms, 'invalid', @failWhale
-
-  setUserName: (user) =>
-    @name = user.get 'name'
-    utils.log 'User name is ' + @name
+#     @listenTo @forms, 'add', -> utils.log 'rep-view caught add event'
+#     @listenTo @forms, 'request', @viewRequest
+#     @listenTo @forms, 'change', @render
+#     @listenTo @forms, 'sync', @success
+#     @listenTo @forms, 'error', @failWhale
+#     @listenTo @forms, 'invalid', @failWhale
 
   render: =>
     super
-    utils.log 'rendering rep view for ' + @id
+    utils.log 'rendering rep view for ' + @login
     @renderDatepicker '#review-datepicker'
     @renderDatepicker '#network-datepicker'
 
-  removeActive: =>
-    # Hack to get the chart to render in the inactive tab
-    # http://stackoverflow.com/a/11816438
-    chart_class = 'chart-' + @attrs[1][0..2]
-    tab = '#' + chart_class + '-cont'
-    @$(tab).removeClass 'active'
-
   renderDatepicker: (selection) =>
-    momentous = new Momentous @.$ selection
+    momentous = new Momentous @$ selection
     momentous.init()
     # utils.log momentous
 
@@ -75,7 +57,7 @@ module.exports = class RepView extends View
     keys = ((y for x,y of z)[0] for z in data)
     values = ((y for x,y of z)[1] for z in data)
     obj = _.object(keys, values)
-    _.extend obj, {rep: @id, manager: @name, form: form[1..]}
+    _.extend obj, {rep: @id, manager: 'name', form: form[1..]}
 
   checkOnline: -> $.ajax config.api_forms
 
@@ -115,7 +97,7 @@ module.exports = class RepView extends View
   success: (model, textStatus, res) =>
     utils.log 'rep-view caught sync event'
     if model.get('id')
-      utils.log 'successfully posted form #' + model.get('id') + '!'
+      utils.log 'successfully posted form #' + model.get('login') + '!'
       @render()
       @$('#success-modal').modal()
     else
@@ -127,7 +109,7 @@ module.exports = class RepView extends View
 
   failWhale: (model, textStatus, res) =>
     if model.get('id')
-      utils.log 'failed to post form for ' + model.get('id')
+      utils.log 'failed to post form for ' + model.get('login')
       @$('#fail-modal').modal()
     else
       utils.log 'failed to fetch forms'

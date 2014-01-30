@@ -1,8 +1,9 @@
-debug_mobile = true
+debug_mobile = false
 debug_prod = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
+gh_api_token = 'cdac348c97dbdf5252d530103e0bfb2b9275d126'
 
 if dev and not debug_prod
   console.log 'development envrionment set'
@@ -20,7 +21,6 @@ else
   api_fetch = 'http://ongeza.herokuapp.com/api/fetch'
   api_render = 'http://ongeza.herokuapp.com/api/render'
   api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
-  api_get = 'http://ongeza-api.herokuapp.com/'
   api_forms = 'http://ongeza-forms.herokuapp.com/api/forms'
   api_logs = 'http://flogger.herokuapp.com/api/logs'
   age = 12 # in hours
@@ -45,14 +45,16 @@ config =
   api_get: api_get
   api_forms: api_forms
   api_logs: api_logs
+  api_token: gh_api_token
   mobile: mobile
   rpp: 100 # form results per page
   max_age: age
-  to_chart: 'work_data'
-  data_attrs: ['cur_work_data', 'prev_work_data']
-  hash_attrs: ['cur_work_hash', 'prev_work_hash']
-  res: ['rep_info', 'work_data', 'score', 'progress_data', 'feedback_data', 'visits']
+  info_attr: 'info'
+  prgrs_attr: 'progress'
+  data_attr: 'work_data'
+  hash_attr: 'work_hash'
   parsed_suffix: '_c'
+  chart_attr: 'work_data_c'
   svg_suffix: '_svg'
   img_suffix: '_img'
 

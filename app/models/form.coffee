@@ -8,4 +8,4 @@ module.exports = class Form extends Model
 
   initialize: ->
     super
-    # utils.log 'initialize form model'
+    utils.log 'initialize form model'

@@ -1,7 +1,6 @@
 Chaplin = require 'chaplin'
 routes = require 'routes'
 Reps = require 'models/reps'
-Users = require 'models/users'
 Forms = require 'models/forms'
 Navbar = require 'models/navbar'
 Layout = require 'views/layout'
@@ -10,7 +9,7 @@ Layout = require 'views/layout'
 module.exports = class Application extends Chaplin.Application
   # Set your application name here so the document title is set to
   # “Controller title – Site title” (see Chaplin.Layout#adjustTitle)
-  title: 'Ongeza Sales Rep App'
+  title: 'Top Githubbers'
 
   initialize: ->
     super
@@ -50,17 +49,11 @@ module.exports = class Application extends Chaplin.Application
   # Create additional mediator properties.
   initMediator: ->
     # Add additional application-specific properties and methods
-    Chaplin.mediator.user = null
-    Chaplin.mediator.loggingIn = false
-    Chaplin.mediator.loginFailed = false
-    Chaplin.mediator.synced = false
     Chaplin.mediator.download = {}
     Chaplin.mediator.rep_id = null
-    Chaplin.mediator.users = new Users()
-    Chaplin.mediator.forms = new Forms()
+#     Chaplin.mediator.forms = new Forms()
     Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
-    Chaplin.mediator.users.fetch()
-    Chaplin.mediator.forms.fetch {remote: false}
+#     Chaplin.mediator.forms.fetch {remote: false}
     Chaplin.mediator.reps.fetch()
     Chaplin.mediator.seal()

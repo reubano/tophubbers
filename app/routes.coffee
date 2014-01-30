@@ -2,8 +2,6 @@ module.exports = (match) ->
   match '', 'home#show'
   match 'home', 'home#show'
   match 'home/:refresh', 'home#show'
-  match 'logout', 'auth#logout'
-  match 'login', 'auth#login'
 
   # Dynamic checklist of reps ordered and categorized by progress
   match 'tocalls', 'tocalls#index'
@@ -27,6 +25,6 @@ module.exports = (match) ->
   # Customer feedback score
   # Data table of progress
   # Mint like progress bars
-  match 'rep/:id', 'rep#show'
-  match 'rep/:id/:ignore_cache', 'rep#show'
-  match 'rep/:id/:ignore_cache/:refresh', 'rep#show'
+  match 'rep/:login', 'rep#show'
+  match 'rep/:login/:ignore_cache', 'rep#show'
+  match 'rep/:login/:ignore_cache/:refresh', 'rep#show'

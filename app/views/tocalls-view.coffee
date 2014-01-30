@@ -14,9 +14,6 @@ module.exports = class TocallsView extends CollectionView
   initialize: (options) =>
     super
     @subscribeEvent 'resort', @sort
-    @subscribeEvent 'loginStatus', @render
-    @subscribeEvent 'loggingIn', @render
-    @subscribeEvent 'userUpdated', @render
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'tocalls-view caught dispatcher event'
     # @listenTo @model,'all', @renderCheckbox

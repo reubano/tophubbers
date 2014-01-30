@@ -1,17 +1,20 @@
-{{#if_logged_in}}
-	{{#if_manager}}
-		<div class="control-group">
-			<div class="controls">
-				<a class="btn" href="/visits/true">
-					<i class="icon-refresh"></i> Refresh Data
-				</a>
-			</div>
-		</div>
+<div class="control-group">
+	<div class="controls">
+		<a class="btn" href="/visits/true">
+			<i class="icon-refresh"></i> Refresh Data
+		</a>
+	</div>
+</div>
 
-		<h2>House Visits by Day </h2><ul class="unstyled" id="visit-list"></ul>
-	{{else}}
-		<h2 class="text-error">You are not authorized to see this page.</h2>
-	{{/if_manager}}
-{{else}}{{#if_not_logging_in}}
-	<h2 class="text-error">You must log in to see this page.</h2>
-{{/if_not_logging_in}}{{/if_logged_in}}
+<h2>User Stats Summary</h2>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Name</th><th>Repos</th>
+			<th>Gists</th><th>Followers</th>
+			<th>Following</th>
+		</tr>
+	</thead>
+	<tbody id="visit-list"></tbody>
+</table>

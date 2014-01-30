@@ -7,10 +7,8 @@ utils = require 'lib/utils'
 module.exports = class HomeController extends Controller
   mediator = Chaplin.mediator
 
-  adjustTitle: 'Ongeza Home'
-  collection: mediator.reps
-  model: mediator.navbar
-  forms: mediator.forms
+  adjustTitle: 'Top Githubbers'
+#   forms: mediator.forms
 
   initialize: =>
     utils.log 'initialize home-controller'

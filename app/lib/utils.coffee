@@ -11,7 +11,7 @@ Minilog
   .enable()
   .pipe new Minilog.backends.jQuery {url: config.api_logs, interval: 5000}
 
-minilog = Minilog 'ongeza'
+minilog = Minilog 'tophubbers'
 
 _(utils).extend
   # String helpers
@@ -332,85 +332,8 @@ found on host #{host}"
       # Firefox' latency arguments
       acc.handles[id] = setTimeout (-> handler()), acc.interval
 
-  # Call the given function `func` when the global event `eventType` occurs.
-  # Defaults to 'login', so the `func` is called when
-  # the user has successfully logged in.
-  # When the function is called, `this` points to the given `context`.
-  # You may pass a `loginContext` for the UI context where
-  # the login was triggered.
-  afterLogin: (context, func, eventType = 'login', args...) ->
-    if mediator.user
-      # All fine, just pass through
-      func.apply context, args
-    else
-      # Register a handler for the given event
-      loginHandler = ->
-        # Cleanup
-        mediator.unsubscribe eventType, loginHandler
-        # Pass to wrapped function
-        func.apply context, args
-
-      mediator.subscribe eventType, loginHandler
-
-  deferMethodsUntilLogin: (obj, methods, eventType = 'login') ->
-    methods = [methods] if typeof methods is 'string'
-
-    for name in methods
-      func = obj[name]
-      unless typeof func is 'function'
-        throw new TypeError "utils.deferMethodsUntilLogin: method #{name}
-not found"
-      obj[name] = _(utils.afterLogin).bind null, obj, func, eventType
-
-  # Delegates to afterLogin, but triggers the login dialog if the user
-  # isn't logged in and calls preventDefault if an event object is passed.
-  ensureLogin: (context, func, loginContext, eventType = 'login', args...) ->
-    utils.afterLogin context, func, eventType, args...
-
-    unless mediator.user
-      # If an event is passed to the original function, prevent the
-      # default action
-      if (e = args[0]) and typeof e.preventDefault is 'function'
-        e.preventDefault()
-
-      # Start login process
-      mediator.publish '!showLogin', loginContext
-
-  # Wrap methods which need a logged-in user.
-  # Trigger the login when they are called and there is no user.
-  # Arguments:
-  # `obj`: The object whose methods should be wrapped
-  # `methods`: A string or an array of strings with method names
-  # `loginContext`: object with login context information, should have
-  #                a `description` property
-  # `eventType`: The global PubSub event the actual method call will wait for.
-  #             Defaults to 'login'.
-  ensureLoginForMethods: (obj, methods, loginContext, eventType = 'login') ->
-    # Transform a single method string into a list
-    methods = [methods] if typeof methods is 'string'
-
-    for name in methods
-      func = obj[name]
-      unless typeof func is 'function'
-        throw new TypeError "utils.ensureLoginForMethods: method #{name}
-not found"
-      obj[name] = _(utils.ensureLogin).bind(
-        null, obj, func, loginContext, eventType
-      )
-
-  # Facebook image helper
+  # Logging helper
   # ---------------------
-  facebookImageURL: (fbId, type = 'square') ->
-    # Create query string
-    params = type: type
-
-    # Add the Facebook access token if present
-    if mediator.user
-      accessToken = mediator.user.get('accessToken')
-      params.access_token = accessToken if accessToken
-
-    "https://graph.facebook.com/#{fbId}/picture?#{$.param(params)}"
-
   log: (message, level='debug') ->
     if level
       text = JSON.stringify message
@@ -423,5 +346,4 @@ not found"
 
       minilog[level] data
     else console.log message
-
 module.exports = utils

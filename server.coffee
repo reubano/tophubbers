@@ -8,7 +8,7 @@
 if process.env.NODETIME_ACCOUNT_KEY
   require('nodetime').profile
     accountKey: process.env.NODETIME_ACCOUNT_KEY
-    appName: 'Ongeza'
+    appName: 'Top Githubbers'
 
 # External dependencies
 express = require 'express'
@@ -45,7 +45,7 @@ mc = memjs.Client.create()
 s3 = knox.createClient
   key: process.env.AWS_ACCESS_KEY_ID
   secret: process.env.AWS_SECRET_ACCESS_KEY
-  bucket: process.env.S3_BUCKET_NAME or 'ongeza'
+  bucket: process.env.S3_BUCKET_NAME or 'tophubbers'
   region: 'eu-west-1'
 
 if config.dev
@@ -545,12 +545,13 @@ processPage = (page, ph, reps) ->
       data_obj = {}
 
       for rep in json.data
-        raw = (JSON.parse Common.getChartData a, rep[a], rep.id for a in config.data_attrs)
-        hashes = (md5 JSON.stringify r for r in raw)
-        hash_obj = _.object config.hash_attrs, hashes
+        raw = JSON.parse Common.convertData rep[config.data_attr], rep.login
+        hash = md5 JSON.stringify raw
+        hash_obj = {}
+        hash_obj[config.hash_attr] = hash
         hash_obj.id = rep.id
         hash_list.push hash_obj
-        _.extend data_obj, _.object hashes, raw
+        data_obj[hash] = raw
 
       keys = _.uniq _.keys data_obj
       (data_list.push {hash: k, data: data_obj[k]} for k in keys)
@@ -602,7 +603,7 @@ processPage = (page, ph, reps) ->
 
   # start server
   server = app.listen port, ->
-    suffix = if config.dev then "localhost:#{port}" else 'ongeza.herokuapp.com'
+    suffix = if config.dev then "localhost:#{port}" else 'tophubbers.herokuapp.com'
     home = "http://#{suffix}"
 
     logger.info "Listening on port #{port}"
