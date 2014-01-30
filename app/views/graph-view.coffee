@@ -10,165 +10,171 @@ module.exports = class GraphView extends View
   autoAttach: false
   template: template
 #   listen:
-#     addedToParent: 'getChartScript'
-#     addedToParent: 'addedToParentAlert'
-#     visibilityChange: 'visibilityChangeAlert'
+#     addedToParent: -> utils.log 'graph-view heard addedToParent'
+#     visibilityChange: -> utils.log 'graph-view heard visibilityChange'
+#     'all': (event) -> utils.log "heard #{event}"
 
   initialize: (options) =>
-#     console.log options
     super
-    @attr = options.attr
+    @model = options.model
     @refresh = options.refresh
     @ignore_cache = options.ignore_cache
-    @id = @model.get('id')
-    @location = @model.get('location')
-    @login = @model.get('login')
+    @login = @model.get 'login'
     @has_svg = config.svg
     @canvas = config.canvas
-    @listen_suffix = if @has_svg then config.parsed_suffix else ''
+    @rendered = false
     @changed = false
 
     utils.log "initialize graph-view for #{@login}"
     utils.log options, false
 
-    @listen_attr = if @has_svg then config.data_attr else config.hash_attr
-    @chart_attr = @attr + @listen_suffix
-    changes = 'change:' + @listen_attr + @listen_suffix
+    @listenTo @model, "change:#{config.chart_attr}", =>
+      utils.log "graph-view heard #{@login}'s change:#{config.chart_attr}"
+      @changed = true
+      @unsetCache @model
+      _.defer @getChartScript, @model
 
-    @listenTo @model, changes, =>
-      utils.log 'graph-view heard ' + changes
-      @changed = @listen_attr
-      @unsetCache @changed
-      @render() if @changed is @attr
-
-    @model.fetchData @refresh, 'chart'
+    @model.fetchData(@refresh, 'chart').done (model) =>
+      _.defer @getChartScript, model
 
   render: =>
     super
     utils.log "rendering graph-view for #{@login}"
     @attach()
-    _.defer @getChartScript, @ignore_cache
+    @rendered = true
+    @pubRender "#{@login}-view"
 
-  visibilityChangeAlert: ->
-    utils.log 'graph-view heard visibilityChange'
+  getChartScript: (model) =>
+    login = model.get 'login'
+    parent = Common.getParent login
 
-  addedToParentAlert: ->
-    utils.log 'graph-view heard addedToParent'
+    if $(parent)?.html()?.length > 20 and not @changed and not @ignore_cache
+      return utils.log 'getChartScript requirements not met'
 
-  getChartScript: (ignore_cache) =>
-    utils.log "getting chart for #{@login}"
-    @unsetCache @listen_attr if ignore_cache
-    utils.log 'setting variables for ' + @attr
-    @options = {attr: @attr, id: @id}
-    @parent = Common.getParent @login
-    console.log "parent is #{@parent}"
-    @svg_attr = @attr + config.svg_suffix
-    @img_attr = @attr + config.img_suffix
-    @text = if @has_svg then "#{@login} #{@svg_attr}" else "#{@login} #{@img_attr}"
-    chart_json = @model.has @chart_attr
-    name = @model.get 'name'
-    svg = if @model.has @svg_attr then @model.get @svg_attr else null
-    img = if @model.has @img_attr then @model.get @img_attr else null
+    utils.log "getting chart for #{login}"
+    @unsetCache model if @ignore_cache
+    @text = if @has_svg then "#{login} #{config.svg_attr}" else "#{login} #{config.img_attr}"
+    chart_json = model.has config.chart_attr
+    name = model.get 'name'
+    hash = model.get config.hash_attr
+    svg = model.get config.svg_attr
+    img = model.get config.img_attr
 
-    if @canvas and img and not @changed and not ignore_cache
+    if @canvas and img and not @changed and not @ignore_cache
       utils.log "fetching #{@text} from cache"
-      utils.log img
-      @$(@parent).html img
-      @pubRender @attr
-    else if @canvas and name
+      $(parent).html img
+      @pubRender config.img_attr
+    else if @canvas and hash
       utils.log "fetching #{@text} from server"
-      data = {hash: @model.get @attr}
-      _.extend data, @options
-      $.post(config.api_render, data).done(@gvSuccess).fail(@gvFailWhale)
-    else if svg and not @changed and not ignore_cache
+      string = model.get config.chart_attr
+      localStorage.setItem login, string
+      publish = => @pubRender config.img_attr
+      @getImg(login, hash).done(@setImg, publish).fail(@gvFailWhale)
+    else if svg and not @changed and not @ignore_cache
       utils.log "drawing #{@text} from cache"
-      @$(@parent).html svg
-      @pubRender @attr
+      $(parent).html svg
+      @pubRender config.svg_attr
     else if chart_json and name
-      selection = Common.getSelection @login
-      utils.log "#{@login} #{@attr} has svg: #{svg?}"
-      utils.log "#{@login} #{@attr} ignore svg: #{ignore_cache}"
+      selection = Common.getSelection login
+      utils.log "#{login} has svg: #{svg?}"
+      utils.log "#{login} ignore svg: #{@ignore_cache}"
       utils.log "fetching script for #{selection}"
-      chart_data = JSON.parse @model.get @chart_attr
-      do (@login, @attr) =>
+      chart_data = JSON.parse model.get config.chart_attr
+      do (login, parent, model) =>
         nv.addGraph makeChart(chart_data, selection, @changed, true), =>
-          @setSVG @login
-          @pubRender @attr
-    else utils.log "#{@login} has no #{@chart_attr} or no name"
+          @setSVG login, parent, model
+          @pubRender config.svg_attr
+    else utils.log "#{login} has no #{config.chart_attr} or hash or name"
 
   pubRender: (attr) =>
     @publishEvent 'rendered:' + attr
     utils.log 'published rendered:' + attr
 
-  unsetCache: (prefix) =>
-    suffix = if @has_svg then 'svg_suffix' else 'img_suffix'
-    attr = prefix + config[suffix]
-    utils.log "unsetting #{@login} #{attr}"
-    @model.unset attr
-    @model.save()
+  unsetCache: (model) =>
+    attr = if @has_svg then config.svg_attr else config.img_attr
+    utils.log "unsetting #{model.get 'login'} #{attr}"
+    model.unset attr
+    model.save()
 
-  setImg: (login) =>
-    parent = Common.getParent login
+  setImg: (model, parent) =>
     html = $(parent).html()
+    login = model.get 'login'
 
-    if html and html.length is 57
+    if html?.length > 50
       img = html.replace(/\"/g, '\'')
-      attr = "chart#{config.img_suffix}"
-      utils.log "setting #{login} #{attr}"
-      @model.set attr, img
-      @model.save()
-    else
-      utils.log 'html blank or malformed for ' + parent
+      utils.log "setting #{login} #{config.img_attr}"
+      model.set config.img_attr, img
+      model.save()
+    else utils.log "html appears blank for #{login}: #{html.length}"
 
-  setSVG: (login) =>
-    parent = Common.getParent login
-    html = @$(parent).html()
+  setSVG: (login, parent, model) =>
+    html = $(parent).html()
     bad = ['opacity: 0.0', 'opacity: 0.1', 'opacity: 0.2', 'opacity: 0.3',
       'opacity: 0.4', 'opacity: 0.5', 'opacity: 0.6']
 
     if html and (html.indexOf(b) < 0 for b in bad) and html.length > 40
       svg = html.replace(/\"/g, '\'')
-      attr = @attr + config.svg_suffix
-      utils.log "setting #{login} #{attr}"
-      @model.set attr, svg
-      @model.save()
+      utils.log "setting #{login} #{config.svg_attr}"
+      model.set config.svg_attr, svg
+      model.save()
+    else utils.log "html blank or malformed for #{login} with length #{html.length}"
+
+  getImg: (login, hash) => $.Deferred((deferred) =>
+    parent = Common.getParent login
+    data = {login: login, hash: hash}
+    res = {location: "#{config.api_render}?#{JSON.stringify data}", status: 417}
+    model = @model
+
+    if $(parent)
+      url = "#{config.api_uploads}/#{login}/#{hash}"
+      utils.log "setting html for #{parent} to #{url}"
+
+      $(parent).html "<img src=#{url}>"
+      $("#{parent} img").one 'error', -> deferred.reject res
+      $("#{parent} img").one 'load', -> deferred.resolve model, parent
     else
-      utils.log 'html blank or malformed for ' + parent
+      utils.log "selection #{parent} doesn't exist", 'error'
+      deferred.reject res).promise()
 
   gvSuccess: (data, textStatus, res) =>
-    if data?.login?
-      login = data.login
-      parent = Common.getParent login
-      utils.log "successfully fetched png for #{login}!"
+    utils.log 'enter gvSuccess'
+    loc = res.getResponseHeader 'Location'
 
-      if $(parent)
-        url = "#{config.api_uploads}/#{data.hash}"
-        utils.log "setting html for #{parent} to #{url}"
-        $(parent).html "<img src=#{url}>"
-        @setImg login
-        @pubRender data.attr
-      else utils.log "selection #{parent} doesn't exist", 'error'
-    else
-      loc = res.getResponseHeader 'Location'
+    if data?.login? and data?.hash?
+      utils.log "getting #{data.login}'s image"
+      @getImg(data.login, data.hash).done(@setImg).fail(@gvFailWhale)
+    else if loc
+      splits1 = loc.split('/')
+      splits2 = loc.split('?')
 
-      try
-        splits = loc.split('/') if loc else false
-      catch TypeError
-        splits = false
-
-      if 'progress' in splits
-        utils.log "trying to get progress: #{loc}", false
-        $.get(loc).done(@gvSuccess).fail(@gvFailWhale)
-      else if splits
-        utils.log "trying to post render: #{splits[1]}", false
-        $.post(config.api_render, splits[1]).done(@gvSuccess).fail(@gvFailWhale)
-      else utils.log "Location header not found", 'error'
+      if 'progress' in splits1
+        wait = parseInt res.getResponseHeader 'Retry-After'
+        utils.log "checking progress: #{loc} in #{wait/1000}s"
+        _.delay (=> $.get(loc).done(@gvSuccess).fail(@gvFailWhale)), wait
+      else if splits2.length > 1
+        url = splits[0]
+        data = JSON.parse splits[1]
+        data.string = localStorage.getItem data.login if data.data
+        utils.log "posting data to #{url}"
+        $.post(url, data).done(@gvSuccess).fail(@gvFailWhale)
+      else utils.log "error parsing location #{loc}", 'error'
+    else utils.log "Location header not found", 'error'
 
   gvFailWhale: (res, textStatus, err) =>
+    utils.log 'enter gvFailWhale'
     if res.status is 503
       wait = parseInt res.getResponseHeader 'Retry-After'
-      console.log "retrying #{res.getResponseHeader 'Location'} in #{wait/1000}s"
+      utils.log "retrying #{res.getResponseHeader 'Location'} in #{wait/1000}s"
       do (res) => _.delay @gvSuccess, wait, {}, 'OK', res
+    else if res.status is 417
+      loc = res.location ? res.getResponseHeader('Location')
+      splits = loc?.split('?') ? false
+      return utils.log "Location header not found", 'error' if not loc
+      url = splits[0]
+      data = JSON.parse splits[1]
+      data.string = localStorage.getItem data.login
+      utils.log "posting data to #{url}"
+      $.post(url, data).done(@gvSuccess).fail(@gvFailWhale)
     else
       try
         error = JSON.parse(res.responseText).error

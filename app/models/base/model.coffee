@@ -20,6 +20,6 @@ module.exports = class Model extends Chaplin.Model
     else
       utils.log "fetch doesn't have promise"
       $.Deferred((deferred) => @fetch
-        success: deferred.resolve
+        success: => deferred.resolve @
         error: deferred.reject).promise()
 

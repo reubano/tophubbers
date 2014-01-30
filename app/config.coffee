@@ -12,7 +12,7 @@ rep_url = "https://api.github.com/users/"
 if dev and not debug_prod
   console.log 'development envrionment set'
   mode = 'development'
-  api_fetch = "/api/fetch"
+  api_progress = "/api/progress"
   api_render = "/api/render"
   api_uploads = "/api/uploads"
   api_forms = "http://localhost:5002/api/forms"
@@ -21,7 +21,7 @@ if dev and not debug_prod
 else
   console.log 'production envrionment set'
   mode = 'production'
-  api_fetch = 'http://ongeza.herokuapp.com/api/fetch'
+  api_progress = 'http://ongeza.herokuapp.com/api/progress'
   api_render = 'http://ongeza.herokuapp.com/api/render'
   api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
   api_forms = 'http://ongeza-forms.herokuapp.com/api/forms'
@@ -46,7 +46,7 @@ config =
   prod: prod
   debug_prod: debug_prod
   dev: dev
-  api_fetch: api_fetch
+  api_progress: api_progress
   api_render: api_render
   api_uploads: api_uploads
   api_forms: api_forms
@@ -62,10 +62,9 @@ config =
   info_attr: 'info'
   prgrs_attr: 'progress'
   data_attr: 'work_data'
+  chart_attr: 'work_string'
   hash_attr: 'work_hash'
-  parsed_suffix: '_c'
-  chart_attr: 'work_data_c'
-  svg_suffix: '_svg'
-  img_suffix: '_img'
+  svg_attr: 'work_svg'
+  img_attr: 'work_img'
 
 module.exports = config

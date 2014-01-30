@@ -17,7 +17,7 @@ module.exports = class RepController extends Controller
 
     @view = new View
       model: @collection.findWhere login: @login
-      attr: if config.mobile then config.hash_attr else config.data_attr
+      attr: @attr
       refresh: params?.refresh ? false
       ignore_cache: @ignore_cache
 

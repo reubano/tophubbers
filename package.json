@@ -32,8 +32,6 @@
     "underscore": "1.5",
     "coffee-script": "1.6",
     "phantom": "0.5",
-    "mongodb": "1.x",
-    "request": "2.x",
     "knox": "0.8.x",
     "nodetime": "0.8.x",
     "winston-papertrail": "0.1.x",
@@ -43,8 +41,7 @@
     "streamifier": "0.0.x",
     "JSONStream": "0.7.x",
     "event-stream": "3.x",
-    "memjs": "0.7.x",
-    "blueimp-md5": "1.x"
+    "memjs": "0.7.x"
   },
   "devDependencies": {
   }
