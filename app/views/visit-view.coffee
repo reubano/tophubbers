@@ -1,5 +1,6 @@
 View = require 'views/base/view'
 template = require 'views/templates/visit'
+utils = require 'lib/utils'
 
 module.exports = class VisitView extends View
   template: template
@@ -12,4 +13,4 @@ module.exports = class VisitView extends View
 
   render: =>
     super
-    # utils.log 'rendering visit view'
+    utils.log 'rendering visit view'

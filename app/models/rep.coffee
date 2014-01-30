@@ -8,7 +8,6 @@ module.exports = class Rep extends Model
 
   sync: (method, model, options) =>
     @local = method isnt 'read'
-    console.log model.get 'name'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to local: #{@local}"
     Backbone.sync(method, model, options)

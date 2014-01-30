@@ -38,7 +38,7 @@ svg = svg_support and not force_canvas
 
 console.log "host: #{host}"
 console.log "mobile device: #{mobile}"
-console.log "svg on: #{svg}"
+console.log "svg: #{svg}"
 console.log "debug production: #{debug_prod}"
 
 config =

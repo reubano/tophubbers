@@ -43,7 +43,7 @@ module.exports = class RepView extends View
 
   render: =>
     super
-    utils.log 'rendering rep view for ' + @login
+    utils.log 'rendering rep-view for ' + @login
     @renderDatepicker '#review-datepicker'
     @renderDatepicker '#network-datepicker'
 
