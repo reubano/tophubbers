@@ -3,9 +3,10 @@ View = require 'views/tocalls-view'
 utils = require 'lib/utils'
 
 module.exports = class TocallsController extends Controller
-  adjustTitle: 'Github Call List'
+  initialize: =>
+    @adjustTitle 'Check List'
+    utils.log 'initialize tocalls-controller'
 
-  initialize: => utils.log 'initialize tocalls-controller'
   comparator: (model) -> - model.get 'score_sort'
 
   index: (params) =>

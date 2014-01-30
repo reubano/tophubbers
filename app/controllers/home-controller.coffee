@@ -7,10 +7,10 @@ utils = require 'lib/utils'
 module.exports = class HomeController extends Controller
   mediator = Chaplin.mediator
 
-  adjustTitle: 'Top Githubbers'
 #   forms: mediator.forms
 
   initialize: =>
+    @adjustTitle 'Home'
     utils.log 'initialize home-controller'
     @subscribeEvent 'fetchData', ->
       _.delay @fetchAndPub, config.max_age * 1000 * 60 * 60

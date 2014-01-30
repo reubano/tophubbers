@@ -4,9 +4,8 @@ View = require 'views/rep-view'
 utils = require 'lib/utils'
 
 module.exports = class RepController extends Controller
-  adjustTitle: 'Github User View'
-
   initialize: =>
+    @adjustTitle 'User View'
     utils.log 'initialize rep-controller'
     console.log @collection
 
