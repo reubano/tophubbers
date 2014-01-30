@@ -21,9 +21,9 @@ if dev and not debug_prod
 else
   console.log 'production envrionment set'
   mode = 'production'
-  api_progress = 'http://ongeza.herokuapp.com/api/progress'
-  api_render = 'http://ongeza.herokuapp.com/api/render'
-  api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
+  api_progress = 'http://tophubbers.herokuapp.com/api/progress'
+  api_render = 'http://tophubbers.herokuapp.com/api/render'
+  api_uploads = 'http://tophubbers.herokuapp.com/api/uploads'
   api_logs = 'http://flogger.herokuapp.com/api/logs'
   age = 12 # in hours
 
