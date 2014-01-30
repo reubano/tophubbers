@@ -1,6 +1,7 @@
 debug_mobile = false
 debug_canvas = false
 debug_prod = false
+debug_minilog = true
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
@@ -43,6 +44,7 @@ config =
   mode: mode
   prod: prod
   debug_prod: debug_prod
+  debug_minilog: debug_minilog
   dev: dev
   api_progress: api_progress
   api_render: api_render

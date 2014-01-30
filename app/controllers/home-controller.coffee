@@ -10,6 +10,6 @@ module.exports = class HomeController extends Controller
     utils.log 'initialize home-controller'
 
   show: (params) =>
-    utils.log 'show home'
+    utils.log 'show home', 'info'
     @view = new View {@model}
 

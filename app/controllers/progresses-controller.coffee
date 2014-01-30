@@ -11,6 +11,7 @@ module.exports = class ProgressesController extends Controller
 
   index: (params) =>
     @collection.comparator = @comparator
+    utils.log 'show progresses', 'info'
     @view = new View
       collection: @collection
       refresh: params?.refresh ? false
