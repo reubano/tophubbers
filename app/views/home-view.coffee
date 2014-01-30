@@ -10,12 +10,10 @@ module.exports = class HomePageView extends View
   template: template
   region: 'content'
   className: 'span12'
-#   forms: mediator.forms
   reps: mediator.reps
 
   initialize: (options) =>
     @subscribeEvent 'dispatcher:dispatch', @render
-#     @setFormData()
     @setRepData()
 
   json2CSV: (json) ->
@@ -41,10 +39,6 @@ module.exports = class HomePageView extends View
       str += line + '\r\n'
 
     str
-
-  setFormData: =>
-    csv = @json2CSV @forms.toJSON()
-    mediator.download.form_href = "data:text/csv;charset=utf-8," + escape csv
 
   setRepData: =>
     keys = ['name', 'id', 'score', 'email', 'called', 'created', 'location']

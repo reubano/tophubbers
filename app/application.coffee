@@ -1,7 +1,6 @@
 Chaplin = require 'chaplin'
 routes = require 'routes'
 Reps = require 'models/reps'
-Forms = require 'models/forms'
 Navbar = require 'models/navbar'
 Layout = require 'views/layout'
 
@@ -51,9 +50,7 @@ module.exports = class Application extends Chaplin.Application
     # Add additional application-specific properties and methods
     Chaplin.mediator.download = {}
     Chaplin.mediator.rep_id = null
-#     Chaplin.mediator.forms = new Forms()
     Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
-#     Chaplin.mediator.forms.fetch {remote: false}
     Chaplin.mediator.reps.fetch()
     Chaplin.mediator.seal()

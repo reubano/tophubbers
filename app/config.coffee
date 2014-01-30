@@ -15,7 +15,6 @@ if dev and not debug_prod
   api_progress = "/api/progress"
   api_render = "/api/render"
   api_uploads = "/api/uploads"
-  api_forms = "http://localhost:5002/api/forms"
   api_logs = "http://localhost:8888/api/logs"
   age = 72 # in hours
 else
@@ -24,7 +23,6 @@ else
   api_progress = 'http://ongeza.herokuapp.com/api/progress'
   api_render = 'http://ongeza.herokuapp.com/api/render'
   api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
-  api_forms = 'http://ongeza-forms.herokuapp.com/api/forms'
   api_logs = 'http://flogger.herokuapp.com/api/logs'
   age = 12 # in hours
 
@@ -49,7 +47,6 @@ config =
   api_progress: api_progress
   api_render: api_render
   api_uploads: api_uploads
-  api_forms: api_forms
   api_logs: api_logs
   api_token: gh_api_token
   reps_url: reps_url
@@ -57,7 +54,6 @@ config =
   mobile: mobile
   svg: svg
   canvas: not svg
-  rpp: 100 # form results per page
   max_age: age
   info_attr: 'info'
   prgrs_attr: 'progress'
