@@ -7,7 +7,7 @@ module.exports = class VisitsController extends Controller
     @adjustTitle 'Stats Summary'
     utils.log 'initialize visits-controller'
 
-  comparator: (model) -> model.get 'id'
+  comparator: (model) -> - model.get 'public_repos'
 
   index: (params) =>
     @collection.comparator = @comparator

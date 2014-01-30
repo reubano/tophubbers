@@ -7,7 +7,7 @@ module.exports = class ProgressesController extends Controller
     @adjustTitle 'Follower Progress'
     utils.log 'initialize progresses-controller'
 
-  comparator: (model) -> - model.get 'score'
+  comparator: (model) -> - model.get 'followers'
 
   index: (params) =>
     @collection.comparator = @comparator
