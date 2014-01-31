@@ -142,3 +142,4 @@ module.exports = class Rep extends Model
       age >= config.max_age
     else
       utils.log "no #{attr} timestamp found"
+      true
