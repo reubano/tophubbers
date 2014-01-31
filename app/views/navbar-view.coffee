@@ -10,7 +10,7 @@ module.exports = class NavbarView extends View
   region: 'navbar'
   template: template
 
-  initialize: (options) ->
+  initialize: (options) =>
     super
     # utils.log 'navbar-view init'
     @subscribeEvent 'dispatcher:dispatch', @render

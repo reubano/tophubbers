@@ -13,7 +13,7 @@ module.exports = class RepController extends Controller
     @login = params.login
     @ignore_cache = params?.ignore_cache ? false
     refresh = params?.refresh ? false
-    utils.log 'show route login is ' + @login
+    utils.log "show #{@login}", 'info'
 
     @view = new View
       model: @collection.findWhere login: @login

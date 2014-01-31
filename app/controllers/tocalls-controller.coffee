@@ -11,6 +11,7 @@ module.exports = class TocallsController extends Controller
 
   index: (params) =>
     @collection.comparator = @comparator
+    utils.log 'show tocalls', 'info'
     @view = new View
       collection: @collection
       refresh: params?.refresh ? false

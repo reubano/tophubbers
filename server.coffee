@@ -61,13 +61,13 @@ encoding = {encoding: 'utf-8'}
 debug_s3 = false
 debug_memcache = true
 debug_toobusy = true
-days = 2
+cache_days = 5
 
 # cache life
-maxCacheAge = days * 24 * 60 * 60 * 1000
+maxCacheAge = cache_days * 24 * 60 * 60 * 1000
 login_expires = 12 * 60 * 60  # 12 hours (in seconds) - chart data
 loc_expires = 60 * 60  # 1 hour (in seconds)
-s3_expires = 2 * 24 * 60 * 60 # 2 days (in seconds)
+s3_expires = cache_days * 24 * 60 * 60 # 2 days (in seconds)
 s3List_expires = 30 * 60  # 30 minutes (in seconds)
 fs_expires = 24 * 60 * 60  # 1 day (in seconds)
 ph_start_expires = 10 * 60  # 10 minutes (in seconds)
@@ -318,26 +318,21 @@ getUploads = (req, res) ->
   progress = "#{config.api_progress}/#{login}/#{hash}"
 
   if config.dev and not debug_s3
-    filepath = path.join 'public', 'uploads', filename
     existsFunc = fileExists
-    getFunc = getFile
-    getFuncArg = res
+    getFunc = -> getFile path.join('public', 'uploads', filename), res
     expires = fs_expires
     prefix = 'fs'
   else
-    filepath = "/#{filename}"
     existsFunc = s3Exists
-    getFunc = s3.getFile
     getFuncArg = (err, resp) -> handleResp err, resp, hash, res
+    getFunc = -> s3.getFile "/#{filename}", getFuncArg
     expires = s3_expires
     prefix = 's3'
 
   keys = [
-    'filename', 'filepath', 'hash', 'progress', 'res', 'getFunc',
-    'getFuncArg', 'prefix', 'expires', 'login']
-  values = [
-    filename, filepath, hash, progress, res, getFunc, getFuncArg,
-    prefix, expires, login]
+    'filename', 'hash', 'progress', 'res', 'getFunc', 'prefix', 'expires',
+    'login']
+  values = [filename, hash, progress, res, getFunc, prefix, expires, login]
   opts = _.object(keys, values)
 
   do (opts) -> existsFunc filename, (exists, cached) ->
@@ -345,7 +340,7 @@ getUploads = (req, res) ->
       logger.info "#{opts.prefix}:#{opts.filename} exists!"
       key = "#{opts.prefix}:#{opts.filename}"
       setKey key, true, opts.expires if not cached
-      opts.getFunc opts.filepath, opts.getFuncArg
+      opts.getFunc()
     else if opts.hash in queued_hashes
       logger.info "#{opts.hash} found in cache"
       opts.res.location opts.progress
@@ -429,7 +424,6 @@ processPage = (page, ph) ->
       do (opts) -> fs.stat opts.filepath, (err, stat) ->
         return handleError err, opts.res, 'send2s3' if err
 
-        # Need to set file expiration to s3_expires
         hdr =
           'x-amz-acl': 'public-read'
           'Content-Length': stat.size

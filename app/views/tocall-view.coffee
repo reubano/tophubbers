@@ -8,6 +8,7 @@ module.exports = class TocallView extends View
 
   initialize: (options) =>
     super
+    utils.log 'initialize tocall-view'
     @refresh = options.refresh
     @listenTo @model, 'change', @render
     @delegate 'click', '.toggle', @toggle
@@ -15,7 +16,7 @@ module.exports = class TocallView extends View
 
   render: =>
     super
-    # utils.log 'rendering tocall view'
+    utils.log 'rendering tocall-view'
     @$el.removeClass 'text-error text-success muted'
 
     if @model.get 'called' then className = 'muted'

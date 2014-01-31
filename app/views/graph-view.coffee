@@ -10,9 +10,9 @@ module.exports = class GraphView extends View
   autoAttach: false
   template: template
 #   listen:
+#     'all': (event) -> utils.log "heard #{event}"
 #     addedToParent: -> utils.log 'graph-view heard addedToParent'
 #     visibilityChange: -> utils.log 'graph-view heard visibilityChange'
-#     'all': (event) -> utils.log "heard #{event}"
 
   initialize: (options) =>
     super
@@ -67,7 +67,7 @@ module.exports = class GraphView extends View
     else if @canvas and hash
       utils.log "fetching #{@text} from server"
       string = model.get config.chart_attr
-      localStorage.setItem login, string
+      utils.sessionStorage login, string
       publish = => @pubRender config.img_attr
       @getImg(login, hash).done(@setImg, publish).fail(@gvFailWhale)
     else if svg and not @changed and not @ignore_cache
@@ -154,7 +154,7 @@ module.exports = class GraphView extends View
       else if splits2.length > 1
         url = splits[0]
         data = JSON.parse splits[1]
-        data.string = localStorage.getItem data.login if data.data
+        data.string = utils.sessionStorage data.login if data.data
         utils.log "posting data to #{url}"
         $.post(url, data).done(@gvSuccess).fail(@gvFailWhale)
       else utils.log "error parsing location #{loc}", 'error'
@@ -172,7 +172,7 @@ module.exports = class GraphView extends View
       return utils.log "Location header not found", 'error' if not loc
       url = splits[0]
       data = JSON.parse splits[1]
-      data.string = localStorage.getItem data.login
+      data.string = utils.sessionStorage data.login
       utils.log "posting data to #{url}"
       $.post(url, data).done(@gvSuccess).fail(@gvFailWhale)
     else

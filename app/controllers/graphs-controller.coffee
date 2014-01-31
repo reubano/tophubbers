@@ -12,6 +12,7 @@ module.exports = class GraphsController extends Controller
 
   index: (params) =>
     @collection.comparator = @comparator
+    utils.log 'show graphs', 'info'
     @view = new View
       collection: @collection
       attr: @attr

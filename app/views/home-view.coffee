@@ -41,7 +41,9 @@ module.exports = class HomePageView extends View
     str
 
   setRepData: =>
-    keys = ['name', 'id', 'score', 'email', 'called', 'created', 'location']
+    keys = [
+      'id', 'name', 'login', 'followers', 'public_repos', 'public_gists',
+      'email', 'location']
 
     collection = []
     for model in @reps.toJSON()

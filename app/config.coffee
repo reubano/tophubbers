@@ -1,6 +1,7 @@
 debug_mobile = false
 debug_canvas = false
 debug_prod = false
+debug_minilog = true
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
@@ -20,9 +21,9 @@ if dev and not debug_prod
 else
   console.log 'production envrionment set'
   mode = 'production'
-  api_progress = 'http://ongeza.herokuapp.com/api/progress'
-  api_render = 'http://ongeza.herokuapp.com/api/render'
-  api_uploads = 'http://ongeza.herokuapp.com/api/uploads'
+  api_progress = 'http://tophubbers.herokuapp.com/api/progress'
+  api_render = 'http://tophubbers.herokuapp.com/api/render'
+  api_uploads = 'http://tophubbers.herokuapp.com/api/uploads'
   api_logs = 'http://flogger.herokuapp.com/api/logs'
   age = 12 # in hours
 
@@ -43,6 +44,7 @@ config =
   mode: mode
   prod: prod
   debug_prod: debug_prod
+  debug_minilog: debug_minilog
   dev: dev
   api_progress: api_progress
   api_render: api_render
@@ -59,6 +61,7 @@ config =
   prgrs_attr: 'progress'
   data_attr: 'work_data'
   chart_attr: 'work_string'
+  score_attr: 'work_score'
   hash_attr: 'work_hash'
   svg_attr: 'work_svg'
   img_attr: 'work_img'

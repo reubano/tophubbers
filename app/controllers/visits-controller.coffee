@@ -11,6 +11,7 @@ module.exports = class VisitsController extends Controller
 
   index: (params) =>
     @collection.comparator = @comparator
+    utils.log 'show visits', 'info'
     @view = new View
       collection: @collection
       refresh: params?.refresh ? false

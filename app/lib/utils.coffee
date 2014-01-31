@@ -78,15 +78,15 @@ _(utils).extend
   # Logging helper
   # ---------------------
   log: (message, level='debug') ->
-    if level
+    if config.dev and not config.debug_minilog then console.log message
+    else if level
       text = JSON.stringify message
       message = if text.length > 512 then "size exceeded" else message
 
       data =
         message: message
         time: (new Date()).getTime()
-        user: if mediator.user? then mediator.user.get 'email' else null
+        user: mediator?.user?.get('email')
 
-      minilog[level] data
-    else console.log message
+      minilog[level] data if level isnt 'debug'
 module.exports = utils

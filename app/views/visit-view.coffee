@@ -6,7 +6,7 @@ module.exports = class VisitView extends View
   template: template
   tagName: 'tr'
 
-  initialize: ->
+  initialize: =>
     super
     @listenTo @model, 'change', @render
     @model.fetchData @refresh
