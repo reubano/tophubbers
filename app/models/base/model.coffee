@@ -10,16 +10,10 @@ module.exports = class Model extends Chaplin.Model
     @set tstamp, new Date().toString()
     @save patch: true
 
-  # Promise helper
+  # Fetch promise helper
   # ---------------------
-  promize: =>
-#     file bug with dualstorage to return promise after local fetch
-    if @fetch.promise
-      utils.log "fetch has promise"
-      @fetch()
-    else
-      utils.log "fetch doesn't have promise"
-      $.Deferred((deferred) => @fetch
-        success: => deferred.resolve @
-        error: deferred.reject).promise()
+  modelFetch: =>
+    $.Deferred((deferred) => @fetch
+      success: deferred.resolve
+      error: deferred.reject).promise()
 

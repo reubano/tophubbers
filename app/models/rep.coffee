@@ -6,7 +6,8 @@ module.exports = class Rep extends Model
   url: => "#{config.rep_url}#{@get 'login'}?access_token=#{config.api_token}"
 
   sync: (method, model, options) =>
-    @local = method isnt 'read'
+    @local = -> method isnt 'read'
+    options.add = method is 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to server: #{not @local()}"
     Backbone.sync(method, model, options)
@@ -50,13 +51,9 @@ module.exports = class Rep extends Model
     do (model = @) -> promise.done(model.setActivity).fail(model.failWhale)
 
   fetchFunc: (force, type) =>
-    if @has 'name' then @setSynced()
-    else
-      utils.log 'No name!', 'error'
-      return @setSynced false
-
+    return utils.log 'No name!', 'error' if not @has 'name'
     if force and type is 'score' then @setScoreSort()
-    else if force or @cacheExpired(config.data_attr)
+    else if (type isnt 'score') and (force or @cacheExpired config.data_attr)
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
       else if type is 'progress' then @getActivity().done(@setProgress)
@@ -73,28 +70,15 @@ module.exports = class Rep extends Model
       saveTs = (model) -> model.saveTstamp config.info_attr
       fetch = (model) -> model.fetchFunc force, type
       resolve = (model) -> deferred.resolve model
-      do (force, type) => @promize()
+      do (force, type) => @modelFetch()
         .done(saveTs, fetch, resolve)
         .fail(@failWhale, deferred.reject)
     else
       deferred.resolve @
       utils.log "using cached #{config.info_attr} data"
-      @setSynced()
       @fetchFunc false, type
 
     utils.log @, false).promise()
-
-  setSynced: (type=true) =>
-    if type and localStorage.synced
-      utils.log 'collection already set to synced'
-    else if not (type or localStorage.synced)
-      utils.log 'collection already set to not synced'
-    else if type
-      utils.log 'setting collection to synced'
-      localStorage.setItem 'synced', true
-    else
-      utils.log 'setting collection to not synced'
-      localStorage.setItem 'synced', false
 
   setProgress: =>
     utils.log 'setting progress data'

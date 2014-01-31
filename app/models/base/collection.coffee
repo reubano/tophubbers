@@ -10,3 +10,11 @@ module.exports = class Collection extends Chaplin.Collection
   display: =>
     utils.log @, false
     utils.log @at(1).getAttributes(), false
+
+  # Fetch promise helper
+  # ---------------------
+  cltnFetch: =>
+    $.Deferred((deferred) => @fetch
+      success: deferred.resolve
+      error: deferred.reject).promise()
+

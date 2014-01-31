@@ -6,7 +6,9 @@ utils = require 'lib/utils'
 module.exports = class Reps extends Collection
   model: Model
   url: config.reps_url
-  local: localStorage.synced
+  storeName: 'Reps'
+  local: -> localStorage.getItem 'synced'
+
   sync: (method, collection, options) =>
     utils.log "collection's sync method is #{method}"
     utils.log "read collection from server: #{not @local()}"
