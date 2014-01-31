@@ -28,6 +28,7 @@ module.exports = class GraphView extends View
     utils.log "initialize graph-view for #{@login}"
     utils.log options, false
 
+    # @listenTo @model, 'change', -> utils.log 'model change'
     @listenTo @model, "change:#{config.chart_attr}", =>
       utils.log "graph-view heard #{@login}'s change:#{config.chart_attr}"
       @changed = true

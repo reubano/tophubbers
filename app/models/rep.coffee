@@ -62,6 +62,7 @@ module.exports = class Rep extends Model
       @setChart()
     else if type is 'progress' and @cacheExpired config.prgrs_attr
       @setProgress()
+    else utils.log "model up to date with force: #{force} and type: #{type}"
 
   fetchData: (force=false, type=false) => $.Deferred((deferred) =>
     if force or not @has('name') or @cacheExpired config.info_attr
@@ -122,7 +123,7 @@ module.exports = class Rep extends Model
     if @get config.data_attr
       utils.log "calculating #{@login}'s missing chart data"
       data = JSON.stringify @convertData @get(config.data_attr)
-      utils.log data, false
+      # utils.log data, false
       @set config.chart_attr, data
       @set config.hash_attr, md5 data
       @saveTstamp config.chart_attr
