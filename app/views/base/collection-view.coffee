@@ -9,6 +9,5 @@ module.exports = class CollectionView extends Chaplin.CollectionView
   initItemView: (model) ->
     new @itemView
       model: model
-      attr: @options.attr
       refresh: @options.refresh
       ignore_cache: @options.ignore_cache

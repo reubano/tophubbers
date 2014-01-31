@@ -33,6 +33,3 @@ module.exports = class GraphsView extends CollectionView
     super
     utils.log 'rendering graphs view'
     @collection.sort()
-
-  clear: ->
-    model.destroy() while model = @collection.first()

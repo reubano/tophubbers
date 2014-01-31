@@ -1,18 +1,6 @@
 Chaplin = require 'chaplin'
 config = require 'config'
-utils = require 'lib/utils'
 mediator = Chaplin.mediator
-
-today = moment()
-month = today.month()
-year = today.year()
-currStart = moment([year, month, 1])
-currEnd = moment(currStart).endOf('month')
-
-isBetween = (date, start, ended) ->
-  (date.isBefore(ended) && date.isAfter(start)) or
-  date.isSame(start) or
-  date.isSame(ended)
 
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers
@@ -44,34 +32,13 @@ Handlebars.registerHelper 'with_config', (options) ->
   context = config
   Handlebars.helpers.with.call(this, context, options)
 
-# Evaluate block with context being forms
-Handlebars.registerHelper 'with_forms', (options) ->
-  context = mediator.forms or {}
-  Handlebars.helpers.with.call(this, context, options)
-
 # Evaluate block with context being download
 Handlebars.registerHelper 'with_download', (options) ->
   context = mediator.download or {}
   Handlebars.helpers.with.call(this, context, options)
 
-# Conditional evaluation
-# ----------------------
-Handlebars.registerHelper 'if_cur_month', (date, options) ->
-  fmt = if date and date[2..2] is '-' then 'MM-DD-YYYY' else 'YYYY-MM-DD'
-  momented = moment date, fmt
-  between = isBetween(momented, currStart, currEnd)
-  if between then options.fn(this) else options.inverse(this)
-
-Handlebars.registerHelper 'if_cur_rep', (id, options) ->
-  if id == mediator.rep_id then options.fn(this) else options.inverse(this)
-
 # Other helpers
 # -----------
-
-# Convert date to day
-Handlebars.registerHelper 'get_day', (date) ->
-  day = if date[-2..-2] is '0' then date[-1..] else date[-2..]
-  new Handlebars.SafeString day
 
 # Loop n times
 Handlebars.registerHelper 'times', (n, block) ->

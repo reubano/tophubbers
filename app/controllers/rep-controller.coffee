@@ -4,9 +4,8 @@ View = require 'views/rep-view'
 utils = require 'lib/utils'
 
 module.exports = class RepController extends Controller
-  adjustTitle: 'Github User View'
-
   initialize: =>
+    @adjustTitle 'User View'
     utils.log 'initialize rep-controller'
     console.log @collection
 
@@ -18,7 +17,7 @@ module.exports = class RepController extends Controller
 
     @view = new View
       model: @collection.findWhere login: @login
-      attr: if config.mobile then config.hash_attr else config.data_attr
+      attr: @attr
       refresh: params?.refresh ? false
       ignore_cache: @ignore_cache
 

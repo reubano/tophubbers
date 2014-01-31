@@ -1,15 +1,14 @@
 Model = require 'models/base/model'
-Common = require 'lib/common'
 config = require 'config'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
-  url: => "https://api.github.com/users/#{@get 'login'}?access_token=#{config.api_token}"
+  url: => "#{config.rep_url}#{@get 'login'}?access_token=#{config.api_token}"
 
   sync: (method, model, options) =>
-    @server = method is 'read'
+    @local = method isnt 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
-    utils.log "sync #{model.get 'login'} to server: #{@server}"
+    utils.log "sync #{model.get 'login'} to local: #{@local}"
     Backbone.sync(method, model, options)
 
   initialize: =>
@@ -17,7 +16,7 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
-    ss = if @has 'score_sort' then @get 'score_sort' else @get 'followers'
+    ss = @get('score_sort') ? @get 'followers'
     @set score_sort: ss
 
   toggle: ->
@@ -32,7 +31,7 @@ module.exports = class Rep extends Model
     utils.log "error: #{err} with #{@login}", 'error' if err
 
   setScoreSort: =>
-    utils.log 'setting score sort'
+    utils.log 'setting score data'
     @set score_sort: @get 'followers'
     @set called: false
     @save patch: true
@@ -44,45 +43,57 @@ module.exports = class Rep extends Model
 
   getActivity: =>
     utils.log "fetching #{@login}'s #{config.data_attr}"
-    url = "https://api.github.com/users/#{@login}/events"
-    data = {access_token: "#{config.api_token}"}
-
-    # post url to 'api/fetch' to fetch rep data serverside
-    if config.mobile
-      utils.log "fetching #{url} server side"
-      do (model = @) -> $.post(config.api_fetch, url: url)
-        .done(model.setActivity).fail(model.failWhale)
-    else
-      utils.log "fetching #{url} client side"
-      do (model = @) -> $.get(url, data)
-        .done(model.setActivity).fail(model.failWhale)
+    base = "https://api.github.com/users/#{@login}/events"
+    url = "#{base}?access_token=#{config.api_token}"
+    promise = $.get url
+    do (model = @) -> promise.done(model.setActivity).fail(model.failWhale)
 
   fetchFunc: (force, type) =>
-    if @cacheExpired(config.data_attr) or force
-      utils.log "fetching new data"
-      if type is 'chart' then @getActivity().done(@setChart)
-      else if type is 'progress' then @setProgress()
-      else if type is 'score' then @setScoreSort()
+    if @has 'name' then @setSynced()
     else
-      utils.log "using cached data"
-      if type is 'chart' and @cacheExpired config.chart_attr then @setChart()
-      else if type is 'progress' and @cacheExpired config.prgrs_attr
-        @setProgress()
-      else if type is 'score' and @cacheExpired config.info_attr
-        @setScoreSort()
+      utils.log 'No name!', 'error'
+      return @setSynced false
 
-  fetchData: (force=false, type=false) =>
-    if force or not @has('login') or @cacheExpired config.info_attr
+    if force and type is 'score' then @setScoreSort()
+    else if force or @cacheExpired(config.data_attr)
+      utils.log "fetching new #{config.data_attr} data"
+      if type is 'chart' then @getActivity().done(@setChart)
+      else if type is 'progress' then @getActivity().done(@setProgress)
+    else if type is 'score' and @cacheExpired(config.info_attr)
+      @setScoreSort()
+    else if type is 'chart' and @cacheExpired(config.chart_attr)
+      @setChart()
+    else if type is 'progress' and @cacheExpired config.prgrs_attr
+      @setProgress()
+
+  fetchData: (force=false, type=false) => $.Deferred((deferred) =>
+    if force or not @has('name') or @cacheExpired config.info_attr
       utils.log "fetching #{@login}'s #{config.info_attr} data"
+      saveTs = (model) -> model.saveTstamp config.info_attr
+      fetch = (model) -> model.fetchFunc force, type
+      resolve = (model) -> deferred.resolve model
       do (force, type) => @promize()
-        .done((model) -> model.saveTstamp config.info_attr)
-        .done((model) -> model.fetchFunc(force, type))
-        .fail(@failWhale)
+        .done(saveTs, fetch, resolve)
+        .fail(@failWhale, deferred.reject)
     else
+      deferred.resolve @
       utils.log "using cached #{config.info_attr} data"
+      @setSynced()
       @fetchFunc false, type
 
-    utils.log @, false
+    utils.log @, false).promise()
+
+  setSynced: (type=true) =>
+    if type and localStorage.synced
+      utils.log 'collection already set to synced'
+    else if not (type or localStorage.synced)
+      utils.log 'collection already set to not synced'
+    else if type
+      utils.log 'setting collection to synced'
+      localStorage.setItem 'synced', true
+    else
+      utils.log 'setting collection to not synced'
+      localStorage.setItem 'synced', false
 
   setProgress: =>
     utils.log 'setting progress data'
@@ -106,14 +117,30 @@ module.exports = class Rep extends Model
       @saveTstamp config.prgrs_attr
     else utils.log "#{config.data_attr} not present"
 
+  convertData: (raw) ->
+    endRows = []
+    durRows = []
+    dur_val = 5
+
+    _.each raw, (model) ->
+      created = model['created_at']
+      date = moment(created).format('MM-DD-YYYY')
+      time = moment(created).format('HH:mm:ss').split(':')
+      start = (time[0] * 60) + (time[1] * 1) + (time[2] / 60)
+      end_val = parseFloat start.toFixed(3)
+      endRows.push {label: date, value: end_val}
+      durRows.push {label: date, value: dur_val}
+
+    data = [{key: 'End', values: endRows}, {key: 'Duration', values: durRows}]
+
   setChart: =>
-    return utils.log "#mobile svg rendering disabled" if config.mobile
     utils.log 'setting chart data'
     if @get config.data_attr
       utils.log "calculating #{@login}'s missing chart data"
-      data = Common.convertData @get(config.data_attr), @login
+      data = JSON.stringify @convertData @get(config.data_attr)
       utils.log data, false
-      @set config.chart_attr, JSON.stringify data
+      @set config.chart_attr, data
+      @set config.hash_attr, md5 data
       @saveTstamp config.chart_attr
       @save patch: true
     else utils.log "#{config.data_attr} not present"

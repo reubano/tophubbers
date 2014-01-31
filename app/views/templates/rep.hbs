@@ -8,32 +8,6 @@
 		</a>
 	</div>
 </div>
-<!--
-<div id="fail-modal" class="modal hide fade">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3><p class="text-error">Submission failure</p></h3>
-	</div>
-	<div class="modal-body">
-		<p>Your form failed to submit. Please try again.</p>
-	</div>
-	<div class="modal-footer">
-		<a href="#" class="btn btn-primary" data-dismiss="modal">Ok</a>
-	</div>
-</div>
-<div id="success-modal" class="modal hide fade">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3><p class="text-success">Form posted</p></h3>
-	</div>
-	<div class="modal-body">
-		<p>Success! Thanks for submitting your form.</p>
-	</div>
-	<div class="modal-footer">
-		<a href="#" class="btn btn-primary" data-dismiss="modal">Ok</a>
-	</div>
-</div>
- -->
 <div class="view" id="{{login}}">
 	<h2>{{name}}</h2>
 	<div id="work-graph">
@@ -41,26 +15,6 @@
 		<div class="chart"><svg id="svg"></svg></div>
 		<hr>
 	</div>
-<!--
-	<div id="work-issues">
-		<h3>Work Issues<br></h3>
-		<div id="issues-cur-cont">
-			<table class="table table-striped table-condensed">
-				<thead>
-					<tr><th>Date</th><th>Reason</th></tr>
-				</thead>
-				<tbody>
-				{{#with_forms}}{{#each models}}{{#with attributes}}
-				{{#if_cur_month date}}{{#if_cur_rep rep}}{{#if reason}}
-					<tr><td>{{date}}</td><td>{{reason}}</td></tr>
-				{{/if}}{{/if_cur_rep}}{{/if_cur_month}}
-				{{/with}}{{/each}}{{/with_forms}}
-				</tbody>
-			</table>
-		</div>
-		<hr>
-	</div>
- -->
 	<div id="feedback">
 		<h3>Scores & Progress<br></h3>
 		<div class="tab-pane active" id="cur_feedback">
@@ -133,40 +87,6 @@
 		</div>
 		<hr>
 	</div>
-
-<!--
-	<div id="forms">
-		<h3>Network Claim Form for {{name}}</h3>
-		<form id="network-form" class="form-horizontal">
-			<div class="control-group">
-				<label class="control-label" for="momentous">Date</label>
-				<div class="controls">
-					<div id="network-datepicker"></div>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="reason">Reason</label>
-				<div class="controls">
-					<select name="reason" id="reason">
-						<option>Network: no data</option>
-						<option>Phone: application not loading</option>
-						<option>Excused leave</option>
-						<option>Unexcused leave</option>
-						<option>Headquarter issue</option>
-					</select>
-					<span class="help-block">Why wasn't the report sent?</span>
-				</div>
-			</div>
-			<div class="control-group">
-				<div class="controls">
-					<button id="network-form-submit" class="btn btn-primary" type="button">Submit</button>
-				</div>
-			</div>
-		</form>
-		<hr>
-	</div>
- -->
-
 	<div id="rep-info">
 		<ul class="inline">
 			<li>Name: {{name}}</li>
