@@ -56,12 +56,16 @@ module.exports = class Rep extends Model
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
       else if type is 'progress' then @getActivity().done(@setProgress)
-    else if type is 'score' and @cacheExpired(config.score_attr)
+      else if type is 'all' then @getActivity().done(@setChart, @setProgress)
+    else if type is 'score' and @cacheExpired config.score_attr
       @setScoreSort()
-    else if type is 'chart' and @cacheExpired(config.chart_attr)
+    else if type is 'chart' and @cacheExpired config.chart_attr
       @setChart()
     else if type is 'progress' and @cacheExpired config.prgrs_attr
       @setProgress()
+    else if type is 'all'
+      if @cacheExpired config.chart_attr then @setChart()
+      if @cacheExpired config.prgrs_attr then @setProgress()
     else utils.log "model up to date with force: #{force} and type: #{type}"
 
   fetchData: (force=false, type=false) => $.Deferred((deferred) =>

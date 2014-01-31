@@ -14,11 +14,10 @@ module.exports = class RepView extends View
     super
     @login = @model.get 'login'
     utils.log 'initialize rep-view for ' + @login
+    @listenTo @model, "change", @render
+    @model.fetchData @refresh, 'all'
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
-
-    for suffix in ['work_data_c', 'feedback_data', 'progress']
-      @listenTo @model, "change:cur_#{suffix}", @render
 
   render: =>
     super
