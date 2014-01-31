@@ -4,7 +4,7 @@ utils = require 'lib/utils'
 
 module.exports = class TocallView extends View
   template: template
-  tagName: 'li'
+  tagName: 'tr'
 
   initialize: (options) =>
     super
