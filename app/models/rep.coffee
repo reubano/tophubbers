@@ -8,7 +8,7 @@ module.exports = class Rep extends Model
   sync: (method, model, options) =>
     @local = method isnt 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
-    utils.log "sync #{model.get 'login'} to local: #{@local}"
+    utils.log "sync #{model.get 'login'} to server: #{not @local()}"
     Backbone.sync(method, model, options)
 
   initialize: =>
@@ -23,7 +23,7 @@ module.exports = class Rep extends Model
     @set called: if @has('called') then not @get('called') else true
     @set score_sort: if @get('called') then 0 else @get 'followers'
     utils.log 'called: ' + @get 'called'
-    utils.log 'score: ' + @get 'score'
+    utils.log 'followers: ' + @get 'followers'
     utils.log 'score sort: ' + @get 'score_sort'
 
   failWhale: (res, textStatus, err) =>
@@ -33,6 +33,7 @@ module.exports = class Rep extends Model
   setScoreSort: =>
     utils.log 'setting score data'
     @set score_sort: @get 'followers'
+    utils.log 'score sort: ' + @get 'score_sort'
     @set called: false
     @save patch: true
 

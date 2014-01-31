@@ -9,7 +9,7 @@ module.exports = class Reps extends Collection
   local: localStorage.synced
   sync: (method, collection, options) =>
     utils.log "collection's sync method is #{method}"
-    utils.log "sync collection locally: #{@local}"
+    utils.log "read collection from server: #{not @local()}"
     Backbone.sync(method, collection, options)
 
   initialize: (options) =>

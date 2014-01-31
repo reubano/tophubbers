@@ -10,9 +10,9 @@ module.exports = class GraphView extends View
   autoAttach: false
   template: template
 #   listen:
+#     'all': (event) -> utils.log "heard #{event}"
 #     addedToParent: -> utils.log 'graph-view heard addedToParent'
 #     visibilityChange: -> utils.log 'graph-view heard visibilityChange'
-#     'all': (event) -> utils.log "heard #{event}"
 
   initialize: (options) =>
     super

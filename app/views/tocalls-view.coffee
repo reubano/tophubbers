@@ -13,16 +13,16 @@ module.exports = class TocallsView extends CollectionView
 
   initialize: (options) =>
     super
+    utils.log 'initialize tocalls-view'
     @subscribeEvent 'resort', @sort
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'tocalls-view caught dispatcher event'
-    # @listenTo @model,'all', @renderCheckbox
 
   sort: =>
-    utils.log 'resorting tocalls view'
+    utils.log 'resorting tocalls-view'
     @collection.sort()
 
   render: =>
     super
-    utils.log 'rendering tocalls view'
+    utils.log 'rendering tocalls-view'
     @collection.sort()

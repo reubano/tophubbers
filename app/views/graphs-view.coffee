@@ -16,7 +16,7 @@ module.exports = class GraphsView extends CollectionView
     addedToDOM: -> utils.log 'graphs-view heard addedToDOM'
     # visibilityChange: -> utils.log 'graphs-view heard visibilityChange'
 
-  initialize: (options) ->
+  initialize: (options) =>
     super
     utils.log 'initialize graphs-view'
     @options = options

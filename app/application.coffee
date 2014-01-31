@@ -12,6 +12,7 @@ module.exports = class Application extends Chaplin.Application
 
   initialize: ->
     super
+    console.log 'initialize application'
 
     # Initialize core components.
     # ---------------------------
