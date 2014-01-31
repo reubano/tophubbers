@@ -61,6 +61,7 @@ config =
   prgrs_attr: 'progress'
   data_attr: 'work_data'
   chart_attr: 'work_string'
+  score_attr: 'work_score'
   hash_attr: 'work_hash'
   svg_attr: 'work_svg'
   img_attr: 'work_img'

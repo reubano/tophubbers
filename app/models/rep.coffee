@@ -17,8 +17,6 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
-    ss = @get('score_sort') ? @get 'followers'
-    @set score_sort: ss
 
   toggle: ->
     @set called: if @has('called') then not @get('called') else true
@@ -36,6 +34,7 @@ module.exports = class Rep extends Model
     @set score_sort: @get 'followers'
     utils.log 'score sort: ' + @get 'score_sort'
     @set called: false
+    @saveTstamp config.score_attr
     @save patch: true
 
   setActivity: (data) =>
@@ -57,7 +56,7 @@ module.exports = class Rep extends Model
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
       else if type is 'progress' then @getActivity().done(@setProgress)
-    else if type is 'score' and @cacheExpired(config.info_attr)
+    else if type is 'score' and @cacheExpired(config.score_attr)
       @setScoreSort()
     else if type is 'chart' and @cacheExpired(config.chart_attr)
       @setChart()
