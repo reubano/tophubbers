@@ -15,6 +15,5 @@ module.exports = class GraphsController extends Controller
     utils.log 'show graphs', 'info'
     @view = new View
       collection: @collection
-      attr: @attr
       refresh: params?.refresh ? false
       ignore_cache: params?.ignore_cache ? false

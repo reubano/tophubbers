@@ -5,8 +5,6 @@ template = require 'views/templates/rep'
 utils = require 'lib/utils'
 
 module.exports = class RepView extends View
-  mediator = Chaplin.mediator
-
   autoRender: true
   region: 'content'
   className: 'span12'
@@ -14,14 +12,8 @@ module.exports = class RepView extends View
 
   initialize: (options) =>
     super
-    @attr = options.attr
-    @id = @model.get 'id'
     @login = @model.get 'login'
-    mediator.rep_id = @id
-
     utils.log 'initialize rep-view for ' + @login
-    console.log options
-
     @subscribeEvent 'dispatcher:dispatch', ->
       utils.log 'rep-view caught dispatcher event'
 
