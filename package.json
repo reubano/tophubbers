@@ -4,10 +4,7 @@
   "description": "Application to view Github users with the most followers",
   "version": "2.4.0",
   "homepage": "",
-  "engines": {
-    "node": "0.10.x",
-    "npm": "1.2.x"
-  },
+  "engines": {"node": "0.10.x"},
   "repository": {
     "type": "git",
     "url": ""
@@ -28,9 +25,9 @@
     "uglify-js-brunch": ">= 1.0 < 1.7",
     "clean-css-brunch": ">= 1.0 < 1.7",
     "express": "3.x",
+    "coffee-script": "1.6",
     "winston": "0.7.x",
     "underscore": "1.5",
-    "coffee-script": "1.6",
     "phantom": "0.5",
     "knox": "0.8.x",
     "nodetime": "0.8.x",
