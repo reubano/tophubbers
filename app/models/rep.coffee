@@ -7,6 +7,7 @@ module.exports = class Rep extends Model
 
   sync: (method, model, options) =>
     @local = -> method isnt 'read'
+    model.collection.local = @local
     options.add = method is 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to server: #{not @local()}"
