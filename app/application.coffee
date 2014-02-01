@@ -55,4 +55,5 @@ module.exports = class Application extends Chaplin.Application
     Chaplin.mediator.navbar = new Navbar()
     Chaplin.mediator.reps.cltnFetch().done (collection) ->
       localStorage.setItem 'tophubbers:synced', true
+      collection.display()
     Chaplin.mediator.seal()

@@ -7,7 +7,6 @@ module.exports = class RepController extends Controller
   initialize: =>
     @adjustTitle 'User View'
     utils.log 'initialize rep-controller'
-    console.log @collection
 
   show: (params) =>
     @login = params.login

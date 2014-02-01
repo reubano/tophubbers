@@ -82,7 +82,7 @@ module.exports = class Rep extends Model
       utils.log "using cached #{config.info_attr} data"
       @fetchFunc false, type
 
-    utils.log @, false).promise()
+    @display()).promise()
 
   setProgress: =>
     utils.log 'setting progress data'
