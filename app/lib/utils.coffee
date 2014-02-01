@@ -80,6 +80,7 @@ _(utils).extend
   log: (message, level='debug') ->
     if config.dev and not config.debug_minilog then console.log message
     else if level
+      console.log message if config.debug_prod_verbose and level is 'debug'
       text = JSON.stringify message
       message = if text.length > 512 then "size exceeded" else message
 
