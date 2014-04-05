@@ -4,11 +4,14 @@
   "description": "Application to view Github users with the most followers",
   "version": "2.4.0",
   "homepage": "",
+  "environment": "web",
   "engines": {"node": "0.10.x"},
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
+  "keywords": [
+		"application", "github-api", "brunch", "chaplin", "d3", "nvd3", "bootstrap",
+		"phantomjs", "memcache", "s3-api", "amazon-api", "nodejs", "offline",
+		"responsive"
+	],
+  "repository": {"type": "git", "url": ""},
   "scripts": {
     "start": "brunch watch --server",
     "test": "brunch test",
