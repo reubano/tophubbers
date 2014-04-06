@@ -6,11 +6,7 @@
   "homepage": "",
   "environment": "web",
   "engines": {"node": "0.10.x"},
-  "keywords": [
-		"application", "github-api", "brunch", "chaplin", "d3", "nvd3", "bootstrap",
-		"phantomjs", "memcache", "s3-api", "amazon-api", "nodejs", "offline",
-		"responsive"
-	],
+  "keywords": ["application", "github-api", "visualization", "amazon-api", "offline"],
   "repository": {"type": "git", "url": ""},
   "scripts": {
     "start": "brunch watch --server",
@@ -43,6 +39,5 @@
     "event-stream": "3.x",
     "memjs": "0.7.x"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
