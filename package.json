@@ -6,7 +6,7 @@
   "homepage": "",
   "environment": "web",
   "engines": {"node": "0.10.x"},
-  "keywords": ["application", "github-api", "visualization", "amazon-api", "offline"],
+  "keywords": ["application", "api-consumer", "visualization", "offline"],
   "repository": {"type": "git", "url": ""},
   "scripts": {
     "start": "brunch watch --server",
