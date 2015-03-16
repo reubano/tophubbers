@@ -6,10 +6,10 @@ module.exports = class VisitView extends View
   template: template
   tagName: 'tr'
 
-  initialize: =>
+  initialize: (options) =>
     super
     @listenTo @model, 'change', @render
-    @model.fetchData @refresh
+    @model.fetchData options.refresh
 
   render: =>
     super

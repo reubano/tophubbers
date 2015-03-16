@@ -10,7 +10,7 @@ module.exports = class ProgressView extends View
   initialize: (options) =>
     super
     @listenTo @model, 'change', @render
-    @model.fetchData @refresh, 'progress'
+    @model.fetchData options.refresh, 'progress'
 
   render: =>
     super

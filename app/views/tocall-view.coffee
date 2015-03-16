@@ -9,10 +9,9 @@ module.exports = class TocallView extends View
   initialize: (options) =>
     super
     utils.log 'initialize tocall-view'
-    @refresh = options.refresh
     @listenTo @model, 'change', @render
     @delegate 'click', '.toggle', @toggle
-    @model.fetchData @refresh, 'score'
+    @model.fetchData options.refresh, 'score'
 
   render: =>
     super
