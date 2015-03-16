@@ -32,11 +32,6 @@ Handlebars.registerHelper 'with_config', (options) ->
   context = config
   Handlebars.helpers.with.call(this, context, options)
 
-# Evaluate block with context being download
-Handlebars.registerHelper 'with_download', (options) ->
-  context = mediator.download or {}
-  Handlebars.helpers.with.call(this, context, options)
-
 # Other helpers
 # -----------
 
