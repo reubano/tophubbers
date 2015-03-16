@@ -17,6 +17,7 @@ module.exports = class GraphView extends View
   initialize: (options) =>
     super
     @model = options.model
+    @resize = options.resize
     @refresh = options.refresh
     @ignore_cache = options.ignore_cache
     @login = @model.get 'login'
@@ -82,7 +83,7 @@ module.exports = class GraphView extends View
       utils.log "fetching script for #{selection}"
       chart_data = JSON.parse model.get config.chart_attr
       do (login, parent, model) =>
-        nv.addGraph makeChart(chart_data, selection, @changed, true), =>
+        nv.addGraph makeChart(chart_data, selection, @changed, @resize), =>
           @setSVG login, parent, model
           @pubRender config.svg_attr
     else utils.log "#{login} has no #{config.chart_attr} or hash or name"

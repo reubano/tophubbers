@@ -17,5 +17,6 @@ module.exports = class RepController extends Controller
     @view = new View
       model: @collection.findWhere login: @login
       refresh: params?.refresh ? false
+      resize: true
       ignore_cache: @ignore_cache
 
