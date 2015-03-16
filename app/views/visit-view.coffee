@@ -8,6 +8,7 @@ module.exports = class VisitView extends View
 
   initialize: (options) =>
     super
+    utils.log 'initialize visit-view'
     @listenTo @model, 'change', @render
     @model.fetchData options.refresh
 

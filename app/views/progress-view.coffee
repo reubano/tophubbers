@@ -9,6 +9,7 @@ module.exports = class ProgressView extends View
 
   initialize: (options) =>
     super
+    utils.log 'initialize progress-view'
     @listenTo @model, 'change', @render
     @model.fetchData options.refresh, 'progress'
 
