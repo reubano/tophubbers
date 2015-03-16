@@ -1,5 +1,3 @@
-_ = _ ? require 'underscore'
-
 Common =
   getParent: (login='login') -> "##{login}.view .chart"
   getSelection: (login='login') -> @getParent(login) + ' svg'
