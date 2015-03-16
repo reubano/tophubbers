@@ -7,7 +7,7 @@ host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
 gh_api_token = $PROCESS_ENV_GITHUB_ACCOUNT_KEY ? null
-query = "followers:%3E5000&access_token=#{gh_api_token}"
+query = "followers:%3E9000&access_token=#{gh_api_token}"
 reps_url = "https://api.github.com/search/users?q=#{query}"
 rep_url = "https://api.github.com/users/"
 
