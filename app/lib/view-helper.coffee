@@ -1,6 +1,5 @@
-Chaplin = require 'chaplin'
 config = require 'config'
-mediator = Chaplin.mediator
+mediator = require 'mediator'
 
 # Application-specific view helpers
 # http://handlebarsjs.com/#helpers

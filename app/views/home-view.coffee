@@ -1,11 +1,9 @@
 View = require 'views/base/view'
 template = require 'views/templates/home'
-Chaplin = require 'chaplin'
 utils = require 'lib/utils'
+mediator = require 'mediator'
 
 module.exports = class HomePageView extends View
-  mediator = Chaplin.mediator
-
   autoRender: true
   template: template
   region: 'content'

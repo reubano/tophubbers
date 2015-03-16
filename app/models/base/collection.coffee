@@ -1,4 +1,3 @@
-Chaplin = require 'chaplin'
 Model = require 'models/base/model'
 utils = require 'lib/utils'
 

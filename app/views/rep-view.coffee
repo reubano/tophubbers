@@ -1,5 +1,4 @@
 config = require 'config'
-Chaplin = require 'chaplin'
 View = require 'views/graph-view'
 template = require 'views/templates/rep'
 utils = require 'lib/utils'
