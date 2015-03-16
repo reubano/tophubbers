@@ -7,7 +7,7 @@ module.exports = class Reps extends Collection
   model: Model
   url: config.reps_url
   storeName: 'Reps'
-  local: -> localStorage.getItem 'tophubbers:synced'
+  local: -> false
 
   sync: (method, collection, options) =>
     utils.log "collection's sync method is #{method}"
