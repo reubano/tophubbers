@@ -10,13 +10,15 @@
 
 <h1 class="text-info">Chose an activity below.</h1>
 
-{{#each items}}
 <hr>
 <div class="row-fluid">
-	<a href="{{href}}">
-		<button class="btn btn-primary btn-large" type="button">
-			{{desc}}
-		</button>
-	</a>
-</div>
+{{#each items}}
+	<div class="span3">
+		<a href="{{href}}">
+			<button class="btn btn-primary btn-large btn-padbottom" type="button">
+				{{desc}}
+			</button>
+		</a>
+	</div>
 {{/each}}
+</div>
