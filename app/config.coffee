@@ -1,7 +1,7 @@
 debug_mobile = false
 debug_canvas = false
 debug_prod = false
-debug_minilog = true
+debug_minilog = false
 debug_prod_verbose = true
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
