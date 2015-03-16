@@ -11,8 +11,8 @@ module.exports = class Collection extends Chaplin.Collection
     utils.log @, false
 #     utils.log @at(1).getAttributes(), false
 
-  # Fetch promise helper
-  # ---------------------
+  # DualStorage Fetch promise helper
+  # --------------------------------
   cltnFetch: =>
     $.Deferred((deferred) => @fetch
       success: deferred.resolve
