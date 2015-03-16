@@ -75,7 +75,7 @@ module.exports = class Rep extends Model
       saveTs = (model) -> model.saveTstamp config.info_attr
       fetch = (model) -> model.fetchFunc force, type
       resolve = (model) -> deferred.resolve model
-      do (force, type) => @modelFetch()
+      @modelFetch()
         .done(saveTs, fetch, resolve)
         .fail(@failWhale, deferred.reject)
     else
