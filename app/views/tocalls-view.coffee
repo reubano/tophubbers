@@ -15,8 +15,6 @@ module.exports = class TocallsView extends CollectionView
     super
     utils.log 'initialize tocalls-view'
     @subscribeEvent 'resort', @sort
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'tocalls-view caught dispatcher event'
 
   sort: =>
     utils.log 'resorting tocalls-view'

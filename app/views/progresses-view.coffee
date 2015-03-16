@@ -14,8 +14,6 @@ module.exports = class ProgressesView extends CollectionView
   initialize: (options) =>
     super
     @subscribeEvent 'resort', @sort
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'progresses-view caught dispatcher event'
     # @listenTo @model,'all', @renderCheckbox
 
   sort: =>

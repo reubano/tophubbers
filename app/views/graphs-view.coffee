@@ -20,14 +20,8 @@ module.exports = class GraphsView extends CollectionView
     super
     utils.log 'initialize graphs-view'
     @options = options
-
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'graphs-view caught dispatcher event'
-      @render()
-
-    @listenTo @collection, 'reset', ->
-      utils.log 'graphs-view heard collection reset'
-      @render()
+    # @subscribeEvent 'dispatcher:dispatch', @render
+    @listenTo @collection, 'reset', @render
 
   render: =>
     super

@@ -16,8 +16,6 @@ module.exports = class RepView extends View
     utils.log 'initialize rep-view for ' + @login
     @listenTo @model, "change", @render
     @model.fetchData @refresh, 'all'
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'rep-view caught dispatcher event'
 
   render: =>
     super

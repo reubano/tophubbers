@@ -13,5 +13,6 @@ module.exports = class HomePageView extends View
   reps: mediator.reps
 
   initialize: (options) =>
-    @subscribeEvent 'dispatcher:dispatch', @render
+    super
+    # @subscribeEvent 'dispatcher:dispatch', @render
 

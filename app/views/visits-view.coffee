@@ -13,8 +13,6 @@ module.exports = class ProgressesView extends CollectionView
 
   initialize: (options) =>
     super
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'visits-view caught dispatcher event'
 
   render: =>
     super
