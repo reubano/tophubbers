@@ -1,14 +1,33 @@
-<div class="container-fluid">
-	<a class="btn btn-navbar btn-padleft" data-toggle="collapse" data-target=".nav-collapse">
-		{{#each items}}<span class="icon-bar"></span>{{/each}}
-	</a>
-	<a class="brand" href="{{main.href}}">{{main.title}}</a>
-
-	<div class="nav-collapse collapse">
-		<ul class="nav">
-			{{#each items}}
-			<li><a href="{{href}}">{{title}}</a></li>
-			{{/each}}
-		</ul>
-	</div><!--/.nav-collapse -->
+<div class="navbar-header">
+  <button
+    type="button"
+    class="navbar-toggle"
+    data-toggle="collapse"
+    data-target=".navbar-collapse"
+  >
+    <span class="sr-only">Toggle navigation</span>
+    {{#times 3}}<span class="icon-bar"></span>{{/times}}
+  </button>
+  <a
+    class="
+      {{#if_active_page site.home.id}}active-nav{{/if_active_page}}
+      navbar-brand
+    "
+    id="nav-home"
+    href="{{main.href}}"
+  >
+    {{main.title}}
+  </a>
 </div>
+<div class="collapse navbar-collapse">
+  <ul class="nav navbar-nav navbar-right">
+    {{#each items}}
+      <li
+        class="{{#if_active_page id}}active{{/if_active_page}}"
+        id="nav-{{id}}"
+      >
+        <a href="{{href}}">{{title}}</a>
+      </li>
+    {{/each}}
+  </ul>
+</div><!--/.nav-collapse -->
