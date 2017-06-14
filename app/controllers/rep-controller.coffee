@@ -19,4 +19,3 @@ module.exports = class RepController extends Controller
       refresh: params?.refresh ? false
       resize: true
       ignore_cache: @ignore_cache
-

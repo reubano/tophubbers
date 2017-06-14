@@ -55,6 +55,7 @@ module.exports = class GraphView extends View
 
     utils.log "getting chart for #{login}"
     @unsetCache model if @ignore_cache
+
     if @has_svg
       @text = "#{login} #{config.svg_attr}"
     else
