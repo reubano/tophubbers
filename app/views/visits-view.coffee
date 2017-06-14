@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/visits'
 View = require 'views/visit-view'
+mediator = require 'mediator'
 utils = require 'lib/utils'
 
 module.exports = class ProgressesView extends CollectionView
@@ -13,6 +14,8 @@ module.exports = class ProgressesView extends CollectionView
 
   initialize: (options) =>
     super
+    utils.log 'initialize visits-view'
+    mediator.setActive 'visits'
 
   render: =>
     super

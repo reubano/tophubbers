@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/graphs'
 View = require 'views/graph-view'
+mediator = require 'mediator'
 utils = require 'lib/utils'
 
 module.exports = class GraphsView extends CollectionView
@@ -19,6 +20,7 @@ module.exports = class GraphsView extends CollectionView
   initialize: (options) =>
     super
     utils.log 'initialize graphs-view'
+    mediator.setActive 'graphs'
     @options = options
     # @subscribeEvent 'dispatcher:dispatch', @render
     @listenTo @collection, 'reset', @render

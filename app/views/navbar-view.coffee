@@ -13,13 +13,14 @@ module.exports = class NavbarView extends View
     super
     utils.log 'initializing navbar view', 'info'
     @delegate 'click', @collapseNav
-    @subscribeEvent 'activePage', (page) =>
-      @activatePage page
+    @subscribeEvent 'activeNav', @activatePage
 
   collapseNav: (e) ->
     if e.target.href? and e.currentTarget.parentElement.id is 'navbar'
       $('.navbar-collapse').collapse('hide')
 
   activatePage: (page) =>
-    @$('nav li.active').removeClass('active')
-    @$("#nav-#{page.id}").addClass('active')
+    _class = if page is 'home' then 'active-nav' else 'active'
+    @$('.active-nav').removeClass('active-nav')
+    @$('.active').removeClass('active')
+    @$("#nav-#{page}").addClass(_class)

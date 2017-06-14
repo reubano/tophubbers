@@ -24,5 +24,6 @@ module.exports = class Application extends Chaplin.Application
     mediator.reps.cltnFetch().done (collection) ->
       localStorage.setItem 'tophubbers:synced', true
       collection.display()
+    mediator.active = null
     mediator.seal()
     super

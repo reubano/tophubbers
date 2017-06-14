@@ -5,6 +5,7 @@ mediator = require 'mediator'
 # http://handlebarsjs.com/#helpers
 # --------------------------------
 
+register = (name, fn) -> Handlebars.registerHelper name, fn
 # Map helpers
 # -----------
 
@@ -30,6 +31,16 @@ Handlebars.registerHelper 'url', (routeName, params..., options) ->
 Handlebars.registerHelper 'with_config', (options) ->
   context = config
   Handlebars.helpers.with.call(this, context, options)
+
+# Conditional evaluation
+# ----------------------
+register 'if_active_page', (id, options) ->
+  console.log "active id: #{id}"
+  console.log "mediator.active: #{mediator.active}"
+  if id is mediator.active
+    options.fn(this)
+  else
+    options.inverse(this)
 
 # Other helpers
 # -----------
