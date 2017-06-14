@@ -56,18 +56,12 @@ module.exports = class Rep extends Model
     else if (type isnt 'score') and (force or @cacheExpired config.data_attr)
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
-      else if type is 'progress' then @getActivity().done(@setProgress)
-      else if type is 'all' then @getActivity().done(@setChart, @setProgress)
     else if type is 'score' and @cacheExpired config.score_attr
       @setScoreSort()
-    else if type is 'chart' and @cacheExpired config.chart_attr
+    else if type in ['chart', 'all'] and @cacheExpired config.chart_attr
       @setChart()
-    else if type is 'progress' and @cacheExpired config.prgrs_attr
-      @setProgress()
-    else if type is 'all'
-      if @cacheExpired config.chart_attr then @setChart()
-      if @cacheExpired config.prgrs_attr then @setProgress()
-    else utils.log "model up to date with force: #{force} and type: #{type}"
+    else
+      utils.log "model up to date with force: #{force} and type: #{type}"
 
   fetchData: (force=false, type=false) => $.Deferred((deferred) =>
     if force or not @has('name') or @cacheExpired config.info_attr
@@ -84,28 +78,6 @@ module.exports = class Rep extends Model
       @fetchFunc false, type
 
     @display()).promise()
-
-  setProgress: =>
-    utils.log 'setting progress data'
-    if @get config.data_attr
-      target = 100
-      max = 20000
-      pts = @get('followers') / max * 100
-
-      utils.log "calculating #{@login}'s missing progress data"
-
-      pre = Math.min(pts, target) - 1
-      to_date = if (pts >= target) then 0 else target - pre - 1
-      post = if (pts > target) then pts - pre - 1 else 0
-      gap = target - (pre + to_date + post) - 1
-      end = if pts >= target then 0 else 1
-
-      @save
-        pts: pts, pre: pre, to_date: to_date, post: post, gap: gap, end: end
-        patch: true
-
-      @saveTstamp config.prgrs_attr
-    else utils.log "#{config.data_attr} not present"
 
   convertData: (raw) ->
     endRows = []

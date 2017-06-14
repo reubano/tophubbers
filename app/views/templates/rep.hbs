@@ -16,74 +16,26 @@
 		<hr>
 	</div>
 	<div id="feedback">
-		<h3>Scores & Progress</h3>
+		<h3>Stats Summary</h3>
 		<div class="tab-pane active" id="cur_feedback">
-			<ul class="unstyled">
-				<li>
-					<div class="row-fluid">
-						<div class="span2">
-							<label>Score Summary</label>
-						</div>
-						<div class="span10">
-							<div>
-								<table class="table table-striped">
-									<thead><tr>
-										<th>Score 1</th><th>Score 2</th>
-										<th>Score 3</th><th>Score 4</th>
-									</tr></thead>
-									<tbody><tr>
-										<td><a class="btn btn-large btn-warning disabled">
-										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
-										<td><a class="btn btn-large btn-warning disabled">
-										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
-										<td><a class="btn btn-large btn-warning disabled">
-										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
-										<td><a class="btn btn-large btn-warning disabled">
-										{{#times score}}<i class="icon-star icon-white"></i>{{/times}}{{#untimes score}}<i class="icon-star"></i>{{/untimes}}</a></td>
-									</tr></tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				</li>
-				<li>
-					<div class="row-fluid">
-						<div class="span2">
-							<label>Stats Summary</label>
-						</div>
-						<div class="span10">
-							<table class="table table-striped">
-								<thead><tr>
-									<th>Repos</th>
-									<th>Gists</th>
-									<th>Followers</th>
-									<th>Following</th>
-								</tr></thead>
-								<tbody><tr>
-									<td>{{public_repos}}</td>
-									<td>{{public_gists}}</td>
-									<td>{{followers}}</td>
-									<td>{{following}}</td>
-								</tr></tbody>
-							</table>
-						</div>
-					</div>
-				</li>
-				<li>
-					<div class="row-fluid">
-						<div class="span2">
-							<label>Followers Progress</label>
-						</div>
-						<div class="progress span10">
-							<div class="bar" style="width: {{pre}}%;"></div>
-							<div class="bar bar-muted" style="width: {{to_date}}%;"></div>
-							<div class="bar" style="width: {{post}}%;"></div>
-							<div class="bar bar-transparent" style="width: {{gap}}%;"></div>
-							<div class="bar bar-success" style="width: {{end}}%;"></div>
-						</div>
-					</div>
-				</li>
-			</ul>
+			<div class="row-fluid">
+				<div class="span12">
+					<table class="table table-striped">
+						<thead><tr>
+							<th>Repos</th>
+							<th>Gists</th>
+							<th>Followers</th>
+							<th>Following</th>
+						</tr></thead>
+						<tbody><tr>
+							<td>{{public_repos}}</td>
+							<td>{{public_gists}}</td>
+							<td>{{followers}}</td>
+							<td>{{following}}</td>
+						</tr></tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 		<hr>
 	</div>
