@@ -53,5 +53,7 @@ module.exports = class Application extends Chaplin.Application
     Chaplin.mediator.rep_id = null
     Chaplin.mediator.reps = new Reps()
     Chaplin.mediator.navbar = new Navbar()
-    Chaplin.mediator.reps.cltnFetch().done(-> localStorage.setItem 'synced', true)
+    Chaplin.mediator.reps.cltnFetch().done (collection) ->
+      localStorage.setItem 'tophubbers:synced', true
+      collection.display()
     Chaplin.mediator.seal()

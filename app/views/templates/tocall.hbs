@@ -1,11 +1,11 @@
-<div class="view">
+<td>
 	<label class="checkbox">
 		<input class="toggle" type="checkbox"{{#if called}} checked{{/if}}>
-		<p>
-			{{name}} ({{followers}})
-			<a class="btn btn-mini" href="/rep/{{login}}">
-				<i class="icon-chevron-right"></i> Go
-			</a>
-		</p>
+		<p>{{name}} ({{followers}})</p>
 	</label>
-</div>
+</td>
+<td>
+	<a class="btn" href="/rep/{{login}}">
+		 Go <i class="icon-chevron-right"></i>
+	</a>
+</td>

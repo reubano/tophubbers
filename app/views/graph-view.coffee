@@ -28,6 +28,7 @@ module.exports = class GraphView extends View
     utils.log "initialize graph-view for #{@login}"
     utils.log options, false
 
+    # @listenTo @model, 'change', -> utils.log 'model change'
     @listenTo @model, "change:#{config.chart_attr}", =>
       utils.log "graph-view heard #{@login}'s change:#{config.chart_attr}"
       @changed = true
@@ -111,8 +112,10 @@ module.exports = class GraphView extends View
     html = $(parent).html()
     bad = ['opacity: 0.0', 'opacity: 0.1', 'opacity: 0.2', 'opacity: 0.3',
       'opacity: 0.4', 'opacity: 0.5', 'opacity: 0.6']
+    list = (html.indexOf(b) < 0 for b in bad)
+    iterator = (init, value) -> init and value
 
-    if html and (html.indexOf(b) < 0 for b in bad) and html.length > 40
+    if html and _.reduce(list, iterator, true) and html.length > 40
       svg = html.replace(/\"/g, '\'')
       utils.log "setting #{login} #{config.svg_attr}"
       model.set config.svg_attr, svg

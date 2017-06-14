@@ -7,6 +7,7 @@ module.exports = class Rep extends Model
 
   sync: (method, model, options) =>
     @local = -> method isnt 'read'
+    model.collection.local = @local
     options.add = method is 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to server: #{not @local()}"
@@ -56,12 +57,17 @@ module.exports = class Rep extends Model
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
       else if type is 'progress' then @getActivity().done(@setProgress)
-    else if type is 'score' and @cacheExpired(config.score_attr)
+      else if type is 'all' then @getActivity().done(@setChart, @setProgress)
+    else if type is 'score' and @cacheExpired config.score_attr
       @setScoreSort()
-    else if type is 'chart' and @cacheExpired(config.chart_attr)
+    else if type is 'chart' and @cacheExpired config.chart_attr
       @setChart()
     else if type is 'progress' and @cacheExpired config.prgrs_attr
       @setProgress()
+    else if type is 'all'
+      if @cacheExpired config.chart_attr then @setChart()
+      if @cacheExpired config.prgrs_attr then @setProgress()
+    else utils.log "model up to date with force: #{force} and type: #{type}"
 
   fetchData: (force=false, type=false) => $.Deferred((deferred) =>
     if force or not @has('name') or @cacheExpired config.info_attr
@@ -77,7 +83,7 @@ module.exports = class Rep extends Model
       utils.log "using cached #{config.info_attr} data"
       @fetchFunc false, type
 
-    utils.log @, false).promise()
+    @display()).promise()
 
   setProgress: =>
     utils.log 'setting progress data'
@@ -122,7 +128,7 @@ module.exports = class Rep extends Model
     if @get config.data_attr
       utils.log "calculating #{@login}'s missing chart data"
       data = JSON.stringify @convertData @get(config.data_attr)
-      utils.log data, false
+      # utils.log data, false
       @set config.chart_attr, data
       @set config.hash_attr, md5 data
       @saveTstamp config.chart_attr
@@ -141,3 +147,4 @@ module.exports = class Rep extends Model
       age >= config.max_age
     else
       utils.log "no #{attr} timestamp found"
+      true
