@@ -1,14 +1,7 @@
 # Usage: coffee server.coffee
 # TODO: add node cluster
 # TODO: migrate to EU region
-# TODO: setup nodetime
 # TODO: try base64 uri encoding
-
-# nodetime
-if process.env.NODETIME_ACCOUNT_KEY
-  require('nodetime').profile
-    accountKey: process.env.NODETIME_ACCOUNT_KEY
-    appName: 'Top Githubbers'
 
 # External dependencies
 express = require 'express'
@@ -18,8 +11,6 @@ through = require 'through'
 knox = require 'knox'
 memjs = require 'memjs'
 papertrail = require('winston-papertrail').Papertrail
-toobusy = require 'toobusy'
-toobusy.maxLag(100)
 streamifier = require 'streamifier'
 JSONStream = require 'JSONStream'
 pngquant = require 'pngquant'
@@ -60,7 +51,6 @@ logger = new winston.Logger {transports: transports}
 encoding = {encoding: 'utf-8'}
 debug_s3 = false
 debug_memcache = true
-debug_toobusy = true
 cache_days = 5
 
 # cache life
@@ -78,7 +68,6 @@ rq_timeout = 20 * 1000 # request timeout (in milliseconds)
 sv_timeout = 25 * 1000 # server timeout (in milliseconds)
 ph_timeout = 1 * 60 * 1000 # phantomjs rendering timeout (in milliseconds)
 wait_timeout = 2 * 60 * 1000 # timeout to start rendering from queue (in milliseconds)
-sv_retry_after = 5 * 1000 # toobusy wait time between requests (in milliseconds)
 
 # other
 ave_render_time = 5 * 1000 # phantomjs average rendering time (in milliseconds)
@@ -104,13 +93,6 @@ app.use express.bodyParser()
 app.use express.compress()
 app.use express.timeout sv_timeout
 app.use express.static __dirname + '/public', {maxAge: maxCacheAge}
-app.use (req, res, next) ->
-  return next() if not toobusy() or (config.dev and not debug_toobusy)
-  res.setHeader 'Retry-After', sv_retry_after
-  data = {login: req.body.login, hash: req.body.hash, data: req.body.string?}
-  res.location req.url + if data then "?#{JSON.stringify data}"  else ''
-  err = {message: "server too busy. try #{loc} again later."}
-  handleError err, res, 'app', 503, false
 
 # CORS support
 configCORS = (req, res, next) ->
@@ -552,7 +534,6 @@ processPage = (page, ph) ->
 
   process.on 'SIGINT', ->
     server.close()
-    toobusy.shutdown()
     process.exit()
 
 phantom.create (ph) ->

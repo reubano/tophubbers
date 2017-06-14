@@ -1,4 +1,3 @@
-Chaplin = require 'chaplin'
 utils = require 'lib/utils'
 
 module.exports = class Model extends Chaplin.Model
@@ -14,8 +13,8 @@ module.exports = class Model extends Chaplin.Model
     @set tstamp, new Date().toString()
     @save patch: true
 
-  # Fetch promise helper
-  # ---------------------
+  # DualStorage Fetch promise helper
+  # --------------------------------
   modelFetch: =>
     $.Deferred((deferred) => @fetch
       success: deferred.resolve

@@ -6,8 +6,8 @@ utils = require 'lib/utils'
 module.exports = class SiteView extends View
   container: 'body'
   id: 'container'
-  className: 'container-fluid'
   regions:
-    '#navbar': 'navbar'
-    '#content': 'content'
+    navbar: '#navbar'
+    content: '#content'
+    footer: '#site-footer'
   template: template

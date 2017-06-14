@@ -1,4 +1,3 @@
-Chaplin = require 'chaplin'
 Model = require 'models/base/model'
 utils = require 'lib/utils'
 
@@ -9,10 +8,10 @@ module.exports = class Collection extends Chaplin.Collection
 
   display: =>
     utils.log @, false
-#     utils.log @at(1).getAttributes(), false
+    # utils.log @at(1).getAttributes(), false
 
-  # Fetch promise helper
-  # ---------------------
+  # DualStorage Fetch promise helper
+  # --------------------------------
   cltnFetch: =>
     $.Deferred((deferred) => @fetch
       success: deferred.resolve

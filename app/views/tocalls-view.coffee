@@ -1,6 +1,7 @@
 CollectionView = require 'views/base/collection-view'
 template = require 'views/templates/tocalls'
 View = require 'views/tocall-view'
+mediator = require 'mediator'
 utils = require 'lib/utils'
 
 module.exports = class TocallsView extends CollectionView
@@ -14,9 +15,8 @@ module.exports = class TocallsView extends CollectionView
   initialize: (options) =>
     super
     utils.log 'initialize tocalls-view'
+    mediator.setActive 'tocalls'
     @subscribeEvent 'resort', @sort
-    @subscribeEvent 'dispatcher:dispatch', ->
-      utils.log 'tocalls-view caught dispatcher event'
 
   sort: =>
     utils.log 'resorting tocalls-view'

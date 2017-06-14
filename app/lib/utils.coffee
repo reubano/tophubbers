@@ -1,6 +1,5 @@
 config = require 'config'
-Chaplin = require 'chaplin'
-mediator = Chaplin.mediator
+mediator = require 'mediator'
 
 # Application-specific utilities
 # ------------------------------
@@ -84,10 +83,10 @@ _(utils).extend
       text = JSON.stringify message
       message = if text.length > 512 then "size exceeded" else message
 
-      data =
-        message: message
-        time: (new Date()).getTime()
-        user: mediator?.user?.get('email')
+      # data =
+      #   message: message
+      #   time: (new Date()).getTime()
+      #   user: mediator?.user?.get('email')
 
-      minilog[level] data if level isnt 'debug'
+      # minilog[level] data if level isnt 'debug'
 module.exports = utils

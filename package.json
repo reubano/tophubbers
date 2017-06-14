@@ -5,39 +5,57 @@
   "version": "2.4.0",
   "homepage": "",
   "environment": "web",
-  "engines": {"node": "0.10.x"},
-  "keywords": ["application", "api-consumer", "visualization", "offline"],
-  "repository": {"type": "git", "url": ""},
+  "engines": {
+    "node": "4.4.x"
+  },
+  "keywords": [
+    "application",
+    "api-consumer",
+    "visualization",
+    "offline"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
   "scripts": {
     "start": "brunch watch --server",
     "test": "brunch test",
-    "postinstall": "brunch build --optimize"
+    "postinstall": "brunch build --production"
   },
   "dependencies": {
-    "brunch": "1.6",
-    "auto-reload-brunch": "1.6",
-    "javascript-brunch": ">= 1.0 < 1.7",
-    "coffee-script-brunch": ">= 1.0 < 1.7",
-    "css-brunch": ">= 1.0 < 1.7",
-    "stylus-brunch": ">= 1.0 < 1.7",
-    "handlebars-brunch": ">= 1.0 < 1.7",
-    "uglify-js-brunch": ">= 1.0 < 1.7",
-    "clean-css-brunch": ">= 1.0 < 1.7",
-    "express": "3.x",
-    "coffee-script": "1.6",
-    "winston": "0.7.x",
-    "underscore": "1.5",
-    "phantom": "0.5",
-    "knox": "0.8.x",
-    "nodetime": "0.8.x",
-    "winston-papertrail": "0.1.x",
-    "toobusy": "0.2.x",
-    "through": "2.x",
-    "pngquant": "0.0.x",
-    "streamifier": "0.0.x",
     "JSONStream": "0.7.x",
+    "auto-reload-brunch": "^1.7.8",
+    "brunch": "^1.7.20",
+    "clean-css-brunch": ">= 1.0 < 1.8",
+    "coffee-script": "1.6",
+    "coffee-script-brunch": ">= 1.0 < 1.8",
+    "coffeelint-brunch": ">= 1.0 < 1.8",
+    "css-brunch": ">= 1.0 < 1.8",
     "event-stream": "3.x",
-    "memjs": "0.7.x"
+    "express": "3.x",
+    "handlebars-brunch": ">= 1.0 < 1.8",
+    "javascript-brunch": ">= 1.0 < 1.8",
+    "knox": "0.8.x",
+    "md5": "^1.0.0",
+    "memjs": "0.7.x",
+    "phantom": "2.x",
+    "pngquant": "0.0.x",
+    "process-env-brunch": "^1.4.4-d",
+    "streamifier": "0.0.x",
+    "stylus-brunch": ">= 1.0 < 1.8",
+    "through": "2.x",
+    "uglify-js-brunch": ">= 1.0 < 1.8",
+    "underscore": "1.5",
+    "winston": "0.7.x",
+    "winston-papertrail": "0.1.x"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "chai": ">= 1.5.0",
+    "mocha": ">= 1.8.2",
+    "sinon": ">= 1.6.0",
+    "sinon-chai": ">= 2.3.1",
+    "phantomjs": ">= 1.9.7-5",
+    "mocha-phantomjs": ">= 3.3.2"
+  }
 }

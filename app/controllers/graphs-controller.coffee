@@ -16,4 +16,5 @@ module.exports = class GraphsController extends Controller
     @view = new View
       collection: @collection
       refresh: params?.refresh ? false
+      resize: false
       ignore_cache: params?.ignore_cache ? false

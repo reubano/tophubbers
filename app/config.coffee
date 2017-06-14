@@ -1,18 +1,19 @@
 debug_mobile = false
 debug_canvas = false
 debug_prod = false
-debug_minilog = true
-debug_prod_verbose = true
+debug_minilog = false
+debug_prod_verbose = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
-gh_api_token = 'cdac348c97dbdf5252d530103e0bfb2b9275d126'
-query = "followers:%3E5000&access_token=#{gh_api_token}"
+gh_api_token = $PROCESS_ENV_GITHUB_ACCOUNT_KEY ? null
+query = "followers:%3E8500&access_token=#{gh_api_token}"
 reps_url = "https://api.github.com/search/users?q=#{query}"
 rep_url = "https://api.github.com/users/"
+cm_api_key = $PROCESS_ENV_CLOUD_MADE_API_KEY ? null
 
 if dev and not debug_prod
-  console.log 'development envrionment set'
+  console.log 'development environment set'
   mode = 'development'
   api_progress = "/api/progress"
   api_render = "/api/render"
@@ -20,7 +21,7 @@ if dev and not debug_prod
   api_logs = "http://localhost:8888/api/logs"
   age = 72 # in hours
 else
-  console.log 'production envrionment set'
+  console.log 'production environment set'
   mode = 'production'
   api_progress = 'http://tophubbers.herokuapp.com/api/progress'
   api_render = 'http://tophubbers.herokuapp.com/api/render'
@@ -29,7 +30,8 @@ else
   age = 12 # in hours
 
 ua = navigator?.userAgent?.toLowerCase()
-mobile_device = (/iphone|ipod|ipad|android|blackberry|opera mini|opera mobi/).test ua
+list = 'iphone|ipod|ipad|android|blackberry|opera mini|opera mobi'
+mobile_device = (/"#{list}"/).test ua?.toLowerCase()
 force_mobile = (dev and debug_mobile)
 mobile = mobile_device or force_mobile
 svg_support = Modernizr?.svg ? not mobile_device
@@ -42,6 +44,31 @@ console.log "svg: #{svg}"
 console.log "debug production: #{debug_prod}"
 
 config =
+  srchProviders:
+    google: L.GeoSearch.Provider.Google
+    openstreetmap: L.GeoSearch.Provider.OpenStreetMap
+    esri: L.GeoSearch.Provider.Esri
+
+  tileProviders:
+    1: 'MapBox.reubano.ghdp3e73'
+    2: 'OpenStreetMap'
+    3: 'Esri.WorldTopoMap'
+    4: 'CloudMade'
+
+  options:
+    icon: 'user'
+    tileProvider: 3
+    tpOptions: {maxZoom: 5, apiKey: cm_api_key, styleID: 1}
+    srchProviderName: 'openstreetmap'
+    zoomLevel: 2
+    center: [24.4, 29.9]
+    setView: true
+
+  author:
+    name: 'Reuben Cummings'
+    url: 'https://www.reubano.xyz/'
+
+  cm_api_key: cm_api_key
   mode: mode
   prod: prod
   debug_prod: debug_prod

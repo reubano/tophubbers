@@ -11,11 +11,6 @@ module.exports = (match) ->
   match 'graphs/:ignore_cache', 'graphs#index'
   match 'graphs/:ignore_cache/:refresh', 'graphs#index'
 
-  # Data table of reps ordered by watch score
-  # Mint like progress bars summarizing points for each rep
-  match 'progresses', 'progresses#index'
-  match 'progresses/:refresh', 'progresses#index'
-
   # Data table of reps ordered by employee num summarizing house visits
   match 'visits', 'visits#index'
   match 'visits/:refresh', 'visits#index'

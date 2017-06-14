@@ -1,5 +1,6 @@
 Model = require 'models/base/model'
 config = require 'config'
+mediator = require 'mediator'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
@@ -8,6 +9,8 @@ module.exports = class Rep extends Model
   sync: (method, model, options) =>
     @local = -> method isnt 'read'
     model.collection.local = @local
+
+    # https://github.com/nilbus/Backbone.dualStorage/issues/78
     options.add = method is 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to server: #{not @local()}"
@@ -18,6 +21,14 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
+
+    L.Control.GeoSearch =
+      L.Control.GeoSearch.extend
+        _showLocation: (coordinates) => @set {coordinates}
+
+    @srchProviderName = config.options.srchProviderName
+    @search = new L.Control.GeoSearch
+      provider: new config.srchProviders[@srchProviderName]()
 
   toggle: ->
     @set called: if @has('called') then not @get('called') else true
@@ -50,32 +61,51 @@ module.exports = class Rep extends Model
     promise = $.get url
     do (model = @) -> promise.done(model.setActivity).fail(model.failWhale)
 
+  getCoords: =>
+    @search.addTo(mediator.map)
+    location = @get 'location'
+    google = @srchProviderName.indexOf('google') is 0
+    msg = "coding location: #{location} with #{@srchProviderName}"
+
+    if google and mediator.googleLoaded
+      @search.geosearch location
+    else if google
+      do (model = @) =>
+        @subscribeEvent 'googleLoaded', ->
+          model.search.geosearch model.get 'location'
+    else
+      utils.log msg
+      @search.geosearch location
+
   fetchFunc: (force, type) =>
     return utils.log 'No name!', 'error' if not @has 'name'
-    if force and type is 'score' then @setScoreSort()
+
+    if type is 'coordinates' and mediator.map
+      @getCoords()
+    else if type is 'coordinates'
+      @subscribeEvent 'mapSet', =>
+        @getCoords()
+        mediator.unsubscribe 'mapSet'
+
+    else if force and type is 'score'
+      @setScoreSort()
     else if (type isnt 'score') and (force or @cacheExpired config.data_attr)
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
-      else if type is 'progress' then @getActivity().done(@setProgress)
-      else if type is 'all' then @getActivity().done(@setChart, @setProgress)
     else if type is 'score' and @cacheExpired config.score_attr
       @setScoreSort()
-    else if type is 'chart' and @cacheExpired config.chart_attr
+    else if type in ['chart', 'all'] and @cacheExpired config.chart_attr
       @setChart()
-    else if type is 'progress' and @cacheExpired config.prgrs_attr
-      @setProgress()
-    else if type is 'all'
-      if @cacheExpired config.chart_attr then @setChart()
-      if @cacheExpired config.prgrs_attr then @setProgress()
-    else utils.log "model up to date with force: #{force} and type: #{type}"
+    else
+      utils.log "model up to date with force: #{force} and type: #{type}"
 
-  fetchData: (force=false, type=false) => $.Deferred((deferred) =>
+  fetchData: (force, type) => $.Deferred((deferred) =>
     if force or not @has('name') or @cacheExpired config.info_attr
       utils.log "fetching #{@login}'s #{config.info_attr} data"
       saveTs = (model) -> model.saveTstamp config.info_attr
       fetch = (model) -> model.fetchFunc force, type
       resolve = (model) -> deferred.resolve model
-      do (force, type) => @modelFetch()
+      @modelFetch()
         .done(saveTs, fetch, resolve)
         .fail(@failWhale, deferred.reject)
     else
@@ -84,28 +114,6 @@ module.exports = class Rep extends Model
       @fetchFunc false, type
 
     @display()).promise()
-
-  setProgress: =>
-    utils.log 'setting progress data'
-    if @get config.data_attr
-      target = 100
-      max = 20000
-      pts = @get('followers') / max * 100
-
-      utils.log "calculating #{@login}'s missing progress data"
-
-      pre = Math.min(pts, target) - 1
-      to_date = if (pts >= target) then 0 else target - pre - 1
-      post = if (pts > target) then pts - pre - 1 else 0
-      gap = target - (pre + to_date + post) - 1
-      end = if pts >= target then 0 else 1
-
-      @save
-        pts: pts, pre: pre, to_date: to_date, post: post, gap: gap, end: end
-        patch: true
-
-      @saveTstamp config.prgrs_attr
-    else utils.log "#{config.data_attr} not present"
 
   convertData: (raw) ->
     endRows = []

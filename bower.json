@@ -1,0 +1,70 @@
+{
+  "name": "tophubbers",
+  "version": "0.0.1",
+  "main": "public/javascripts/app.js",
+  "dependencies": {
+    "chaplin": "~1.0.0",
+    "console-polyfill": "~0.1.0",
+    "lodash": "~2.0.0",
+    "jquery": "~2.1.3",
+    "h5bp-helpers": "~0.1.0",
+    "bootstrap": "~3.3.2",
+    "minilog": "*",
+    "moment": "~2.4.0",
+    "nvd3": "~1.1.14-beta",
+    "leaflet-dist": "~0.7.0",
+    "leaflet-providers": "~1.0.1",
+    "Leaflet.awesome-markers": "git://github.com/sigma-geosistemas/Leaflet.awesome-markers.git",
+    "L.GeoSearch": "git://github.com/smeijer/L.GeoSearch.git",
+    "md5": "~0.3.0",
+    "backbone.dualstorage": "~1.4.0"
+  },
+  "overrides": {
+    "backbone": {
+      "dependencies": {
+        "lodash": "*",
+        "jquery": "*"
+      },
+      "main": "backbone.js"
+    },
+    "nvd3": {
+      "dependencies": {
+        "d3": "3.3.5"
+      },
+      "main": [
+        "nv.d3.js",
+        "nv.d3.css"
+      ]
+    },
+    "leaflet-dist": {
+      "name": "leaflet-dist",
+      "dependencies": {},
+      "main": [
+        "leaflet.js",
+        "leaflet.css"
+      ]
+    },
+    "L.GeoSearch": {
+      "dependencies": {
+        "leaflet-dist": "*"
+      },
+      "main": [
+        "src/js/l.control.geosearch.js",
+        "src/js/l.geosearch.provider.google.js",
+        "src/js/l.geosearch.provider.openstreetmap.js",
+        "src/js/l.geosearch.provider.esri.js",
+        "src/css/l.geosearch.css"
+      ]
+    },
+    "Leaflet.markercluster": {
+      "dependencies": {
+        "leaflet-dist": "*"
+      },
+      "main": [
+        "dist/leaflet.markercluster-src.js",
+        "dist/MarkerCluster.css",
+        "dist/MarkerCluster.Default.css"
+      ]
+    }
+  }
+}

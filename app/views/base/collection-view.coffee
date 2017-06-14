@@ -1,4 +1,3 @@
-Chaplin = require 'chaplin'
 View = require 'views/base/view'
 
 module.exports = class CollectionView extends Chaplin.CollectionView
@@ -6,8 +5,9 @@ module.exports = class CollectionView extends Chaplin.CollectionView
   # so we need to borrow the method from the View prototype:
   getTemplateFunction: View::getTemplateFunction
 
-  initItemView: (model) ->
+  initItemView: (model) =>
     new @itemView
       model: model
-      refresh: @options.refresh
-      ignore_cache: @options.ignore_cache
+      refresh: @options?.refresh
+      resize: @options?.resize
+      ignore_cache: @options?.ignore_cache

@@ -4,10 +4,12 @@ utils = require 'lib/utils'
 module.exports = class Navbar extends Model
   defaults:
     items: [
-      {href: '/tocalls', title: 'Check List', desc: 'View Check List'},
-      {href: '/graphs', title: 'Activity', desc: 'View Activity'},
-      {href: '/progresses', title: 'Progress', desc: 'View Progress'},
-      {href: '/visits', title: 'Stats', desc: 'View Stats'},
+      {
+        href: '/tocalls', title: 'Check List', desc: 'View Check List',
+        id: 'tocalls'
+      }
+      {href: '/graphs', title: 'Activity', desc: 'View Activity', id: 'graphs'}
+      {href: '/visits', title: 'Stats', desc: 'View Stats', id: 'visits'}
     ]
 
     main:

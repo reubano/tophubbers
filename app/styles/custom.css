@@ -6,11 +6,49 @@ dimensions... For example width should be =< margin.left + margin.right
 + 1, of course 1 pixel for the entire chart would not be very useful,
 BUT should not have errors
 */
-.chart svg {height: 400px;}
+body {overflow-x: hidden !important;}
+
+.chart {
+  height: 400px;
+  margin-left: -11px;
+  margin-right: -84px;
+}
+
+#map {
+  height: 400px;
+  width: 750px;
+  position: relative;
+}
+
 g.nv-group.nv-series-0 {fill-opacity: 0 !important;}
 g.nv-group.nv-series-1 {overflow: hidden;}
 
 /* Bootstrap CSS */
+body {padding-top: 60px;}
+.gallery {padding-bottom: 1em;}
+.leaflet-control-geosearch {display: none;}
+.active-nav {color: #FFFFFF !important;}
 .progress .bar-muted {opacity: 0.2 !important;}
 .progress .bar-transparent {opacity: 0 !important;}
 .btn-padleft {margin-left: 50px !important;}
+.btn-padbottom {margin-bottom: 30px !important;}
+
+/* Marker setup */
+.awesome-marker {
+  background: url('/images/markers-soft.png') no-repeat 0 0;
+}
+
+.awesome-marker-shadow {
+  background: url('/images/markers-shadow.png') no-repeat 0 0;
+}
+
+/* Retina displays */
+@media (min--moz-device-pixel-ratio: 1.5),(-o-min-device-pixel-ratio: 3/2),
+(-webkit-min-device-pixel-ratio: 1.5),(min-device-pixel-ratio: 1.5),(min-resolution: 1.5dppx) {
+ .awesome-marker {
+  background-image: url('/images/markers-soft@2x.png');
+ }
+ .awesome-marker-shadow {
+  background-image: url('/images/markers-shadow@2x.png');
+ }
+}

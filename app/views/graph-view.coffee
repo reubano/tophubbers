@@ -17,6 +17,7 @@ module.exports = class GraphView extends View
   initialize: (options) =>
     super
     @model = options.model
+    @resize = options.resize
     @refresh = options.refresh
     @ignore_cache = options.ignore_cache
     @login = @model.get 'login'
@@ -54,7 +55,12 @@ module.exports = class GraphView extends View
 
     utils.log "getting chart for #{login}"
     @unsetCache model if @ignore_cache
-    @text = if @has_svg then "#{login} #{config.svg_attr}" else "#{login} #{config.img_attr}"
+
+    if @has_svg
+      @text = "#{login} #{config.svg_attr}"
+    else
+      @text = "#{login} #{config.img_attr}"
+
     chart_json = model.has config.chart_attr
     name = model.get 'name'
     hash = model.get config.hash_attr
@@ -82,7 +88,7 @@ module.exports = class GraphView extends View
       utils.log "fetching script for #{selection}"
       chart_data = JSON.parse model.get config.chart_attr
       do (login, parent, model) =>
-        nv.addGraph makeChart(chart_data, selection, @changed, true), =>
+        nv.addGraph makeChart(chart_data, selection, @changed, @resize), =>
           @setSVG login, parent, model
           @pubRender config.svg_attr
     else utils.log "#{login} has no #{config.chart_attr} or hash or name"
@@ -97,7 +103,7 @@ module.exports = class GraphView extends View
     model.unset attr
     model.save()
 
-  setImg: (model, parent) =>
+  setImg: (model, parent) ->
     html = $(parent).html()
     login = model.get 'login'
 
@@ -108,7 +114,7 @@ module.exports = class GraphView extends View
       model.save()
     else utils.log "html appears blank for #{login}: #{html.length}"
 
-  setSVG: (login, parent, model) =>
+  setSVG: (login, parent, model) ->
     html = $(parent).html()
     bad = ['opacity: 0.0', 'opacity: 0.1', 'opacity: 0.2', 'opacity: 0.3',
       'opacity: 0.4', 'opacity: 0.5', 'opacity: 0.6']
@@ -120,7 +126,8 @@ module.exports = class GraphView extends View
       utils.log "setting #{login} #{config.svg_attr}"
       model.set config.svg_attr, svg
       model.save()
-    else utils.log "html blank or malformed for #{login} with length #{html.length}"
+    else
+      utils.log "html blank or malformed for #{login} of length #{html.length}"
 
   getImg: (login, hash) => $.Deferred((deferred) =>
     parent = Common.getParent login
