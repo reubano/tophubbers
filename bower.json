@@ -14,7 +14,7 @@
     "nvd3": "~1.1.14-beta",
     "leaflet-dist": "~0.7.0",
     "leaflet-providers": "~1.0.1",
-    "Leaflet.awesome-markers": "~2.0.1",
+    "Leaflet.awesome-markers": "git://github.com/sigma-geosistemas/Leaflet.awesome-markers.git",
     "L.GeoSearch": "git://github.com/smeijer/L.GeoSearch.git",
     "md5": "~0.3.0",
     "backbone.dualstorage": "~1.4.0"

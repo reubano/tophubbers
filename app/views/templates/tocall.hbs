@@ -1,7 +1,12 @@
 <td>
 	<label class="checkbox">
 		<input class="toggle" type="checkbox"{{#if called}} checked{{/if}}>
+	{{#if followers}}
 		<p>{{name}} ({{followers}})</p>
+	{{else}}
+		<p>Loading...</p>
+	{{/if}}
+
 	</label>
 </td>
 <td>

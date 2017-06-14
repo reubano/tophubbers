@@ -1,5 +1,6 @@
 Model = require 'models/base/model'
 config = require 'config'
+mediator = require 'mediator'
 utils = require 'lib/utils'
 
 module.exports = class Rep extends Model
@@ -8,6 +9,8 @@ module.exports = class Rep extends Model
   sync: (method, model, options) =>
     @local = -> method isnt 'read'
     model.collection.local = @local
+
+    # https://github.com/nilbus/Backbone.dualStorage/issues/78
     options.add = method is 'read'
     utils.log "#{model.get 'login'}'s sync method is #{method}"
     utils.log "sync #{model.get 'login'} to server: #{not @local()}"
@@ -18,6 +21,14 @@ module.exports = class Rep extends Model
     @login = @get 'login'
     utils.log "initialize #{@login}'s model"
     @set created: new Date().toString() if @isNew() or not @has 'created'
+
+    L.Control.GeoSearch =
+      L.Control.GeoSearch.extend
+        _showLocation: (coordinates) => @set {coordinates}
+
+    @srchProviderName = config.options.srchProviderName
+    @search = new L.Control.GeoSearch
+      provider: new config.srchProviders[@srchProviderName]()
 
   toggle: ->
     @set called: if @has('called') then not @get('called') else true
@@ -50,9 +61,34 @@ module.exports = class Rep extends Model
     promise = $.get url
     do (model = @) -> promise.done(model.setActivity).fail(model.failWhale)
 
+  getCoords: =>
+    @search.addTo(mediator.map)
+    location = @get 'location'
+    google = @srchProviderName.indexOf('google') is 0
+    msg = "coding location: #{location} with #{@srchProviderName}"
+
+    if google and mediator.googleLoaded
+      @search.geosearch location
+    else if google
+      do (model = @) =>
+        @subscribeEvent 'googleLoaded', ->
+          model.search.geosearch model.get 'location'
+    else
+      utils.log msg
+      @search.geosearch location
+
   fetchFunc: (force, type) =>
     return utils.log 'No name!', 'error' if not @has 'name'
-    if force and type is 'score' then @setScoreSort()
+
+    if type is 'coordinates' and mediator.map
+      @getCoords()
+    else if type is 'coordinates'
+      @subscribeEvent 'mapSet', =>
+        @getCoords()
+        mediator.unsubscribe 'mapSet'
+
+    else if force and type is 'score'
+      @setScoreSort()
     else if (type isnt 'score') and (force or @cacheExpired config.data_attr)
       utils.log "fetching new #{config.data_attr} data"
       if type is 'chart' then @getActivity().done(@setChart)
@@ -63,7 +99,7 @@ module.exports = class Rep extends Model
     else
       utils.log "model up to date with force: #{force} and type: #{type}"
 
-  fetchData: (force=false, type=false) => $.Deferred((deferred) =>
+  fetchData: (force, type) => $.Deferred((deferred) =>
     if force or not @has('name') or @cacheExpired config.info_attr
       utils.log "fetching #{@login}'s #{config.info_attr} data"
       saveTs = (model) -> model.saveTstamp config.info_attr
