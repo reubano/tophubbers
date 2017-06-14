@@ -12,7 +12,7 @@ reps_url = "https://api.github.com/search/users?q=#{query}"
 rep_url = "https://api.github.com/users/"
 
 if dev and not debug_prod
-  console.log 'development envrionment set'
+  console.log 'development environment set'
   mode = 'development'
   api_progress = "/api/progress"
   api_render = "/api/render"
@@ -20,7 +20,7 @@ if dev and not debug_prod
   api_logs = "http://localhost:8888/api/logs"
   age = 72 # in hours
 else
-  console.log 'production envrionment set'
+  console.log 'production environment set'
   mode = 'production'
   api_progress = 'http://tophubbers.herokuapp.com/api/progress'
   api_render = 'http://tophubbers.herokuapp.com/api/render'
