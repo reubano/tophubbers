@@ -11,12 +11,12 @@
   "scripts": {
     "start": "brunch watch --server",
     "test": "brunch test",
-    "postinstall": "brunch build --optimize"
+    "postinstall": "brunch build --production"
   },
   "dependencies": {
     "JSONStream": "0.7.x",
-    "auto-reload-brunch": ">= 1.0 < 1.8",
-    "brunch": "~1.7",
+    "auto-reload-brunch": "^1.7.8",
+    "brunch": "^1.7.20",
     "clean-css-brunch": ">= 1.0 < 1.8",
     "coffee-script": "1.6",
     "coffee-script-brunch": ">= 1.0 < 1.8",
