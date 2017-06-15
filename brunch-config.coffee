@@ -15,12 +15,14 @@ exports.config =
     javascripts:
       joinTo:
         'javascripts/app.js': /^app/
-        'javascripts/vendor.js': /^(vendor|bower_components)/
+        'javascripts/vendor.js': /^(?!app)/
 
     stylesheets:
-      joinTo:
-        'stylesheets/app.css': /^(?!test)/
-        'test/stylesheets/test.css': /^test/
+      joinTo: 'stylesheets/app.css'
 
     templates:
       joinTo: 'javascripts/app.js'
+
+  npm:
+    styles:
+      'normalize.css': ['normalize.css']
