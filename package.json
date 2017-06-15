@@ -26,6 +26,7 @@
     "auto-reload-brunch": ">= 1.0 < 1.8",
     "brunch": "^1.8.5",
     "body-parser": "^1.17.2",
+    "bower": "^1.8.0",
     "clean-css-brunch": ">= 1.0 < 1.8",
     "coffee-script": "1.6",
     "coffee-script-brunch": ">= 1.0 < 1.8",
