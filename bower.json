@@ -16,7 +16,8 @@
     "Leaflet.awesome-markers": "^2.0.2",
     "leaflet-geosearch": "^1.1.0",
     "md5": "~0.3.0",
-    "backbone.dualstorage": "~1.4.0"
+    "backbone.dualstorage": "~1.4.0",
+    "normalize-css": "normalize.css#^7.0.0"
   },
   "overrides": {
     "backbone": {

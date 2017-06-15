@@ -21,8 +21,6 @@ exports.config =
       joinTo:
         'stylesheets/app.css': /^(?!test)/
         'test/stylesheets/test.css': /^test/
-      order:
-        after: ['vendor/styles/normalize.css']
 
     templates:
       joinTo: 'javascripts/app.js'
