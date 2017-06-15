@@ -8,8 +8,8 @@
     "underscore": "~1.8.3",
     "h5bp-helpers": "~0.1.0",
     "bootstrap": "~3.3.2",
-    "leaflet-dist": "~0.7.0",
-    "leaflet-providers": "~1.0.1",
+    "leaflet": "^0.7.7",
+    "leaflet-providers": "^1.1.15",
     "Leaflet.awesome-markers": "^2.0.2",
     "leaflet-geosearch": "^1.1.0",
     "minilog": "^3.1.0",
@@ -32,17 +32,9 @@
         "dist/js/bootstrap.js"
       ]
     },
-    "leaflet-dist": {
-      "name": "leaflet-dist",
-      "dependencies": {},
-      "main": [
-        "leaflet.js",
-        "leaflet.css"
-      ]
-    },
     "leaflet-geosearch": {
       "dependencies": {
-        "leaflet-dist": "*"
+        "leaflet": "^0.7.7"
       },
       "main": [
         "src/js/l.control.geosearch.js",
@@ -54,7 +46,7 @@
     },
     "Leaflet.markercluster": {
       "dependencies": {
-        "leaflet-dist": "*"
+        "leaflet": "^0.7.7"
       },
       "main": [
         "dist/leaflet.markercluster-src.js",
