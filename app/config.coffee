@@ -23,10 +23,10 @@ if dev and not debug_prod
 else
   console.log 'production environment set'
   mode = 'production'
-  api_progress = 'http://tophubbers.herokuapp.com/api/progress'
-  api_render = 'http://tophubbers.herokuapp.com/api/render'
-  api_uploads = 'http://tophubbers.herokuapp.com/api/uploads'
-  api_logs = 'http://flogger.herokuapp.com/api/logs'
+  api_progress = 'https://tophubbers.herokuapp.com/api/progress'
+  api_render = 'https://tophubbers.herokuapp.com/api/render'
+  api_uploads = 'https://tophubbers.herokuapp.com/api/uploads'
+  api_logs = 'https://flogger.herokuapp.com/api/logs'
   age = 12 # in hours
 
 ua = navigator?.userAgent?.toLowerCase()

@@ -1,7 +1,7 @@
 # Tophubbers
 
 This is HTML5 application, built with
-[Brunch](http://brunch.io) and [Chaplin](http://chaplinjs.org).
+[Brunch](https://brunch.io) and [Chaplin](https://chaplinjs.org).
 
 ## Installation
 

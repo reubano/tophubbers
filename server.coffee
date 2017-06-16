@@ -17,8 +17,7 @@ logger = new winston.Logger {transports: transports}
 
 # Set variables
 encoding = {encoding: 'utf-8'}
-cacheDays = 5
-maxCacheAge = cacheDays * 24 * 60 * 60 * 1000
+maxCacheAge = 10 * 1000
 serverTimeout = 25 * 1000 # server timeout (in milliseconds)
 
 # other
@@ -63,7 +62,12 @@ configCORS = (req, res, next) ->
 # pushState hack
 configPush = (req, res, next) ->
   if 'api' in req.url.split('/') then return next()
-  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
+
+  if ~req.get('Host').indexOf('localhost')
+    newUrl = "#{req.protocol}://#{req.get('Host')}/##{req.url}"
+  else
+    newUrl = "https://#{req.get('Host')}/##{req.url}"
+
   res.redirect newUrl
 
 # create server routes
