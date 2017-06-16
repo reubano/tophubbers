@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "public/javascripts/app.js",
   "dependencies": {
-    "chaplin": "~1.0.0",
+    "chaplin": "~1.1.0",
     "jquery": "~2.2.0",
     "underscore": "~1.8.3",
     "h5bp-helpers": "~0.1.0",
