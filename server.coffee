@@ -17,8 +17,7 @@ logger = new winston.Logger {transports: transports}
 
 # Set variables
 encoding = {encoding: 'utf-8'}
-cacheDays = 5
-maxCacheAge = cacheDays * 24 * 60 * 60 * 1000
+maxCacheAge = 10 * 1000
 serverTimeout = 25 * 1000 # server timeout (in milliseconds)
 
 # other
