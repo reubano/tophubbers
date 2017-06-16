@@ -27,8 +27,10 @@ module.exports = class Rep extends Model
         _showLocation: (coordinates) => @set {coordinates}
 
     @srchProviderName = config.options.srchProviderName
+    srchProvider = config.srchProviders[@srchProviderName]
+
     @search = new L.Control.GeoSearch
-      provider: new config.srchProviders[@srchProviderName]()
+      provider: new L.GeoSearch.Provider[srchProvider]()
 
   toggle: ->
     @set called: if @has('called') then not @get('called') else true

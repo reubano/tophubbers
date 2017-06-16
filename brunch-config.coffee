@@ -1,5 +1,8 @@
 exports.config =
   # See http://brunch.io/#documentation for docs.
+  watcher: usePolling: true
+  notifications: false
+
   plugins:
     coffeelint:
       pattern: /^app\/.*\.coffee$/

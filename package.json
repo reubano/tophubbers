@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "JSONStream": "0.7.x",
-    "auto-reload-brunch": "^1.7.8",
-    "brunch": "^1.7.20",
+    "auto-reload-brunch": ">= 1.0 < 1.8",
+    "brunch": "^1.8.5",
     "clean-css-brunch": ">= 1.0 < 1.8",
     "coffee-script": "1.6",
     "coffee-script-brunch": ">= 1.0 < 1.8",
@@ -53,9 +53,9 @@
   "devDependencies": {
     "chai": ">= 1.5.0",
     "mocha": ">= 1.8.2",
-    "sinon": ">= 1.6.0",
-    "sinon-chai": ">= 2.3.1",
+    "mocha-phantomjs": ">= 3.3.2",
     "phantomjs": ">= 1.9.7-5",
-    "mocha-phantomjs": ">= 3.3.2"
+    "sinon": ">= 1.6.0",
+    "sinon-chai": ">= 2.3.1"
   }
 }
