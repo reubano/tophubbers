@@ -1,15 +1,23 @@
-# Brunch with Chaplin TODOMVC
-Brunch with Chaplin is a skeleton (boilerplate) for [Brunch](http://brunch.io)
-based on [Chaplin](https://github.com/chaplinjs/chaplin) framework.
+# Tophubbers
 
-The application is based on the skeleton.
+This is HTML5 application, built with
+[Brunch](http://brunch.io) and [Chaplin](http://chaplinjs.org).
+
+## Installation
+
+Clone this repo manually with git or use `brunch new gh:reubano/tophubbers  `
 
 ## Getting started
-* Install [Brunch](http://brunch.io) if you hadn’t already (`npm install -g brunch`).
-* Execute `npm install` in the root directory once.
-* Execute `brunch build` in the root directory to build app every time. That’s all.
-* Execute `brunch watch` if you want to continuously rebuild the app
-on every change. To run the app then, you will need to open `public/index.html` in your browser (assuming the root is `/todomvc/` root or so).
+* Setup (if you don't have them):
+    * [Node.js](https://nodejs.org): `sudo port install node` or `brew install node` on OS X
+    * [Brunch](https://brunch.io): `npm install -g brunch`
+    * [Bower](https://bower.io/): `npm install -g bower`
 
-## Author
-The stuff was made by [@paulmillr](http://paulmillr.com).
+* Install:
+    * `npm install`
+
+* Run:
+    * `brunch watch --server` — watches the project with continuous rebuild. This will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history).
+    * `brunch build --production` — builds minified project for production
+
+## License

@@ -1,5 +1,5 @@
 exports.config =
-  # See http://brunch.io/#documentation for docs.
+  # See http://brunch.io/docs/config for docs.
   watcher: usePolling: true
   notifications: false
 
