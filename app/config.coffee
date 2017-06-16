@@ -6,7 +6,7 @@ debug_prod_verbose = false
 host = window?.location?.hostname ? require('os').hostname()
 dev = host in ['localhost', 'tokpro.local', 'tokpro']
 prod = not dev
-gh_api_token = $PROCESS_ENV_GITHUB_ACCOUNT_KEY ? null
+gh_api_token = $PROCESS_ENV_GITHUB_TOKEN_TH ? null
 query = "followers:%3E8500&access_token=#{gh_api_token}"
 reps_url = "https://api.github.com/search/users?q=#{query}"
 rep_url = "https://api.github.com/users/"
