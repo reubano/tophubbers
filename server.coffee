@@ -63,7 +63,12 @@ configCORS = (req, res, next) ->
 # pushState hack
 configPush = (req, res, next) ->
   if 'api' in req.url.split('/') then return next()
-  newUrl = req.protocol + '://' + req.get('Host') + '/#' + req.url
+
+  if ~req.get('Host').indexOf('localhost')
+    newUrl = "#{req.protocol}://#{req.get('Host')}/##{req.url}"
+  else
+    newUrl = "https://#{req.get('Host')}/##{req.url}"
+
   res.redirect newUrl
 
 # create server routes

@@ -2,7 +2,7 @@ config = require 'config'
 mediator = require 'mediator'
 
 # Application-specific view helpers
-# http://handlebarsjs.com/#helpers
+# https://handlebarsjs.com/#helpers
 # --------------------------------
 
 register = (name, fn) -> Handlebars.registerHelper name, fn
