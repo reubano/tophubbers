@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "brunch": "^2.10.9",
+    "console-polyfill": "~0.1.0",
     "normalize.css": "~7.0.0",
     "body-parser": "^1.17.2",
     "bower": "^1.8.0",

@@ -24,5 +24,8 @@ exports.config =
       joinTo: 'javascripts/app.js'
 
   npm:
+    globals:
+      _cp: 'console-polyfill'
+
     styles:
       'normalize.css': ['normalize.css']
