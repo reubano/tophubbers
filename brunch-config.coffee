@@ -1,5 +1,8 @@
 exports.config =
-  # See http://brunch.io/#documentation for docs.
+  # See http://brunch.io/docs/config for docs.
+  watcher: usePolling: true
+  notifications: false
+
   plugins:
     coffeelint:
       pattern: /^app\/.*\.coffee$/
@@ -12,16 +15,17 @@ exports.config =
     javascripts:
       joinTo:
         'javascripts/app.js': /^app/
-        'javascripts/vendor.js': /^(vendor|bower_components)/
-        'test/javascripts/test.js': /^test(\/|\\)(?!vendor)/
-        'test/javascripts/test-vendor.js': /^test(\/|\\)(?=vendor)/
+        'javascripts/vendor.js': /^(?!app)/
 
     stylesheets:
-      joinTo:
-        'stylesheets/app.css': /^(?!test)/
-        'test/stylesheets/test.css': /^test/
-      order:
-        after: ['vendor/styles/normalize.css']
+      joinTo: 'stylesheets/app.css'
 
     templates:
       joinTo: 'javascripts/app.js'
+
+  npm:
+    globals:
+      _cp: 'console-polyfill'
+
+    styles:
+      'normalize.css': ['normalize.css']
