@@ -61,7 +61,7 @@ config =
     tpOptions: {maxZoom: 5, apiKey: cm_api_key, styleID: 1}
     srchProviderName: 'openstreetmap'
     zoomLevel: 2
-    center: [24.4, 29.9]
+    center: [20, 8]
     setView: true
 
   author:
