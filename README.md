@@ -5,7 +5,7 @@ This is an HTML5 single page application, built with
 
 ## Installation
 
-Clone this repo 
+Clone this repo
 
     git clone https://github.com/reubano/tophubbers.git
 
@@ -16,19 +16,19 @@ Clone this repo
 [Node.js](https://nodejs.org) (on OS X)
 
     sudo port install node
-    
-or 
+
+or
 
     brew install node
-    
+
 [Brunch](https://brunch.io)
 
     npm install -g brunch
-    
+
 [Bower](https://bower.io/)
-    
+
     npm install -g bower
-    
+
 [CoffeeScript](http://coffeescript.org/)
 
     npm install -g coffee-script
@@ -53,22 +53,22 @@ CoffeeScript version 1.12.6
 Install both node and bower dependencies
 
     npm install
-  
 
-Watch the project with continuous rebuild. This will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history).
+
+Watch the project with continuous rebuild (this will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history))
 
     brunch watch --server
-    
+
 ## Other commands
 
 Watch the project with continuous rebuild, but don't serve it
 
     brunch watch
-    
+
 Build minified assets
 
     brunch build --production
-    
+
 Launch a production express server
 
     coffee server.cofee
@@ -76,4 +76,4 @@ Launch a production express server
 
 ## License
 
-Tophubbers is distributed under the [MIT License](http://opensource.org/licenses/MIT).
+Tophubbers is distributed under the [MIT License](http://opensource.org/licenses/MIT)
