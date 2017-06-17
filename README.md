@@ -54,7 +54,6 @@ Install both node and bower dependencies
 
     npm install
 
-
 Watch the project with continuous rebuild (this will also launch HTTP server with [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history))
 
     brunch watch --server
@@ -72,7 +71,6 @@ Build minified assets
 Launch a production express server
 
     coffee server.cofee
-
 
 ## License
 
