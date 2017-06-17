@@ -1,5 +1,5 @@
 Common =
-  getParent: (login='login') -> "##{login}.view .chart"
-  getSelection: (login='login') -> @getParent(login) + ' svg'
+  getParent: (login) -> "##{login}.view .chart"
+  getSelection: (login) -> @getParent(login) + ' svg'
 
 module.exports = Common
