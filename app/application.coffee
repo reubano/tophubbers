@@ -1,5 +1,4 @@
 mediator = require 'mediator'
-routes = require 'routes'
 Reps = require 'models/reps'
 Navbar = require 'models/navbar'
 config = require 'config'
