@@ -25,7 +25,7 @@ g.nv-group.nv-series-1 {overflow: hidden;}
 
 /* Bootstrap CSS */
 body {padding-top: 60px;}
-.gallery {padding-bottom: 1em;}
+.gallery {padding: 0 0 1em;}
 .leaflet-control-geosearch {display: none;}
 .active-nav {color: #FFFFFF !important;}
 .progress .bar-muted {opacity: 0.2 !important;}
