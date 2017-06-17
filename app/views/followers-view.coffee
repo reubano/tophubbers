@@ -23,7 +23,7 @@ module.exports = class FollowersView extends CollectionView
     if mediator.markers?.clearLayers?
       mediator.markers.clearLayers()
 
-    mediator.markers = new L.LayerGroup().addTo map
+    map.addLayer mediator.markers
 
   render: (options) =>
     super
